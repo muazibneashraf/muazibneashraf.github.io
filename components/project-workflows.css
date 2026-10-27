@@ -1,0 +1,86 @@
+/* A document scanner and a firing neural network form the research workflow. */
+.icu-workflow text { fill: #e4dcfa; font-size: 14px; }
+.icu-workflow .icu-panel { fill: #211d3b; stroke: #9f8ccf; stroke-width: 1; }
+.icu-stage-guides { opacity: .24; stroke-width: .6; }
+.icu-stage-guides circle { fill: currentColor; stroke: none; }
+.icu-workflow .icu-stage-guides text { fill: currentColor; stroke: none; font-size: 9px; }
+.icu-connectors { opacity: .6; }
+.icu-extraction .icu-panel { fill: #302549; stroke: #b59aea; animation: icu-extract 4.5s ease-in-out infinite; }
+.icu-workflow .icu-ocr-title { font-size: 24px; font-weight: 600; }
+.icu-scan-wash { fill: currentColor; opacity: .06; animation: icu-scan-wash 3.6s ease-in-out infinite; }
+.icu-scan-line { animation: icu-scan 3.6s ease-in-out infinite; filter: drop-shadow(0 0 4px currentColor); }
+.icu-ocr-bit { fill: currentColor; animation: icu-bit 1.8s ease-in-out infinite; }
+.icu-value-bar { stroke-dasharray: 1; animation: icu-value 4.5s ease-in-out infinite; }
+.icu-ai-frame { fill: #2c2247; stroke: #af91ed; stroke-width: 1.2; animation: icu-chip 4.5s ease-in-out infinite; }
+.icu-chip-pins { opacity: .4; stroke-width: 1.4; }
+.icu-workflow .icu-ai-title { font-size: 14px; font-weight: 600; letter-spacing: .3px; }
+.icu-workflow .icu-model-label { font-size: 13px; fill: #bca8e6; letter-spacing: .8px; }
+.icu-synapse { opacity: .2; animation: icu-synapse 3s ease-in-out infinite; }
+.icu-neuron { fill: #b89aea; stroke: #e5d4ff; stroke-width: .8; animation: icu-fire 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+@keyframes icu-scan {
+  0%, 100% { transform: translateY(-10px); opacity: 0; }
+  12% { opacity: .9; }
+  78% { transform: translateY(58px); opacity: .9; }
+  90% { transform: translateY(58px); opacity: 0; }
+}
+@keyframes icu-scan-wash {
+  0%, 100% { transform: translateY(-10px); opacity: 0; }
+  12% { opacity: .1; }
+  78% { transform: translateY(58px); opacity: .1; }
+  90% { transform: translateY(58px); opacity: 0; }
+}
+@keyframes icu-extract {
+  0%, 100% { stroke: #8e75b9; }
+  35%, 65% { stroke: #d5b5ff; }
+}
+@keyframes icu-bit { 0%, 70%, 100% { opacity: .2; } 35% { opacity: 1; } }
+@keyframes icu-value {
+  0%, 100% { stroke-dashoffset: .8; opacity: .35; }
+  30%, 80% { stroke-dashoffset: 0; opacity: 1; }
+}
+@keyframes icu-chip {
+  0%, 100% { stroke: #9174be; }
+  50% { stroke: #d6b5ff; }
+}
+@keyframes icu-synapse { 0%, 25%, 85%, 100% { opacity: .18; } 50% { opacity: .85; } }
+@keyframes icu-fire {
+  0%, 25%, 85%, 100% { transform: scale(1); fill: #9473c5; }
+  50% { transform: scale(1.3); fill: #f0dcff; }
+}
+
+/* Local requests meet nearby helpers on a quiet, living map. */
+.community-map-streets { opacity: .075; stroke-width: .8; stroke-linejoin: round; }
+.community-map-neighbors { opacity: .2; stroke-width: .7; }
+.community-map-neighbors > path { stroke-dasharray: 2 5; }
+.community-neighbor-light { animation: community-neighbor 5s ease-in-out infinite; }
+.community-map-route { stroke: currentColor; stroke-width: 1; opacity: .2; }
+.community-map-route-active { stroke: #ffb598; stroke-width: 1.6; stroke-linecap: round; stroke-dasharray: 1; animation: community-connect 7s ease-in-out infinite; }
+.community-map-label rect { fill: #32242e; stroke: #a77365; stroke-width: .7; }
+.community-map-label text { fill: #fbd9ce; font-size: 14px; }
+.community-map-label > path { stroke: currentColor; stroke-width: .7; opacity: .35; stroke-dasharray: 2 4; }
+.community-location-pin { fill: #422c34; stroke: #edaa91; stroke-width: 1.2; }
+.community-location-core { fill: #ffbb9d; }
+.community-location-ripple { fill: none; stroke: #ffaf90; stroke-width: .8; transform-box: fill-box; transform-origin: center; animation: community-location 3.6s ease-out infinite; }
+.community-location-check { fill: none; stroke: #ffd2bd; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.community-match-orbit { fill: #382630; fill-opacity: .5; stroke: currentColor; stroke-width: .6; stroke-opacity: .3; }
+.community-locator-sweep { stroke: #ffc2a7; stroke-width: 1.3; transform-origin: 231px 104px; animation: community-locate 8s linear infinite; }
+.community-match-center { fill: #ffc2a7; animation: community-match 3.6s ease-in-out infinite; }
+.community-match-stem { stroke: currentColor; opacity: .3; stroke-width: .8; }
+.community-map-status rect { fill: #36262f; stroke: #a57363; stroke-width: .7; }
+.community-map-status text { fill: #ffe0d1; font-size: 14px; }
+.community-status-light { fill: #ffc5a4; animation: community-match 3.6s ease-in-out infinite; }
+@keyframes community-connect {
+  0%, 8% { stroke-dashoffset: 1; opacity: 0; }
+  15% { opacity: .9; }
+  65%, 80% { stroke-dashoffset: 0; opacity: .9; }
+  95%, 100% { stroke-dashoffset: 0; opacity: 0; }
+}
+@keyframes community-location { 0% { transform: scale(.75); opacity: .4; } 85%, 100% { transform: scale(1.8); opacity: 0; } }
+@keyframes community-locate { to { transform: rotate(360deg); } }
+@keyframes community-neighbor { 0%, 100% { opacity: .2; } 45%, 55% { opacity: 1; } }
+@keyframes community-match { 0%, 100% { opacity: .55; } 50% { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .icu-value-bar { stroke-dashoffset: 0; }
+  .icu-neuron, .icu-synapse { opacity: .8; }
+}

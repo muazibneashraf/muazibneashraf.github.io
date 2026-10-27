@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 144 104" fill="none">
+  <defs>
+    <linearGradient id="pulse-cyan" x1="8" y1="15" x2="136" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="#55DFFC"/><stop offset="1" stop-color="#29C9EC"/></linearGradient>
+    <linearGradient id="pulse-blue" x1="30" y1="44" x2="110" y2="88" gradientUnits="userSpaceOnUse"><stop stop-color="#6387FF"/><stop offset="1" stop-color="#3989F2"/></linearGradient>
+  </defs>
+  <path d="M11 30 34 7 84 57 122 5H132V18L84 74 34 25 23 37Z" fill="url(#pulse-cyan)"/>
+  <path d="M23 45 34 34 84 83 117 50V67L84 100 34 51V73L23 84Z" fill="url(#pulse-blue)"/>
+  <path d="M4 31 18 43V82H4Z" fill="url(#pulse-cyan)"/>
+  <path d="M136 23V100L120 84V45L86 80 77 71 123 23Z" fill="url(#pulse-cyan)"/>
+  <path d="M4 88H16V100H4ZM136 1H144V13H136Z" fill="#B29BFF"/>
+</svg>

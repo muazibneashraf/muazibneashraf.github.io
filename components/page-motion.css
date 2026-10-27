@@ -1,0 +1,73 @@
+/* A single frame trace and a short education journey. */
+.profile-motion { transform: perspective(1100px) rotateX(var(--profile-x, 0deg)) rotateY(var(--profile-y, 0deg)); transition: transform .35s cubic-bezier(.2, .7, .2, 1); }
+.profile-motion .about-portrait-frame { position: relative; }
+.portrait-frame-trace { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.portrait-frame-trace rect { fill: none; stroke: var(--accent); stroke-width: 1.5; stroke-linecap: round; stroke-dasharray: 1; stroke-dashoffset: 1; vector-effect: non-scaling-stroke; }
+[data-profile-visible="true"] .portrait-frame-trace rect { animation: portrait-trace 1.8s cubic-bezier(.3, .1, .2, 1) .12s both; }
+.education-journey { position: relative; padding-left: 21px; }
+.education-journey::before, .education-journey::after { content: ""; position: absolute; left: 3px; top: 26px; bottom: 21px; width: 1px; background: var(--line); pointer-events: none; }
+.education-journey::after { background: linear-gradient(var(--accent), color-mix(in srgb, var(--blue) 65%, var(--line))); transform: scaleY(0); transform-origin: top; }
+[data-profile-visible="true"] .education-journey::after { animation: education-line 1.4s cubic-bezier(.2, .6, .3, 1) .3s both; }
+.education-milestone { position: relative; }
+.education-milestone::before { content: ""; position: absolute; left: -21px; top: 19px; width: 7px; height: 7px; border: 1px solid var(--accent); border-radius: 50%; background: var(--surface); z-index: 1; }
+.education-entry.education-milestone::before { top: 5px; }
+[data-profile-visible="true"] .education-milestone::before { animation: education-milestone .55s ease-out .5s both; }
+[data-profile-visible="true"] .education-entry:nth-child(1)::before { animation-delay: .9s; }
+[data-profile-visible="true"] .education-entry:nth-child(2)::before { animation-delay: 1.3s; }
+.education-journey > p { font-size: 12px; color: var(--muted); margin: 8px 0; }
+.education-journey > p.mint { color: var(--accent); font-size: 15px; }
+@keyframes portrait-trace { from { stroke-dashoffset: 1; opacity: .25; } to { stroke-dashoffset: 0; opacity: .9; } }
+@keyframes education-line { to { transform: scaleY(1); } }
+@keyframes education-milestone { from { background: var(--surface); transform: scale(.7); } to { background: var(--accent); transform: scale(1); } }
+
+/* The contact action sends a short signal toward its destination. */
+.contact-heading { position: relative; }
+.contact-signal { flex: 1; height: 40px; min-width: 40px; max-width: 320px; color: var(--accent); overflow: visible; pointer-events: none; }
+.contact-signal > path { stroke: currentColor; opacity: .2; fill: none; }
+.contact-signal-beam { stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.contact-heading:hover .contact-signal-beam, .contact-heading:focus-within .contact-signal-beam { animation: contact-signal-send 1.5s cubic-bezier(.2, .6, .4, 1) infinite; }
+.contact-field { position: relative; display: block; margin-top: 8px; }
+.contact-field input, .contact-field textarea { margin-top: 0; transition: background .2s ease, border-color .2s ease; }
+.contact-field-border { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
+.contact-field-border rect { fill: none; stroke: var(--accent); stroke-width: 1.4; vector-effect: non-scaling-stroke; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; transition: stroke-dashoffset .55s cubic-bezier(.2, .7, .2, 1), opacity .2s; }
+.contact-field:focus-within .contact-field-border rect { stroke-dashoffset: 0; opacity: 1; }
+.contact-field:focus-within input, .contact-field:focus-within textarea { border-color: transparent; }
+.contact-form .submit-button { align-items: center; min-height: 47px; gap: 16px; position: relative; overflow: hidden; }
+.contact-submit-art { display: flex; align-items: center; width: 22px; height: 20px; flex: 0 0 auto; }
+.contact-submit-art svg { width: 22px; height: 20px; fill: none; stroke: currentColor; stroke-width: 1.6; stroke-linecap: round; stroke-linejoin: round; }
+.contact-send-icon { transition: transform .25s ease; }
+.submit-button:hover .contact-send-icon { transform: translate(2px, -2px); }
+.contact-submit-label { animation: contact-label-in .24s ease-out both; }
+.contact-form[data-status="sending"] .submit-button::after { content: ""; position: absolute; inset: auto 0 0; height: 3px; background: #0b10204d; transform: scaleX(.3); transform-origin: left; animation: contact-progress 1.3s ease-in-out infinite; }
+.contact-send-dot { fill: currentColor; stroke: none; animation: contact-send-dot 1s ease-in-out infinite; }
+.contact-send-dot:nth-child(2) { animation-delay: .15s; }
+.contact-send-dot:nth-child(3) { animation-delay: .3s; }
+.contact-confirmation { stroke-dasharray: 1; animation: contact-check .45s ease-out both; }
+.form-status .contact-status-icon { display: inline-block; width: 17px; height: 17px; vertical-align: -.3em; margin-right: 8px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+.contact-form[data-status="error"] .form-status { color: var(--coral); }
+.copy-email { display: flex; align-items: center; gap: 8px; }
+.copy-email > svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
+.copy-email[data-copied="true"] > svg path { stroke-dasharray: 1; animation: contact-check .4s ease-out both; }
+@keyframes contact-signal-send { 0% { stroke-dashoffset: 1; opacity: 0; } 15% { opacity: 1; } 70% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: -1; opacity: 0; } }
+@keyframes contact-progress { 0% { transform: translateX(-30%) scaleX(.3); } 100% { transform: translateX(130%) scaleX(.3); } }
+@keyframes contact-send-dot { 0%, 75%, 100% { opacity: .3; } 40% { opacity: 1; } }
+@keyframes contact-label-in { from { opacity: .3; transform: translateY(4px); } to { opacity: 1; transform: none; } }
+@keyframes contact-check { from { stroke-dashoffset: 1; } to { stroke-dashoffset: 0; } }
+
+html[data-motion-paused="true"] .site-frame *,
+html[data-motion-paused="true"] .site-frame *::before,
+html[data-motion-paused="true"] .site-frame *::after,
+html[data-motion-paused="true"] .cv-dialog * { animation-play-state: paused !important; }
+html[data-motion-paused="true"] .profile-motion { transform: none; }
+
+@media (max-width: 760px) { .contact-signal { display: none; } }
+@media (prefers-reduced-motion: reduce) {
+  .education-journey::after { transform: none; }
+  .profile-motion { transform: none; }
+  .portrait-frame-trace rect { stroke-dashoffset: 0; }
+  .education-milestone::before { background: var(--accent); }
+  .contact-field-border { display: none; }
+  .contact-field:focus-within input, .contact-field:focus-within textarea { border-color: var(--accent); }
+  .contact-confirmation, .copy-email[data-copied="true"] > svg path { stroke-dashoffset: 0; }
+  .contact-send-dot { opacity: 1; }
+}

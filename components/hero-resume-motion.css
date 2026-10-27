@@ -1,0 +1,29 @@
+/* A chosen discipline lights a different subnetwork inside the existing globe. */
+.interactive-network { --network-active: var(--accent); }
+.interactive-network[data-network-mode="fullstack"] { --network-active: #8faaff; }
+.interactive-network[data-network-mode="research"] { --network-active: #c1a4ff; }
+.interactive-network .network-node[aria-expanded="true"] { color: var(--network-active); border-color: var(--network-active); box-shadow: 0 0 22px -8px var(--network-active); }
+.interactive-network .network-preview-open { border-color: color-mix(in srgb, var(--network-active) 55%, var(--line)); box-shadow: 0 14px 45px -18px color-mix(in srgb, var(--network-active) 35%, transparent); }
+.interactive-network .network-preview-open .terminal-top > .mint,
+.interactive-network .network-preview-copy > .mono,
+.interactive-network .network-preview-copy .text-link { color: var(--network-active); }
+.interactive-network .network-preview-copy { animation: network-preview-arrival .36s cubic-bezier(.2,.8,.2,1) both; }
+@keyframes network-preview-arrival { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+
+/* The PDF is rerendered at its final pixel size; only its outer frame animates. */
+.cv-dialog .cv-dialog-document { transform-origin: top left; }
+.cv-dialog[open] .cv-dialog-actions > * { animation: resume-control-arrival .3s cubic-bezier(.2,.8,.2,1) .08s both; }
+.cv-dialog[open] .cv-dialog-actions > :last-child { animation-delay: .13s; }
+@keyframes resume-control-arrival { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: translateY(0); } }
+
+html[data-motion-paused="true"] .interactive-network *,
+html[data-motion-paused="true"] .cv-dialog * { animation-play-state: paused !important; }
+html[data-motion-paused="true"] .interactive-network .network-preview-copy,
+html[data-motion-paused="true"] .cv-dialog[open] .cv-dialog-document,
+html[data-motion-paused="true"] .cv-dialog[open] .cv-dialog-actions,
+html[data-motion-paused="true"] .cv-dialog[open] .cv-dialog-actions > * { animation: none !important; opacity: 1; transform: none; }
+html[data-motion-paused="true"] .cv-dialog[open]::backdrop { animation: none !important; }
+@media (prefers-reduced-motion: reduce) {
+  .interactive-network .network-preview-copy,
+  .cv-dialog[open] .cv-dialog-actions > * { animation: none !important; }
+}

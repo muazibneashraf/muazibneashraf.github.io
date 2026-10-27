@@ -1,0 +1,462 @@
+{
+  "site": {
+    "mark": "m",
+    "brand": "muaz",
+    "brandAccent": ".dev",
+    "title": "Muaz Ibne Ashraf",
+    "description": "Muaz Ibne Ashraf is a BRAC University Computer Science graduate building Flask backends, full-stack web applications, and applied AI research prototypes.",
+    "githubUrl": "https://github.com/muazibneashraf",
+    "githubLabel": "GitHub",
+    "linkedinLabel": "LinkedIn",
+    "emailLabel": "Email",
+    "backToTop": "Back to top",
+    "navigation": {
+      "about": "About",
+      "projects": "Projects",
+      "experience": "Experience",
+      "capabilities": "Capabilities",
+      "resume": "Résumé",
+      "contact": "Let’s talk"
+    },
+    "markAccent": ".",
+    "logoUrl": "",
+    "iconUrl": "/brand/neuro-wave-pulse.svg",
+    "faviconUrl": "/brand/neuro-wave-pulse.svg",
+    "logoCrop": {
+      "x": 50,
+      "y": 50,
+      "zoom": 100,
+      "fit": "cover"
+    },
+    "iconCrop": {
+      "x": 50,
+      "y": 50,
+      "zoom": 100,
+      "fit": "contain"
+    }
+  },
+  "hero": {
+    "primaryLabel": "Explore my work",
+    "primaryUrl": "/projects",
+    "resumeLabel": "View résumé",
+    "scrollLabel": "SCROLL TO EXPLORE",
+    "marqueeLead": "IDEAS. SYSTEMS. SOLUTIONS.",
+    "marqueeTrail": "ALWAYS LEARNING",
+    "visualCaption": "EXPLORE MY WORK",
+    "visualHint": "[ SELECT A NODE ]",
+    "codePath": "~/muaz/profile.py",
+    "codeClass": "Muaz",
+    "codeBase": "Developer",
+    "codeFocus": [
+      "backend",
+      "AI/ML"
+    ],
+    "codeMindset": "always learning",
+    "codePrompt": "building what comes next",
+    "nodes": [
+      {
+        "id": "backend",
+        "label": "Backend",
+        "projectId": "admission-lottery"
+      },
+      {
+        "id": "research",
+        "label": "AI & Research",
+        "projectId": "icu-analyzer"
+      },
+      {
+        "id": "fullstack",
+        "label": "Web applications",
+        "projectId": "lifeline"
+      }
+    ]
+  },
+  "sections": {
+    "work": {
+      "eyebrow": "SELECTED PROJECTS",
+      "title": "Explore the work",
+      "intro": "",
+      "actionLabel": "All projects"
+    },
+    "skills": {
+      "eyebrow": "TECHNICAL SKILLS",
+      "title": "Languages and tools I use",
+      "intro": "",
+      "groups": [
+        {
+          "id": "languages",
+          "icon": "</>",
+          "name": "Languages",
+          "items": [
+            "Python",
+            "Java",
+            "C",
+            "C++",
+            "JavaScript",
+            "TypeScript",
+            "SQL"
+          ]
+        },
+        {
+          "id": "web",
+          "icon": "{ }",
+          "name": "Web & backend",
+          "items": [
+            "Flask",
+            "React",
+            "Next.js",
+            "Node.js",
+            "HTML",
+            "CSS",
+            "Bootstrap 5",
+            "Jinja"
+          ]
+        },
+        {
+          "id": "data",
+          "icon": "[ ]",
+          "name": "Data & databases",
+          "items": [
+            "MySQL",
+            "MongoDB",
+            "SQLite",
+            "PostgreSQL",
+            "SQLAlchemy",
+            "NumPy"
+          ]
+        },
+        {
+          "id": "ai",
+          "icon": "⌘",
+          "name": "AI & machine learning",
+          "items": [
+            "PyTorch",
+            "CNN",
+            "LSTM / BiLSTM"
+          ]
+        },
+        {
+          "id": "tools",
+          "icon": ">_",
+          "name": "Tools & deployment",
+          "items": [
+            "Git",
+            "GitHub",
+            "Docker",
+            "Render",
+            "Vercel",
+            "VS Code",
+            "Figma"
+          ]
+        },
+        {
+          "id": "foundations",
+          "icon": "01",
+          "name": "CS foundations",
+          "items": [
+            "OOP",
+            "DSA",
+            "DBMS",
+            "SDLC"
+          ]
+        }
+      ]
+    },
+    "research": {
+      "eyebrow": "RESEARCH",
+      "title": "My final-year thesis",
+      "intro": "",
+      "projectId": "icu-analyzer",
+      "badge": "FINAL-YEAR THESIS · BRAC UNIVERSITY",
+      "subtitle": "Mortality Risk and Health Suggestions for Critical Patients Using Extended LSTM and CNN",
+      "tags": [
+        "CNN-LSTM SEQUENCE MODEL",
+        "ICU LAB TELEMETRY",
+        "ACADEMIC PROTOTYPE"
+      ],
+      "linkLabel": "Read about the thesis",
+      "flowLabel": "RESEARCH PIPELINE WORKFLOW",
+      "note": "Academic prototype · Proposed research model · Non-clinical validation"
+    },
+    "walkthrough": {
+      "eyebrow": "PROJECT WALKTHROUGHS",
+      "title": "How the projects work",
+      "intro": "Select a project, then follow one request through its main stages.",
+      "modeLabel": "LIVE REQUEST TRACE",
+      "requestLabel": "REQUEST",
+      "stepDetail": "A key stage in the {project} workflow.",
+      "linkLabel": "Explore"
+    },
+    "capabilities": {
+      "eyebrow": "CAPABILITIES",
+      "title": "What I can contribute",
+      "intro": "",
+      "linkLabel": "See the work",
+      "items": [
+        {
+          "id": "backend",
+          "projectId": "admission-lottery",
+          "title": "Backend development",
+          "summary": "I build Flask backends, organize API and database code, and set up applications for deployment."
+        },
+        {
+          "id": "web",
+          "projectId": "lifeline",
+          "title": "Connected web applications",
+          "summary": "I’ve worked on database-backed web applications, interactive maps, and real-time chat as part of a project team."
+        },
+        {
+          "id": "ai",
+          "projectId": "icu-analyzer",
+          "title": "Applied AI research",
+          "summary": "My thesis combines OCR report processing with a healthcare application and a proposed CNN + LSTM model."
+        }
+      ]
+    },
+    "projectsPage": {
+      "eyebrow": "PROJECTS / SELECTED WORK",
+      "title": "My projects",
+      "intro": "My thesis, course projects, and personal applications. Each case study explains what I worked on and links to the code where available."
+    },
+    "contactPage": {
+      "eyebrow": "CONTACT",
+      "title": "Get in touch",
+      "intro": "",
+      "detailsTitle": "Let’s connect"
+    },
+    "projectPage": {
+      "overview": "The project",
+      "challenge": "The challenge",
+      "contribution": "My contribution",
+      "gallery": "Project images",
+      "context": "Project context",
+      "role": "MY ROLE",
+      "technologies": "TECHNOLOGIES",
+      "next": "UP NEXT",
+      "source": "View source code",
+      "live": "Visit live project",
+      "explore": "Explore project"
+    },
+    "contactForm": {
+      "nameLabel": "Name",
+      "emailLabel": "Email",
+      "subjectLabel": "Subject",
+      "messageLabel": "Message",
+      "namePlaceholder": "Your name",
+      "emailPlaceholder": "you@example.com",
+      "subjectPlaceholder": "Role or project",
+      "messagePlaceholder": "Tell me about the role or project…",
+      "submitLabel": "Send message",
+      "sendingLabel": "Sending…",
+      "successText": "Thanks for getting in touch. Your message has been received.",
+      "errorText": "The inbox is unavailable.",
+      "directEmailLabel": "Email me directly instead"
+    }
+  },
+  "about": {
+    "previousEducation": [
+      {
+        "id": "hsc",
+        "title": "HSC · Science",
+        "institution": "Rajuk Uttara Model College",
+        "period": "2020",
+        "detail": "GPA 5.00 / 5.00"
+      },
+      {
+        "id": "ssc",
+        "title": "SSC · Science",
+        "institution": "Rajuk Uttara Model College",
+        "period": "2018",
+        "detail": "GPA 5.00 / 5.00"
+      }
+    ],
+    "languages": [
+      {
+        "label": "Bangla",
+        "value": "native"
+      },
+      {
+        "label": "English",
+        "value": "working proficiency"
+      },
+      {
+        "label": "French",
+        "value": ""
+      }
+    ],
+    "educationLabel": "EDUCATION",
+    "languagesLabel": "LANGUAGES",
+    "moreLabel": "More about me",
+    "resumeLabel": "View the full résumé",
+    "lessLabel": "Show less"
+  },
+  "visuals": {
+    "icu-analyzer": {
+      "kind": "icu",
+      "heading": "ICU / ANALYZER",
+      "description": "RESEARCH WORKFLOW",
+      "footer": "DOCUMENT / STRUCTURED DATA",
+      "labels": [
+        "LAB",
+        "REPORT",
+        "OCR",
+        "extract &",
+        "structure",
+        "Lab values",
+        "AI analysis",
+        "CNN + LSTM"
+      ]
+    },
+    "lifeline": {
+      "kind": "community",
+      "heading": "LIFELINE",
+      "description": "COMMUNITY CONNECTIONS",
+      "footer": "FIND HELP. OFFER HELP.",
+      "labels": [
+        "Someone needs a hand",
+        "Someone can help",
+        "Let’s connect"
+      ]
+    },
+    "admission-lottery": {
+      "kind": "architecture",
+      "heading": "ADMISSION / LOTTERY",
+      "description": "APPLICATION STRUCTURE",
+      "footer": "MODULAR BY DESIGN",
+      "labels": [
+        "Web entry",
+        "Flask application",
+        "API",
+        "Migrations",
+        "Config"
+      ]
+    },
+    "portfolio-platform": {
+      "kind": "studio",
+      "heading": "PORTFOLIO / STUDIO",
+      "description": "CONTENT PIPELINE",
+      "footer": "EDIT. PUBLISH. PRESENT.",
+      "labels": [
+        "Admin Studio",
+        "Authenticated API",
+        "Content",
+        "Next.js",
+        "Public Pages"
+      ]
+    }
+  },
+  "payloads": {
+    "portfolio-platform": {
+      "Admin studio": {
+        "stage": "Admin Studio",
+        "action": "UPDATE_PROJECT",
+        "draftFile": "portfolio-content.json",
+        "syncStatus": "staged"
+      },
+      "Authenticated API": {
+        "method": "PUT",
+        "route": "/api/content",
+        "auth": "HttpOnly admin_session",
+        "status": 200
+      },
+      "Portfolio data": {
+        "storage": "JSON content store",
+        "validated": true,
+        "atomicWrite": true
+      },
+      "Server-rendered pages": {
+        "rendering": "Next.js dynamic SSR",
+        "route": "/projects/portfolio-platform",
+        "hydration": "ready"
+      }
+    },
+    "icu-analyzer": {
+      "ICU report": {
+        "document": "patient_lab_record.png",
+        "format": "raster/scan",
+        "resolution": "300dpi"
+      },
+      "OCR extraction": {
+        "ocrEngine": "tesseract_custom",
+        "parsedTokens": [
+          "WBC",
+          "Platelets",
+          "Creatinine",
+          "BUN"
+        ],
+        "extractionConfidence": "high"
+      },
+      "Structured lab values": {
+        "WBC": "12.4 k/uL",
+        "Platelets": "185 k/uL",
+        "Creatinine": "1.2 mg/dL",
+        "Glucose": "140 mg/dL"
+      },
+      "CNN + LSTM research": {
+        "model": "CNN-BiLSTM",
+        "sequenceWindow": 24,
+        "temporalLoss": 0.218,
+        "status": "research_prototype"
+      },
+      "Report review": {
+        "riskLevel": "Elevated Risk",
+        "requiresClinicalReview": true,
+        "clinicalValidation": "non-diagnostic"
+      }
+    },
+    "lifeline": {
+      "Request / offer": {
+        "intent": "AID_REQUEST",
+        "category": "essential_aid",
+        "urgency": "high"
+      },
+      "Location + urgency": {
+        "coordinates": [
+          23.8103,
+          90.4125
+        ],
+        "radiusKm": 5,
+        "priority": "urgent"
+      },
+      "Community discovery": {
+        "matchedVolunteers": 4,
+        "proximityRange": "800m - 2.4km",
+        "state": "active"
+      },
+      "Real-time chat": {
+        "protocol": "Socket.IO",
+        "room": "help_channel_24",
+        "transport": "WebSocket"
+      }
+    },
+    "admission-lottery": {
+      "Web interface": {
+        "form": "lottery_submission",
+        "fields": [
+          "applicant_id",
+          "category_code"
+        ],
+        "method": "POST"
+      },
+      "Flask application": {
+        "route": "/draw/process",
+        "framework": "Flask 2.x",
+        "orm": "SQLAlchemy"
+      },
+      "API layer": {
+        "endpoint": "POST /api/lottery/run",
+        "rngEntropy": "system_random",
+        "status": 200
+      },
+      "Database migrations": {
+        "alembicHead": "a8f3b41d",
+        "transaction": "committed",
+        "rowsUpdated": 250
+      }
+    }
+  },
+  "jobs": {
+    "emptyText": "Professional experience will be added here as I take on new roles.",
+    "linkLabel": "All job experience"
+  }
+}

@@ -1,0 +1,133 @@
+/* The homepage keeps its final geometry throughout the intro. */
+html { scrollbar-gutter: stable; }
+
+/* :has also applies to server HTML, before hydration can set the root state. */
+html:has(.hero-body[data-intro-phase]:not([data-intro-phase="completed"])) {
+  overflow: hidden;
+}
+.site-frame:has(.hero-body[data-intro-phase="init"]) .site-header,
+.site-frame:has(.hero-body[data-intro-phase="typing"]) .site-header,
+.site-frame:has(.hero-body[data-intro-phase="holding"]) .site-header,
+.site-frame:has(.hero-body:is([data-intro-phase="init"], [data-intro-phase="typing"], [data-intro-phase="holding"])) main#main > :not(.hero, .intro-controls-wrap),
+.site-frame:has(.hero-body:is([data-intro-phase="init"], [data-intro-phase="typing"], [data-intro-phase="holding"])) .site-footer {
+  opacity: 0;
+  visibility: hidden;
+}
+.site-frame:has(.hero-body[data-intro-phase="transitioning"]) :is(.site-header, .site-footer, main#main > :not(.hero, .intro-controls-wrap)) {
+  transition: opacity .85s cubic-bezier(.16, 1, .3, 1);
+}
+.hero-body[data-intro-phase] .hero-copy { animation: none; }
+.hero-intro-copy { position: relative; z-index: 10; display: flow-root; }
+/* Invisible full text reserves the exact responsive line breaks and heights.
+   The typed layer shares its width without taking part in layout. */
+.intro-line { position: relative; display: inline-block; vertical-align: top; }
+h1 > .intro-line { display: block; }
+.intro-line-size { visibility: hidden; }
+.intro-line-typed { position: absolute; inset: 0; transform: translate3d(0, 0, 0); }
+.hero-body:is([data-intro-phase="typing"], [data-intro-phase="holding"]) .intro-line-typed {
+  transform: translate3d(var(--intro-line-offset-x, 0px), 0, 0);
+}
+.hero-body[data-intro-phase="transitioning"] .intro-line-typed {
+  transition: transform .95s cubic-bezier(.16, 1, .3, 1);
+}
+.hero-body[data-intro-phase="completed"] .intro-line-size { visibility: visible; }
+.hero-body[data-intro-phase="completed"] .intro-line-typed { visibility: hidden; }
+.hero-body[data-intro-phase="init"] .hero-intro-copy { visibility: hidden; }
+.hero-body:is([data-intro-phase="typing"], [data-intro-phase="holding"]) .hero-intro-copy {
+  transform: translate3d(var(--intro-offset-x, 0px), var(--intro-offset-y, 0px), 0);
+  will-change: transform;
+}
+.hero-body[data-intro-phase="transitioning"] .hero-intro-copy {
+  transform: translate3d(0, 0, 0);
+  transition: transform .95s cubic-bezier(.16, 1, .3, 1);
+  will-change: transform;
+}
+.hero-body[data-intro-phase="completed"] .hero-intro-copy { transform: translate3d(0, 0, 0); }
+
+/* Controls, globe and terminal only fade; their layout anchors never move. */
+.hero-body:is([data-intro-phase="init"], [data-intro-phase="typing"], [data-intro-phase="holding"]) :is(.hero-actions, .hero-socials, .network-visual),
+.hero:has(.hero-body:is([data-intro-phase="init"], [data-intro-phase="typing"], [data-intro-phase="holding"])) :is(.hero-coordinate, .hero-bottom) {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+.hero-body[data-intro-phase="transitioning"] :is(.hero-actions, .hero-socials, .network-visual),
+.hero:has(.hero-body[data-intro-phase="transitioning"]) :is(.hero-coordinate, .hero-bottom) {
+  transition: opacity .8s cubic-bezier(.16, 1, .3, 1);
+}
+/* Paint the caret on the growing text run. A separate moving cursor box
+   registers a layout shift on every keystroke despite the stable hero. */
+.intro-line-typed[data-typing] .intro-typed-run {
+  padding-right: .6em;
+  margin-right: -.6em;
+  background: linear-gradient(var(--accent), var(--accent)) right calc(100% - .08em) / .5em 1px no-repeat;
+  animation: intro-cursor-blink .85s steps(2) infinite;
+}
+@keyframes intro-cursor-blink { 50% { background-size: 0 1px; } }
+
+.intro-controls-wrap {
+  position: fixed;
+  bottom: 28px;
+  right: 28px;
+  z-index: 9999;
+}
+.intro-skip-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  min-height: 38px;
+  background: color-mix(in srgb, var(--surface, #0e172a) 70%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent, #55dffc) 30%, var(--line, #1e2c48));
+  border-radius: 8px;
+  color: var(--muted, #9aaac7);
+  font-family: var(--font-mono, monospace);
+  font-size: 11px;
+  letter-spacing: .8px;
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  cursor: pointer;
+  box-shadow: 0 8px 24px -6px rgba(0, 0, 0, .5);
+  transition: color .2s ease, border-color .2s ease, background .2s ease;
+}
+.intro-skip-btn:hover {
+  color: var(--accent, #55dffc);
+  border-color: var(--accent, #55dffc);
+  background: color-mix(in srgb, var(--accent, #55dffc) 14%, var(--surface, #0e172a));
+}
+.intro-skip-btn:focus-visible { outline: 3px solid var(--accent, #55dffc); outline-offset: 3px; }
+@media (max-width: 760px) {
+  .intro-controls-wrap { bottom: 20px; right: 18px; }
+  .intro-skip-btn { padding: 8px 12px; min-height: 44px; }
+}
+
+/* The head script selects this before the first paint on browser refresh.
+   Show the final server-rendered layout even before React hydrates. */
+html[data-intro-bypass="true"]:has(.hero-body[data-intro-phase]) { overflow: auto !important; }
+html[data-intro-bypass="true"] .hero-body[data-intro-phase] .hero-intro-copy {
+  visibility: visible !important;
+  transform: translate3d(0, 0, 0) !important;
+  transition: none !important;
+}
+html[data-intro-bypass="true"] .intro-line-size { visibility: visible !important; }
+html[data-intro-bypass="true"] :is(.intro-line-typed, .intro-controls-wrap) { display: none !important; }
+html[data-intro-bypass="true"] .site-frame:has(.hero-body[data-intro-phase]) :is(.site-header, .site-footer, main#main > :not(.hero, .intro-controls-wrap), .hero-actions, .hero-socials, .network-visual, .hero-coordinate, .hero-bottom) {
+  opacity: 1 !important;
+  visibility: visible !important;
+  pointer-events: auto !important;
+  transition: none !important;
+}
+/* Do not show overlapping globe controls before their first layout pass. */
+html[data-intro-bypass="true"] .network-visual:not([data-labels-ready]) .network-node { visibility: hidden; }
+.network-visual[data-labels-ready="true"] .network-node { animation: networkNodeFade 0.18s ease-out; }
+@keyframes networkNodeFade { from { opacity: 0; } to { opacity: 1; } }
+
+@media (prefers-reduced-motion: reduce) {
+  .hero-intro-copy { transform: none !important; transition: none !important; visibility: visible !important; }
+  .intro-line-size { visibility: visible; }
+  .intro-line-typed, .intro-controls-wrap { display: none; }
+  .site-frame:has(.hero-body[data-intro-phase]) :is(.site-header, .site-footer, main#main > :not(.hero, .intro-controls-wrap), .hero-actions, .hero-socials, .network-visual, .hero-coordinate, .hero-bottom) {
+    opacity: 1; visibility: visible; pointer-events: auto; transition: none;
+  }
+  html:has(.hero-body[data-intro-phase]) { overflow: auto; }
+}

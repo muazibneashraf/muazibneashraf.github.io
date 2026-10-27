@@ -1,0 +1,111 @@
+/* Small, distinct technical scenes share motion controls, not their layouts. */
+.section-scene { --scene-accent: var(--accent); color: var(--scene-accent); }
+.section-scene[data-scene-visible="false"] *, .section-scene[data-scene-paused="true"] * { animation-play-state: paused !important; }
+.section-scene .sv-panel { fill: color-mix(in srgb, currentColor 7%, #0d192b); stroke-opacity: .6; }
+.section-scene .sv-track { opacity: .24; }
+.skill-motion { width: 120px; height: 60px; margin-bottom: 2px; }
+.skill-motion svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.skill-motion-1, .skill-motion-4 { --scene-accent: var(--blue); }
+.skill-motion-2, .skill-motion-3 { --scene-accent: var(--lilac); }
+.skill-motion .sv-code-bracket { stroke-width: 2; }
+.sv-code-line { stroke-dasharray: 25; animation: sv-code-write 4.5s ease-in-out infinite; opacity: .6; }
+.sv-code-caret { animation: sv-caret 1.2s steps(2, jump-none) infinite; }
+.sv-status { animation: sv-status 3s ease-in-out infinite; }
+.sv-request { animation: sv-request 3.8s ease-in-out infinite; }
+.sv-response { animation: sv-response 3.8s ease-in-out infinite -1.9s; }
+.sv-record { animation: sv-record 4.5s ease-in-out infinite; }
+.sv-db-row { opacity: .45; animation: sv-db-fill 4.5s ease-in-out infinite; }
+.sv-data-dot { offset-path: path("M38 30H68"); offset-anchor: 0px 0px; animation: sv-packet 2.4s linear infinite; }
+.sv-neural-lines path { opacity: .25; animation: sv-neural-link 3.6s ease-in-out infinite; }
+.sv-neuron { fill: currentColor; fill-opacity: .65; stroke-opacity: .8; animation: sv-neuron 3.6s ease-in-out infinite; }
+.sv-deploy-dot { offset-path: path("M35 30H51V15H76V30H88"); offset-anchor: 0px 0px; animation: sv-packet 4s linear infinite; }
+.sv-deploy-check { stroke-dasharray: 25; animation: sv-deploy-check 4s ease-in-out infinite; }
+.sv-deploy-progress { stroke-width: 2; stroke-dasharray: 20; animation: sv-code-write 4s ease-in-out infinite; }
+.sv-tree-path { stroke-dasharray: 1; animation: sv-tree-traverse 4.8s ease-in-out infinite; }
+.sv-tree-leaf { fill: #12283b; animation: sv-leaf 4.8s ease-in-out infinite; }
+@keyframes sv-code-write { 0%, 10% { stroke-dashoffset: 25; } 50%, 85% { stroke-dashoffset: 0; } 100% { stroke-dashoffset: -25; } }
+@keyframes sv-caret { from { opacity: 1; } to { opacity: 0; } }
+@keyframes sv-status { 0%, 100% { opacity: .35; } 50% { opacity: 1; } }
+@keyframes sv-request { 0%, 100% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 80% { transform: translateX(24px); opacity: 1; } 95% { transform: translateX(24px); opacity: 0; } }
+@keyframes sv-response { 0%, 100% { transform: translateX(0); opacity: 0; } 15% { opacity: 1; } 80% { transform: translateX(-24px); opacity: 1; } 95% { transform: translateX(-24px); opacity: 0; } }
+@keyframes sv-record { 0%, 100% { transform: translateX(0); opacity: .3; } 45%, 65% { transform: translateX(4px); opacity: 1; } }
+@keyframes sv-db-fill { 0%, 100% { opacity: .25; } 50% { opacity: .85; } }
+@keyframes sv-packet { 0% { offset-distance: 0%; opacity: 0; } 15%, 85% { opacity: 1; } 100% { offset-distance: 100%; opacity: 0; } }
+@keyframes sv-neural-link { 0%, 100% { opacity: .2; } 50% { opacity: .8; } }
+@keyframes sv-neuron { 0%, 100% { fill-opacity: .3; } 50% { fill-opacity: 1; } }
+@keyframes sv-deploy-check { 0%, 45%, 100% { stroke-dashoffset: 25; opacity: .3; } 70%, 90% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes sv-tree-traverse { 0%, 100% { stroke-dashoffset: 1; opacity: .4; } 60%, 85% { stroke-dashoffset: 0; opacity: 1; } }
+@keyframes sv-leaf { 0%, 100% { fill: #12283b; } 50% { fill: color-mix(in srgb, currentColor 28%, #12283b); } }
+
+.capability-visual { --scene-accent: var(--cap-accent, var(--accent)); margin: -4px 0 22px; height: 100px; }
+.capability-visual svg { display: block; width: 100%; height: 100%; overflow: visible; }
+.cv-baseline { stroke-dasharray: 1 9; opacity: .14; }
+.cv-route { stroke-opacity: .25; }
+.cv-server-status { animation: sv-status 3.6s ease-in-out infinite; }
+.cv-backend-packet { offset-path: path("M58 47H109M166 47H219"); offset-anchor: 0px 0px; animation: sv-packet 4s linear infinite; }
+.cv-backend-reply { offset-path: path("M219 56H166M109 56H58"); offset-anchor: 0px 0px; animation: sv-packet 4s linear infinite -2s; }
+.cv-window-left .cv-sync-line { animation: cv-sync-left 5s ease-in-out infinite; }
+.cv-window-right .cv-sync-line { animation: cv-sync-left 5s ease-in-out infinite -1.4s; }
+.cv-sync-orbit { stroke-opacity: .4; stroke-dasharray: 3 5; transform-origin: 140px 48px; animation: cv-sync-orbit 18s linear infinite; }
+.cv-sync-arrows { stroke-width: 1.5; animation: sv-status 5s ease-in-out infinite; }
+.cv-neural-lines path { opacity: .25; animation: sv-neural-link 3.6s ease-in-out infinite; }
+.cv-scan { animation: cv-scan 4.6s ease-in-out infinite; }
+.cv-ai-packet { offset-path: path("M71 48H109M220 48H263"); offset-anchor: 0px 0px; animation: sv-packet 4.6s linear infinite -2s; }
+.cv-research-output { fill: currentColor; fill-opacity: .2; animation: sv-status 4.6s ease-in-out infinite; }
+@keyframes cv-sync-left { 0%, 100% { opacity: .35; } 40%, 70% { opacity: .9; } }
+@keyframes cv-sync-orbit { to { transform: rotate(360deg); } }
+@keyframes cv-scan { 0%, 100% { transform: translateY(0); opacity: 0; } 15% { opacity: 1; } 80% { transform: translateY(44px); opacity: 1; } 95% { transform: translateY(44px); opacity: 0; } }
+
+/* The research feature is an inspectable sequence, with one visual at a time. */
+.research-sequence { --scene-accent: var(--lilac); min-width: 0; }
+.rs-visual-stage { position: relative; margin: -8px -8px 13px; border: 1px solid color-mix(in srgb, var(--lilac) 13%, transparent); border-radius: 12px; background: radial-gradient(ellipse at 50% 70%, color-mix(in srgb, var(--lilac) 8%, transparent), transparent 75%); }
+.rs-artwork { display: block; width: 100%; height: 154px; color: var(--lilac); }
+.rs-stage-counter { position: absolute; top: 10px; right: 12px; font-size: 8px; color: #ac9dc7; letter-spacing: 1px; }
+.rs-art-scene { animation: rs-arrive .45s ease-out both; }
+.section-scene[data-scene-paused="true"] .rs-art-scene { animation: none !important; opacity: 1; transform: none; }
+.rs-paper, .rs-neural-frame { fill: #211d38; stroke: #a994d0; }
+.rs-artwork text { fill: #d5c4ee; stroke: none; font: 12px var(--font-mono); }
+.rs-artwork .rs-model-label text { font-size: 10px; letter-spacing: 1px; }
+.rs-scanner { stroke-width: 1.7; animation: rs-scan 2.8s ease-in-out infinite; }
+.rs-scanner-wash { fill: currentColor; opacity: .1; stroke: none; animation: rs-scan 2.8s ease-in-out infinite; }
+.rs-scan-bracket, .rs-ocr-side { opacity: .45; }
+.rs-token-box { stroke: #d8b8ff; animation: rs-token 2.8s ease-in-out infinite; }
+.rs-table-record { stroke-width: 2; stroke-dasharray: 55; animation: rs-record 2.8s ease-in-out infinite; }
+.rs-table-head text { font-size: 10px; letter-spacing: 1px; }
+.rs-table-write { stroke-width: 1.6; animation: rs-table-write 2.8s ease-in-out infinite; }
+.rs-neural-links path { opacity: .22; animation: sv-neural-link 2.8s ease-in-out infinite; }
+.rs-neuron { fill: currentColor; stroke: #ead5ff; animation: sv-neuron 2.8s ease-in-out infinite; }
+.rs-neural-packet { offset-path: path("M73 57L122 99L177 82L231 65L284 82"); offset-anchor: 0px 0px; animation: sv-packet 2.8s linear infinite; }
+.rs-chip-pins { opacity: .4; }
+.rs-review-header { fill: #302847; stroke: #b19acb; }
+.rs-review-row { animation: rs-token 2.8s ease-in-out infinite; }
+.rs-review-seal { fill: #342944; stroke: #d5b4ed; }
+.rs-review-check { stroke: #e7ccff; stroke-width: 2.5; stroke-dasharray: 1; animation: rs-review-check 2.8s ease-in-out infinite; }
+.rs-stage-list { display: flex; flex-direction: column; gap: 5px; }
+.rs-stage-list .rs-step { width: 100%; cursor: pointer; color: #c9bfd9; font: 500 12px/1.4 var(--font-body, sans-serif); text-align: left; padding: 9px 12px; gap: 11px; border-radius: 7px; background: color-mix(in srgb, var(--lilac) 4%, var(--surface)); }
+.rs-step[aria-pressed="true"] { border-color: #ae91db; color: #f0e5ff; background: color-mix(in srgb, var(--lilac) 15%, var(--surface)); }
+.rs-step:focus-visible { outline: 2px solid #d9baff; outline-offset: 3px; }
+.rs-step-number { color: #ad93cd; font-size: 10px; flex-shrink: 0; }
+.rs-step-mark { width: 4px; height: 4px; border-radius: 50%; background: currentColor; opacity: .25; margin-left: auto; flex-shrink: 0; }
+.rs-step[aria-pressed="true"] .rs-step-mark { opacity: 1; box-shadow: 0 0 7px #cba6ff66; }
+.rs-description { min-height: 3em; margin: 12px 0 0; color: #bcb0cd; font-size: 11px; line-height: 1.6; }
+.rs-note { color: #a99aba; font-size: 9px; line-height: 1.65; margin: 9px 0 0; }
+@keyframes rs-arrive { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+@keyframes rs-scan { 0%, 100% { transform: translateY(-8px); opacity: 0; } 12% { opacity: 1; } 78% { transform: translateY(75px); opacity: .9; } 92% { transform: translateY(75px); opacity: 0; } }
+@keyframes rs-token { 0%, 100% { opacity: .35; } 40%, 75% { opacity: 1; } }
+@keyframes rs-record { 0%, 100% { stroke-dashoffset: 55; opacity: .35; } 45%, 85% { stroke-dashoffset: 0; opacity: .85; } }
+@keyframes rs-table-write { 0%, 100% { transform: translateY(0); opacity: 0; } 15% { opacity: .6; } 80% { transform: translateY(76px); opacity: .6; } 95% { transform: translateY(76px); opacity: 0; } }
+@keyframes rs-review-check { 0%, 10% { stroke-dashoffset: 1; opacity: .3; } 45%, 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .3; } }
+
+@media (max-width: 760px) {
+  .skill-motion { width: 102px; height: 51px; }
+  .capability-visual { max-width: 330px; height: 95px; }
+  .rs-visual-stage { margin-inline: 0; }
+  .rs-artwork { height: 150px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .section-scene *, .section-scene *::before, .section-scene *::after { animation: none !important; transition: none !important; }
+  .sv-data-dot, .sv-deploy-dot, .cv-backend-packet, .cv-backend-reply, .cv-ai-packet, .rs-neural-packet, .rs-scanner, .rs-scanner-wash, .rs-table-write, .cv-scan { display: none; }
+  .sv-code-line, .sv-deploy-check, .sv-deploy-progress, .sv-tree-path, .rs-review-check, .rs-table-record { stroke-dashoffset: 0; }
+  .rs-art-scene { opacity: 1; transform: none; }
+}
