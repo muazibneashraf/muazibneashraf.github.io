@@ -35,7 +35,6 @@ type NetworkFocus = (typeof NODE_LAYOUTS)[number]["focus"];
 
 const BASE_NODES = NEURAL_GLOBE.nodes;
 const EDGES = NEURAL_GLOBE.edges;
-const EDGE_TYPES = NEURAL_GLOBE.edgeTypes;
 const NODE_COUNT = BASE_NODES.length;
 
 const GLOBE_WARNINGS = [
@@ -249,32 +248,14 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         containerRef.current?.setAttribute("data-labels-ready", "true");
       }
 
-      // Refined technical orbital paths framing the spherical cluster
-      const orbit = ctx.createLinearGradient(
-        centerX - radius,
-        centerY - radius,
-        centerX + radius,
-        centerY + radius,
-      );
-      orbit.addColorStop(0, "rgba(85, 223, 252, 0.38)");
-      orbit.addColorStop(0.5, "rgba(99, 135, 255, 0.22)");
-      orbit.addColorStop(1, "rgba(178, 155, 255, 0.32)");
-      ctx.strokeStyle = orbit;
-      ctx.lineWidth = 0.95;
+      // Technical orbital path framing the spherical cluster (back arc)
+      ctx.globalAlpha = 0.16;
+      ctx.strokeStyle = cyan;
+      ctx.lineWidth = 0.75;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-
-      // Primary elliptical orbit gently framing the globe
       ctx.beginPath();
-      ctx.ellipse(centerX, centerY, radius * 1.22, radius * 0.44, -0.45, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.stroke();
-
-      // Subtle secondary orbit accent - delicate so it doesn't over-circle the scene
-      ctx.globalAlpha = 0.28;
-      ctx.beginPath();
-      ctx.ellipse(centerX, centerY, radius * 0.56, radius * 1.08, -0.5, 0, Math.PI * 2);
-      ctx.closePath();
+      ctx.ellipse(centerX, centerY, radius * 1.18, radius * 0.4, -0.42, Math.PI, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1;
 
@@ -292,7 +273,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const y2 = n.x * yx + n.y * yy + n.z * yz;
         const z2 = n.x * zx + n.y * zy + n.z * zz;
 
-        const perspective = 1 + z2 * 0.09;
+        const perspective = Math.sqrt(15) / (4 - z2);
         const pt = projected[i];
         pt.x = centerX + x1 * radius * perspective;
         pt.y = centerY + y2 * radius * perspective;
@@ -301,13 +282,16 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       }
 
       for (let e = 0; e < EDGES.length; e++) {
-        const [a, b] = EDGES[e];
-        const p = projected[a], q = projected[b];
-        curves[e].x = (p.x + q.x) / 2;
-        curves[e].y = (p.y + q.y) / 2;
+        const n = NEURAL_GLOBE.controls[e];
+        const x = n.x * xx + n.y * xy + n.z * xz;
+        const y = n.x * yx + n.y * yy + n.z * yz;
+        const z = n.x * zx + n.y * zy + n.z * zz;
+        const perspective = Math.sqrt(15) / (4 - z);
+        curves[e].x = centerX + x * radius * perspective;
+        curves[e].y = centerY + y * radius * perspective;
       }
 
-      // Render network edges with depth-based luminescence (cortex circled texture + inner tesseract)
+      // Render network edges with depth-based luminescence (cortex circled texture + volumetric inner synapses)
       const edgeCount = EDGES.length;
       ctx.globalAlpha = 1;
       for (let e = 0; e < edgeCount; e++) {
@@ -315,39 +299,24 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const p = projected[i];
         const q = projected[j];
         const depth = (p.z + q.z + 2) / 4;
+        const shell = NEURAL_GLOBE.cortex[e];
         const signal = Math.max(activation[i], activation[j]);
-        const type = EDGE_TYPES[e];
 
-        if (type === "tesseract") {
-          // 4D hypercube neural core: dimensional geometric core lines
-          ctx.strokeStyle = depth > 0.45 ? cyan : lilac;
-          ctx.lineWidth = 1.15 + depth * 0.4 + signal * 0.35;
-          ctx.globalAlpha = 0.28 + depth * 0.5 + signal * 0.22;
-        } else if (type === "synapse") {
-          // Neural bridging synapses connecting tesseract to outer cortex
-          ctx.strokeStyle = lilac;
-          ctx.lineWidth = 0.75 + depth * 0.25 + signal * 0.2;
-          ctx.globalAlpha = 0.14 + depth * 0.3 + signal * 0.18;
-        } else {
+        if (shell) {
           // Outer spherical cortex lattice (clean circled texture)
-          if (depth > 0.55) {
-            ctx.strokeStyle = cyan;
-            ctx.lineWidth = 0.85 + signal * 0.3;
-            ctx.globalAlpha = 0.1 + depth * 0.38 + signal * 0.18;
-          } else if (depth > 0.35) {
-            ctx.strokeStyle = blue;
-            ctx.lineWidth = 0.65 + signal * 0.2;
-            ctx.globalAlpha = 0.06 + depth * 0.2 + signal * 0.14;
-          } else {
-            ctx.strokeStyle = blue;
-            ctx.lineWidth = 0.5;
-            ctx.globalAlpha = 0.03 + depth * 0.1 + signal * 0.08;
-          }
+          ctx.strokeStyle = depth > 0.45 ? cyan : blue;
+          ctx.globalAlpha = (0.055 + depth * depth * 0.28) + signal * 0.16;
+          ctx.lineWidth = depth > 0.5 ? 0.75 : 0.55;
+        } else {
+          // Inner neural processing synapses: curved volumetric paths
+          ctx.strokeStyle = activeFocus === "research" ? lilac : depth > 0.45 ? cyan : lilac;
+          ctx.globalAlpha = (0.075 + depth * depth * 0.5) + signal * 0.2;
+          ctx.lineWidth = 0.75 + signal * 0.35;
         }
 
         ctx.beginPath();
         ctx.moveTo(p.x, p.y);
-        ctx.lineTo(q.x, q.y);
+        ctx.quadraticCurveTo(curves[e].x, curves[e].y, q.x, q.y);
         ctx.stroke();
       }
 
@@ -357,11 +326,15 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         if (!isPaused && !motion.matches) {
           pulse.progress += pulse.speed * delta;
           if (pulse.progress >= 1) {
+            const target = EDGES[pulse.edgeIdx][1];
+            activation[target] = 1;
+            const routes = NEURAL_GLOBE.outgoing[target];
             pulse.progress = 0;
-            pulse.edgeIdx = Math.floor(Math.random() * EDGES.length);
-            pulse.speed = 0.007 + Math.random() * 0.008;
+            pulse.edgeIdx = routes.length
+              ? routes[Math.floor(Math.random() * routes.length)]
+              : NEURAL_GLOBE.inputs[Math.floor(Math.random() * NEURAL_GLOBE.inputs.length)];
+            pulse.speed = 0.007 + Math.random() * 0.006;
             activation[EDGES[pulse.edgeIdx][0]] = 0.8;
-            activation[EDGES[pulse.edgeIdx][1]] = 1;
           }
         }
 
@@ -371,22 +344,23 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const avgZ = (p.z + q.z) / 2;
 
         if (avgZ > -0.15) {
-          const px = p.x + (q.x - p.x) * pulse.progress;
-          const py = p.y + (q.y - p.y) * pulse.progress;
+          const t = pulse.progress, u = 1 - t, control = curves[pulse.edgeIdx];
+          const px = u * u * p.x + 2 * u * t * control.x + t * t * q.x;
+          const py = u * u * p.y + 2 * u * t * control.y + t * t * q.y;
           const alpha = Math.min(1, Math.max(0, (avgZ + 0.2) * 1.4));
 
           // Soft radiant bloom
-          ctx.globalAlpha = 0.32 * alpha;
+          ctx.globalAlpha = 0.22 * alpha;
           ctx.fillStyle = pulse.isCyan ? cyan : lilac;
           ctx.beginPath();
-          ctx.arc(px, py, 4.2, 0, Math.PI * 2);
+          ctx.arc(px, py, 3.8, 0, Math.PI * 2);
           ctx.fill();
 
           // High-luminance signal core
-          ctx.globalAlpha = alpha;
+          ctx.globalAlpha = alpha * 0.9;
           ctx.fillStyle = ink;
           ctx.beginPath();
-          ctx.arc(px, py, 1.7, 0, Math.PI * 2);
+          ctx.arc(px, py, 1.4, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -395,49 +369,55 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       for (let i = 0; i < NODE_COUNT; i++) {
         const p = projected[i];
         const isHub = BASE_NODES[i].hub;
-        const isTesseract = BASE_NODES[i].tesseract;
+        const isShell = BASE_NODES[i].shell;
         const signal = activation[i];
         const front = Math.max(0, (p.z + 1) / 2);
 
         // Focal hub corona
-        if (isHub && p.z > -0.1) {
-          ctx.globalAlpha = 0.1 + signal * 0.18 + front * 0.12;
-          ctx.fillStyle = isTesseract ? lilac : cyan;
+        if ((isHub || signal > 0.1) && p.z > -0.1) {
+          ctx.globalAlpha = 0.09 + signal * 0.16 + front * 0.1;
+          ctx.fillStyle = isShell ? cyan : lilac;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, (isTesseract ? 6 : 7.5) + signal * 2, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, (isShell ? 7 : 6) + signal * 2.2, 0, Math.PI * 2);
           ctx.fill();
-        }
 
-        if (isTesseract) {
-          // Tesseract vertices: dimensional geometric core nodes
-          ctx.globalAlpha = Math.min(1, 0.35 + front * 0.55 + signal * 0.25);
-          ctx.fillStyle = isHub ? lilac : cyan;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, (isHub ? 2.4 : 1.7) + signal * 0.4, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          // Cortex nodes
-          if (p.z > 0.3) {
-            ctx.globalAlpha = Math.min(1, 0.75 + p.z * 0.25 + signal * 0.2);
-            ctx.fillStyle = isHub ? lilac : cyan;
+          // Prominent front hubs: subtle star sparkle
+          if (p.z > 0.35 && isHub) {
+            ctx.globalAlpha = 0.22 + front * 0.28;
+            ctx.strokeStyle = isShell ? cyan : lilac;
+            ctx.lineWidth = 0.6;
             ctx.beginPath();
-            ctx.arc(p.x, p.y, isHub ? 2.4 : 1.8, 0, Math.PI * 2);
-            ctx.fill();
-          } else if (p.z > 0) {
-            ctx.globalAlpha = Math.min(1, 0.5 + p.z * 0.3 + signal * 0.15);
-            ctx.fillStyle = isHub ? lilac : blue;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, isHub ? 2.0 : 1.4, 0, Math.PI * 2);
-            ctx.fill();
-          } else {
-            ctx.globalAlpha = 0.18 + (p.z + 1) * 0.2;
-            ctx.fillStyle = blue;
-            ctx.beginPath();
-            ctx.arc(p.x, p.y, 1.0, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.moveTo(p.x - 6.5, p.y);
+            ctx.lineTo(p.x + 6.5, p.y);
+            ctx.moveTo(p.x, p.y - 6.5);
+            ctx.lineTo(p.x, p.y + 6.5);
+            ctx.stroke();
           }
         }
+
+        ctx.globalAlpha = Math.min(1, (isShell ? 0.2 + front * 0.55 : 0.3 + front * 0.65) + signal * 0.2);
+        ctx.fillStyle = signal > 0.4 ? ink : isHub ? lilac : isShell ? cyan : blue;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (isHub ? 2.3 : isShell ? 1.3 : 1.5) + signal * 0.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (isHub && p.z > 0) {
+          ctx.globalAlpha = 0.2 + signal * 0.2;
+          ctx.strokeStyle = isShell ? cyan : lilac;
+          ctx.lineWidth = 0.6;
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, 4.2 + signal, 0, Math.PI * 2);
+          ctx.stroke();
+        }
       }
+
+      // Technical orbital path framing the spherical cluster (front arc)
+      ctx.globalAlpha = 0.18;
+      ctx.strokeStyle = cyan;
+      ctx.lineWidth = 0.75;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radius * 1.18, radius * 0.4, -0.42, 0, Math.PI);
+      ctx.stroke();
       ctx.globalAlpha = 1;
 
       if (spin.charge >= 1 && !bursting) {

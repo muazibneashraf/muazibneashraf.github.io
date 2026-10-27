@@ -39,6 +39,11 @@ test("neural paths stay inside a spherical volume and route signals between conn
     for (const edge of graph.outgoing[node]) queue.push(graph.edges[edge][1]);
   }
   assert.ok([...visited].some(node => graph.nodes[node].x > 0.7), "activations reach the output layer");
+  const hubs = graph.nodes.filter(node => node.hub);
+  assert.ok(hubs.length >= 8, "sufficient hubs for visual focal points");
+  const hubYs = hubs.map(h => h.y), hubZs = hubs.map(h => h.z);
+  assert.ok(Math.max(...hubYs) - Math.min(...hubYs) > 1.2, "hubs span vertical dimensions in 3D without linear alignment");
+  assert.ok(Math.max(...hubZs) - Math.min(...hubZs) > 1.2, "hubs span depth dimensions in 3D without linear alignment");
 });
 
 test("screen-space dragging follows the hand in either direction and preserves a unit rotation", () => {
