@@ -24,7 +24,7 @@
 .contact-heading { position: relative; }
 .contact-signal { flex: 1; height: 40px; min-width: 40px; max-width: 320px; color: var(--accent); overflow: visible; pointer-events: none; }
 .contact-signal > path { stroke: currentColor; opacity: .2; fill: none; }
-.contact-signal-beam { stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; }
+.contact-signal-beam { stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: contact-signal-send 4.5s cubic-bezier(.2, .6, .4, 1) infinite; }
 .contact-heading:hover .contact-signal-beam, .contact-heading:focus-within .contact-signal-beam { animation: contact-signal-send 1.5s cubic-bezier(.2, .6, .4, 1) infinite; }
 .contact-field { position: relative; display: block; margin-top: 8px; }
 .contact-field input, .contact-field textarea { margin-top: 0; transition: background .2s ease, border-color .2s ease; }
@@ -60,7 +60,7 @@ html[data-motion-paused="true"] .site-frame *::after,
 html[data-motion-paused="true"] .cv-dialog * { animation-play-state: paused !important; }
 html[data-motion-paused="true"] .profile-motion { transform: none; }
 
-@media (max-width: 760px) { .contact-signal { display: none; } }
+@media (max-width: 760px) { .contact-signal { max-width: 140px; height: 32px; min-width: 28px; } }
 @media (prefers-reduced-motion: reduce) {
   .education-journey::after { transform: none; }
   .profile-motion { transform: none; }

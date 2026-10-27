@@ -71,13 +71,13 @@ export function advanceBackground(system: BackgroundSystem, seconds: number, sec
   system.light = damp(system.light, theme.light, 1.8, dt);
   system.energy = damp(system.energy, theme.energy, 1.8, dt);
   system.parallax = damp(system.parallax, Math.tanh(scroll / 1800) * 0.012, 3, dt);
-  system.scale = damp(system.scale, mobile ? 0.8 : 1, 4, dt);
-  for (const edge of system.edges) edge.density = damp(edge.density, mobile ? (edge.id === 0 ? 0.55 : 0) : 1, 4, dt);
+  system.scale = damp(system.scale, mobile ? 0.85 : 1, 4, dt);
+  for (const edge of system.edges) edge.density = damp(edge.density, mobile ? 0.75 : 1, 4, dt);
   for (const node of system.nodes) {
     const t = system.clock * node.speed;
     node.x = node.homeX + Math.sin(t + node.phase) * node.driftX * node.depth;
     node.y = node.homeY + Math.cos(t * 0.83 + node.phase) * node.driftY * node.depth;
-    node.density = damp(node.density, mobile && !node.mobile ? 0 : 1, 4, dt);
+    node.density = damp(node.density, mobile ? 0.85 : 1, 4, dt);
   }
   for (const pulse of system.pulses) pulse.progress = (pulse.progress + pulse.speed * dt) % 2.4;
 }
@@ -238,8 +238,6 @@ export function advanceNeuroField(
   const dt = Math.max(0, Math.min(seconds, 0.05));
 
   for (const node of field.nodes) {
-    if (mobile && !node.mobile) continue;
-
     const w1 = Math.sin(node.homeX * 3.6 + node.homeY * 2.2 - clock * 0.85 + node.phase);
     const w2 = Math.sin(node.homeX * 2.4 - node.homeY * 3.2 + clock * 0.55);
     const waveVal = (w1 * 0.58 + w2 * 0.42 + 1) * 0.5;

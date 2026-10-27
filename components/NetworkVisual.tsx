@@ -28,25 +28,6 @@ const NODE_LAYOUTS = [
 
 type NetworkFocus = (typeof NODE_LAYOUTS)[number]["focus"];
 
-type FocusScene = { color: string; nodes: [number, number][]; edges: [number, number][] };
-const FOCUS_SCENES: Record<NetworkFocus, FocusScene> = {
-  backend: {
-    color: "85, 223, 252",
-    nodes: [[-.64, -.4], [-.2, -.4], [.25, -.4], [.66, -.4], [-.2, .02], [.25, .02], [.66, .02], [-.2, .4], [.25, .4], [.66, .4]],
-    edges: [[0, 1], [1, 2], [2, 3], [1, 4], [4, 5], [5, 6], [4, 7], [7, 8], [8, 9], [2, 5], [5, 8]],
-  },
-  fullstack: {
-    color: "122, 158, 255",
-    nodes: [[-.58, -.4], [-.58, 0], [-.58, .4], [-.22, -.24], [-.22, .24], [.22, -.24], [.22, .24], [.58, -.4], [.58, 0], [.58, .4]],
-    edges: [[0, 3], [1, 3], [1, 4], [2, 4], [3, 5], [4, 6], [3, 6], [4, 5], [5, 7], [5, 8], [6, 8], [6, 9]],
-  },
-  research: {
-    color: "190, 161, 255",
-    nodes: [[-.62, -.4], [-.62, 0], [-.62, .4], [-.2, -.28], [-.2, .28], [.2, -.4], [.2, 0], [.2, .4], [.62, -.2], [.62, .2]],
-    edges: [[0, 3], [0, 4], [1, 3], [1, 4], [2, 3], [2, 4], [3, 5], [3, 6], [3, 7], [4, 5], [4, 6], [4, 7], [5, 8], [5, 9], [6, 8], [6, 9], [7, 8], [7, 9]],
-  },
-};
-
 // Pre-computed Fibonacci sphere geometry (computed once, 0 runtime allocation)
 const NODE_COUNT = 180;
 const BASE_NODES = Array.from({ length: NODE_COUNT }, (_, i) => {
@@ -116,7 +97,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
   }, [paused]);
 
   const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (e.pointerType === "touch" || !containerRef.current) return;
+    if (!containerRef.current) return;
     const rect = containerRef.current.getBoundingClientRect();
     const x = (e.clientX - rect.left) / rect.width;
     const y = (e.clientY - rect.top) / rect.height;
@@ -182,7 +163,10 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       const focusAmount = Math.min(1, focusWeights.backend + focusWeights.fullstack + focusWeights.research);
 
       // Supersample ordinary displays as well, keeping the thin orbit smooth.
-      const ratio = Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2);
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const ratio = isMobile
+        ? Math.min(window.devicePixelRatio || 1, 1.35)
+        : Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2);
       const targetW = Math.round(width * ratio);
       const targetH = Math.round(height * ratio);
 
@@ -292,7 +276,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
 
       // Render network edges with depth-based luminescence
       const edgeCount = EDGES.length;
-      ctx.globalAlpha = 1 - focusAmount * .65;
+      ctx.globalAlpha = 1;
       for (let e = 0; e < edgeCount; e++) {
         const [i, j] = EDGES[e];
         const p = projected[i];
@@ -388,67 +372,6 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       }
       ctx.globalAlpha = 1;
 
-      // Selection exposes a different technical subnetwork inside the same globe.
-      // Only this light overlay changes; the sphere and its animation stay mounted.
-      for (const focus of Object.keys(FOCUS_SCENES) as NetworkFocus[]) {
-        const weight = focusWeights[focus];
-        if (weight < .003) continue;
-        const scene = FOCUS_SCENES[focus];
-        const driftX = pointerRef.current.currX * radius * .05;
-        const driftY = pointerRef.current.currY * radius * .04;
-        const px = (index: number) => centerX + scene.nodes[index][0] * radius + driftX;
-        const py = (index: number) => centerY + scene.nodes[index][1] * radius + driftY;
-        ctx.globalAlpha = weight;
-        ctx.lineWidth = 1.2;
-        for (let e = 0; e < scene.edges.length; e++) {
-          const [from, to] = scene.edges[e];
-          const x1 = px(from), y1 = py(from), x2 = px(to), y2 = py(to);
-          const progress = (focusTime / 2100 + e * .17) % 1;
-          ctx.strokeStyle = `rgba(${scene.color}, .42)`;
-          ctx.beginPath(); ctx.moveTo(x1, y1);
-          if (focus === "backend") { ctx.lineTo(x2, y1); ctx.lineTo(x2, y2); }
-          else if (focus === "fullstack") ctx.bezierCurveTo((x1 + x2) / 2, y1, (x1 + x2) / 2, y2, x2, y2);
-          else ctx.lineTo(x2, y2);
-          ctx.stroke();
-          if (e % (focus === "research" ? 3 : 2) !== 0) continue;
-          let x = x1 + (x2 - x1) * progress, y = y1 + (y2 - y1) * progress;
-          if (focus === "backend") {
-            const horizontal = Math.abs(x2 - x1), vertical = Math.abs(y2 - y1), distance = (horizontal + vertical) * progress;
-            if (distance < horizontal) { x = x1 + Math.sign(x2 - x1) * distance; y = y1; }
-            else { x = x2; y = y1 + Math.sign(y2 - y1) * (distance - horizontal); }
-          } else if (focus === "fullstack") {
-            const inv = 1 - progress, middle = (x1 + x2) / 2;
-            x = inv ** 3 * x1 + 3 * inv ** 2 * progress * middle + 3 * inv * progress ** 2 * middle + progress ** 3 * x2;
-            y = inv ** 3 * y1 + 3 * inv ** 2 * progress * y1 + 3 * inv * progress ** 2 * y2 + progress ** 3 * y2;
-          }
-          ctx.fillStyle = `rgba(${scene.color}, .18)`; ctx.beginPath(); ctx.arc(x, y, 5, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = "rgba(235, 244, 255, .95)"; ctx.beginPath(); ctx.arc(x, y, 1.7, 0, Math.PI * 2); ctx.fill();
-        }
-        for (let i = 0; i < scene.nodes.length; i++) {
-          const glow = .45 + Math.sin(focusTime / 520 - i * .65) * .2;
-          ctx.fillStyle = `rgba(${scene.color}, ${glow * .28})`;
-          ctx.beginPath(); ctx.arc(px(i), py(i), focus === "research" ? 8 : 7, 0, Math.PI * 2); ctx.fill();
-          ctx.fillStyle = "#dceaff";
-          ctx.strokeStyle = `rgba(${scene.color}, .9)`;
-          if (focus === "backend") {
-            ctx.beginPath(); ctx.roundRect(px(i) - 3, py(i) - 3, 6, 6, 1.5); ctx.fill(); ctx.stroke();
-          } else { ctx.beginPath(); ctx.arc(px(i), py(i), focus === "research" ? 3.2 : 2.7, 0, Math.PI * 2); ctx.fill(); }
-        }
-        // A departing signal lands at the project preview's top edge.
-        const exitIndex = focus === "backend" ? 3 : focus === "fullstack" ? 7 : 8;
-        const fromX = px(exitIndex), fromY = py(exitIndex);
-        const toX = previewTarget.x, toY = previewTarget.y;
-        const controlX = Math.min(width - 12, Math.max(fromX, toX) + radius * .17);
-        ctx.strokeStyle = `rgba(${scene.color}, .35)`; ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.moveTo(fromX, fromY); ctx.quadraticCurveTo(controlX, fromY + radius * .26, toX, toY); ctx.stroke();
-        const t = (focusTime / 2400) % 1, inverse = 1 - t;
-        const signalX = inverse * inverse * fromX + 2 * inverse * t * controlX + t * t * toX;
-        const signalY = inverse * inverse * fromY + 2 * inverse * t * (fromY + radius * .26) + t * t * toY;
-        ctx.fillStyle = `rgba(${scene.color}, .2)`; ctx.beginPath(); ctx.arc(signalX, signalY, 6, 0, Math.PI * 2); ctx.fill();
-        ctx.fillStyle = "#eff8ff"; ctx.beginPath(); ctx.arc(signalX, signalY, 2, 0, Math.PI * 2); ctx.fill();
-      }
-      ctx.globalAlpha = 1;
-
       // Schedule next frame when motion is enabled and visible
       if (!isPaused && !motion.matches && visible && !document.hidden) {
         lastFrame = timestamp;
@@ -507,8 +430,11 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       className="network-visual interactive-network"
       data-motion={paused ? "paused" : "running"}
       data-network-mode={selected ?? "overview"}
+      style={{ touchAction: "pan-y" }}
       onPointerMove={handlePointerMove}
       onPointerLeave={handlePointerLeave}
+      onPointerUp={handlePointerLeave}
+      onPointerCancel={handlePointerLeave}
       onKeyDown={(e) => {
         if (e.key === "Escape") setSelected(null);
       }}
@@ -519,7 +445,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       </div>
       <canvas
         ref={canvasRef}
-        aria-label={selected ? `${node?.label ?? selected}: ${selected === "backend" ? "routing circuit" : selected === "research" ? "layered neural network" : "synchronized application network"}` : "Animated interconnected spherical network"}
+        aria-label={selected ? `${node?.label ?? selected}: interactive focus mode` : "Animated interconnected spherical network"}
         role="img"
       />
       {networkNodes.map((n) => (

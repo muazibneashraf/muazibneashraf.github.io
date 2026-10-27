@@ -203,7 +203,6 @@ export function SystemNarrativeBackground() {
         for (const edge of neuroField.edges) {
           const a = neuroField.nodes[edge.from];
           const b = neuroField.nodes[edge.to];
-          if (mobile && (!a.mobile || !b.mobile)) continue;
           const avgBrightness = (a.brightness + b.brightness) * 0.5;
           const alpha = avgBrightness * 0.22 * introWeight * system.energy * fieldVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
           if (alpha < 0.003) continue;
@@ -221,7 +220,6 @@ export function SystemNarrativeBackground() {
           if (!edge) continue;
           const a = neuroField.nodes[edge.from];
           const b = neuroField.nodes[edge.to];
-          if (mobile && (!a.mobile || !b.mobile)) continue;
 
           const px = a.screenX + (b.screenX - a.screenX) * p.progress;
           const py = a.screenY + (b.screenY - a.screenY) * p.progress;
@@ -240,7 +238,6 @@ export function SystemNarrativeBackground() {
         }
 
         for (const n of neuroField.nodes) {
-          if (mobile && !n.mobile) continue;
           const alpha = n.brightness * (n.isHub ? 0.85 : 0.6) * introWeight * (0.4 + system.energy * 0.6) * fieldVisibility(n.screenX, n.screenY, n.screenX, n.screenY);
           if (alpha < 0.005) continue;
 
@@ -272,7 +269,7 @@ export function SystemNarrativeBackground() {
         const a = system.nodes[edge.from], b = system.nodes[edge.to];
         const target = edge.clearance = segmentVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
         edge.visibility = motion.matches ? target : damp(edge.visibility, target, 7, blend);
-        const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? (edge.id === 0 ? 0.55 : 0) : 1) : edge.density);
+        const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? 0.75 : 1) : edge.density);
         const alpha = Math.min(edge.visibility, edge.clearance) * density * system.energy * 0.3;
         if (alpha < 0.002) continue;
         ctx.strokeStyle = `rgba(${color},${alpha})`; ctx.lineWidth = 0.85;
@@ -281,7 +278,7 @@ export function SystemNarrativeBackground() {
       for (const p of system.pulses) {
         if (p.progress > 1) continue; // Independent quiet intervals between signals.
         const edge = system.edges[p.edgeId], a = system.nodes[edge.from], b = system.nodes[edge.to];
-        const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? (edge.id === 0 ? 0.55 : 0) : 1) : edge.density);
+        const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? 0.75 : 1) : edge.density);
         const alpha = Math.sin(p.progress * Math.PI) ** 2 * Math.min(edge.visibility, edge.clearance) * density * system.energy;
         if (alpha < 0.005) continue;
         const x = a.screenX + (b.screenX - a.screenX) * p.progress;
@@ -292,7 +289,7 @@ export function SystemNarrativeBackground() {
         ctx.beginPath(); ctx.arc(x, y, 1.3, 0, Math.PI * 2); ctx.fill();
       }
       for (const n of system.nodes) {
-        const density = motion.matches ? (mobile && !n.mobile ? 0 : 1) : n.density;
+        const density = motion.matches ? (mobile ? 0.85 : 1) : n.density;
         const brightness = 0.84 + Math.sin(system.clock * n.speed * 1.7 + n.phase) * 0.16;
         const alpha = Math.min(n.visibility, n.clearance) * density * brightness * (n.ambient ? 0.18 : 0.68) * (0.4 + system.energy * 0.6);
         if (alpha < 0.003) continue;
@@ -377,9 +374,9 @@ export function SystemNarrativeBackground() {
     document.fonts.ready.then(() => { if (!disposed) requestMeasure(); });
     advanceBackground(system, 0, section, window.innerWidth < 768, scroll);
     if (window.innerWidth < 768) {
-      for (const n of system.nodes) n.density = n.mobile ? 1 : 0;
-      for (const e of system.edges) e.density = e.id === 0 ? 0.55 : 0;
-      system.scale = 0.8;
+      for (const n of system.nodes) n.density = 0.85;
+      for (const e of system.edges) e.density = 0.75;
+      system.scale = 0.85;
     }
     measure(); draw(0); schedule();
     return () => {
