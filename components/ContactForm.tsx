@@ -28,6 +28,10 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
   const [status, setStatus] = useState<"idle" | "sending" | "sent" | "error">(
     "idle",
   );
+  const [draft, setDraft] = useState<{ subject: string; message: string }>({
+    subject: "",
+    message: "",
+  });
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -35,14 +39,58 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
     setStatus("sending");
     const form = event.currentTarget;
     const data = new FormData(form);
-    const payload = Object.fromEntries(data.entries());
+
+    const name = String(data.get("name") || "").trim();
+    const senderEmail = String(data.get("email") || "").trim();
+    const subject = String(data.get("subject") || "").trim() || "Portfolio Inquiry";
+    const message = String(data.get("message") || "").trim();
+    const honeypot = String(data.get("website") || data.get("_honey") || "").trim();
+
+    setDraft({ subject, message });
+
+    // Spam honeypot
+    if (honeypot) {
+      form.reset();
+      setStatus("sent");
+      return;
+    }
+
     try {
-      const response = await fetch("/api/messages", {
+      // Send directly to user's Gmail inbox via FormSubmit
+      const endpoint = `https://formsubmit.co/ajax/${encodeURIComponent(email)}`;
+      const response = await fetch(endpoint, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Accept": "application/json",
+        },
+        body: JSON.stringify({
+          name,
+          email: senderEmail,
+          _replyto: senderEmail,
+          _subject: `[Portfolio] ${subject} - from ${name}`,
+          message,
+          _template: "table",
+          _captcha: "false",
+        }),
+      });
+
+      // Also persist to local /admin inbox if server is running
+      void fetch("/api/messages", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-      if (response.ok) {
+        body: JSON.stringify({ name, email: senderEmail, subject, message }),
+      }).catch(() => {});
+
+      const result = await response.json().catch(() => null);
+
+      if (
+        response.ok &&
+        (result?.success === "true" ||
+          result?.success === true ||
+          result?.message?.includes("Activation") ||
+          result?.message?.includes("successfully"))
+      ) {
         form.reset();
         setStatus("sent");
       } else {
@@ -99,6 +147,7 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
       <label className="honeypot" aria-hidden="true">
         Website
         <input name="website" tabIndex={-1} autoComplete="off" />
+        <input name="_honey" tabIndex={-1} autoComplete="off" style={{ display: "none" }} />
       </label>
       <button
         type="submit"
@@ -116,7 +165,14 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
         {status === "error" && (
           <>
             {copy.errorText}{" "}
-            <a href={gmailComposeUrl(email)} target="_blank" rel="noreferrer">
+            <a
+              href={gmailComposeUrl(email, {
+                subject: draft.subject,
+                body: draft.message,
+              })}
+              target="_blank"
+              rel="noreferrer"
+            >
               {copy.directEmailLabel}
             </a>
           </>
