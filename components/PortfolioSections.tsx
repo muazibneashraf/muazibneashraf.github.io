@@ -136,9 +136,9 @@ export function AboutSection({
             <span className="degree-date mono">{education.Graduation}</span>
           </div>
           <p className="mint">
-            {education.University || content.identity.university}
+            {education.Department}
           </p>
-          <p>{education.Department}</p>
+          <p>{education.University || content.identity.university}</p>
           {content.about.education
             .filter(
               (item) =>
