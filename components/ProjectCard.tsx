@@ -1,11 +1,28 @@
+"use client";
+
 import Link from "next/link";
 import type { Project, ContentSections } from "@/lib/types";
 import { ProjectVisual } from "./ProjectVisual";
 import { ProjectTransition } from "./ProjectTransition";
+
 export function ProjectCard({ project, labels }: { project: Project; labels: ContentSections["projectPage"]; index?: number }) {
   const href = "/projects/" + project.slug;
+
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button")) return;
+
+    const selection = typeof window !== "undefined" ? window.getSelection() : null;
+    if (selection && selection.toString().length > 0) return;
+
+    const titleLink = e.currentTarget.querySelector<HTMLAnchorElement>(".project-title-link");
+    if (titleLink) {
+      titleLink.click();
+    }
+  };
+
   return (
-    <article className="project-card">
+    <article className="project-card" onClick={handleCardClick}>
       <ProjectTransition slug={project.slug} part="art"><Link
         className="project-image-link"
         href={href}
@@ -17,7 +34,7 @@ export function ProjectCard({ project, labels }: { project: Project; labels: Con
       </Link></ProjectTransition>
       <div className="project-card-copy">
         <ProjectTransition slug={project.slug} part="title"><h3>
-          <Link href={href} transitionTypes={["project-open"]}>{project.title}</Link>
+          <Link className="project-title-link" href={href} transitionTypes={["project-open"]}>{project.title}</Link>
         </h3></ProjectTransition>
         <p className="project-role">{project.role}</p>
         <p>{project.summary}</p>
@@ -29,7 +46,12 @@ export function ProjectCard({ project, labels }: { project: Project; labels: Con
         <div className="project-links">
           <Link href={href} transitionTypes={["project-open"]}>{labels.explore}</Link>
           {project.repository && (
-            <a href={project.repository} target="_blank" rel="noreferrer">
+            <a
+              href={project.repository}
+              target="_blank"
+              rel="noreferrer"
+              onClick={(e) => e.stopPropagation()}
+            >
               Source code
             </a>
           )}

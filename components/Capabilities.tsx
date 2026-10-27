@@ -1,3 +1,5 @@
+"use client";
+
 import { headingText } from "@/lib/editable-content";
 import Link from "next/link";
 import type { SiteContent } from "@/lib/types";
@@ -5,6 +7,20 @@ import { CapabilityVisual } from "./CapabilityVisual";
 
 export function Capabilities({ content }: { content: SiteContent }) {
   const settings = content.sections.capabilities;
+
+  const handleCapabilityClick = (e: React.MouseEvent<HTMLElement>) => {
+    const target = e.target as HTMLElement;
+    if (target.closest("a, button")) return;
+
+    const selection = typeof window !== "undefined" ? window.getSelection() : null;
+    if (selection && selection.toString().length > 0) return;
+
+    const link = e.currentTarget.querySelector<HTMLAnchorElement>(".text-link");
+    if (link) {
+      link.click();
+    }
+  };
+
   return (
     <section
       id="capabilities"
@@ -24,13 +40,19 @@ export function Capabilities({ content }: { content: SiteContent }) {
             (item) => item.id === capability.projectId,
           );
           return (
-            <article className="capability-card" key={capability.id}>
+            <article
+              className="capability-card"
+              key={capability.id}
+              onClick={handleCapabilityClick}
+            >
               <CapabilityVisual kind={capability.title} index={index} />
               <h3>{capability.title}</h3>
               <p>{capability.summary}</p>
-              {project && <Link className="text-link" href={`/projects/${project.slug}`}>
-                {settings.linkLabel}: {project.title}
-              </Link>}
+              {project && (
+                <Link className="text-link" href={`/projects/${project.slug}`}>
+                  {settings.linkLabel}: {project.title}
+                </Link>
+              )}
             </article>
           );
         })}
