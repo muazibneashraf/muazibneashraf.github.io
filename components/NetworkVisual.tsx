@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import type { Project, HeroSettings, SiteContent } from "@/lib/types";
 import { advanceGlobe, createGlobeMotion, rotateGlobe, type GlobeBurst } from "@/lib/globe-motion";
 import { NEURAL_GLOBE } from "@/lib/neural-globe";
-import { drawNeuralSurface } from "@/lib/neural-globe-surface";
+import { drawNeuralGlow } from "@/lib/neural-globe-glow";
 import "./hero-resume-motion.css";
 import "./globe-motion.css";
 
@@ -132,9 +132,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     const blue = palette.getPropertyValue("--blue").trim();
     const lilac = palette.getPropertyValue("--lilac").trim();
     const ink = palette.getPropertyValue("--ink").trim();
-    const surface = palette.getPropertyValue("--surface").trim();
-    const background = palette.getPropertyValue("--bg").trim();
-    const surfaceTheme = { accent: cyan, blue, surface, bg: background };
+    const glowTheme = { accent: cyan, blue };
 
     // Pre-allocated active packet pulses
     const PULSE_COUNT = 7;
@@ -258,9 +256,12 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       ctx.beginPath();
       ctx.ellipse(centerX, centerY, radius * 1.17, radius * 0.38, -0.4, Math.PI, Math.PI * 2);
       ctx.stroke();
-      // Directional material shading makes the whole object read as a 3D orb.
-      // The neural volume is then drawn within this translucent, rounded body.
-      drawNeuralSurface(ctx, centerX, centerY, radius, surfaceTheme, spin.charge);
+      ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = lilac;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radius * 0.57, radius * 1.08, -0.48, 0, Math.PI * 2);
+      ctx.stroke();
+      drawNeuralGlow(ctx, centerX, centerY, radius, glowTheme, spin.charge);
       ctx.globalAlpha = 1;
 
       const { x: qx, y: qy, z: qz, w: qw } = spin;
@@ -275,8 +276,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const y2 = n.x * yx + n.y * yy + n.z * yz;
         const z2 = n.x * zx + n.y * zy + n.z * zz;
 
-        // Perspective calibrated so the projected sphere keeps an exact round
-        // silhouette as it rotates, with foreshortening inside the volume.
+        // The camera preserves depth; the cortex itself defines the silhouette.
         const perspective = Math.sqrt(15) / (4 - z2);
         const pt = projected[i];
         pt.x = centerX + x1 * radius * perspective;
@@ -305,10 +305,11 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const depth = (p.z + q.z + 2) / 4;
 
         const shell = NEURAL_GLOBE.cortex[e];
+        const facet = NEURAL_GLOBE.facets[e];
         const signal = Math.max(activation[i], activation[j]);
-        ctx.strokeStyle = shell ? blue : activeFocus === "research" ? lilac : cyan;
-        ctx.globalAlpha = (shell ? 0.055 + depth * depth * 0.27 : 0.075 + depth * depth * 0.5) + signal * 0.16;
-        ctx.lineWidth = shell ? 0.65 : 0.75 + signal * 0.35;
+        ctx.strokeStyle = facet ? cyan : shell ? blue : activeFocus === "research" ? lilac : blue;
+        ctx.globalAlpha = (facet ? 0.075 + depth * depth * 0.43 : shell ? 0.025 + depth * 0.09 : 0.035 + depth * depth * 0.21) + signal * 0.16;
+        ctx.lineWidth = facet ? 0.65 + depth * 0.3 : 0.6 + signal * 0.3;
 
         ctx.beginPath();
         ctx.moveTo(p.x, p.y);
@@ -375,10 +376,10 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
           ctx.arc(p.x, p.y, 4 + signal * 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
-        ctx.globalAlpha = Math.min(1, (BASE_NODES[i].shell ? 0.18 + front * 0.55 : 0.3 + front * 0.65) + signal * 0.2);
+        ctx.globalAlpha = Math.min(1, (BASE_NODES[i].shell ? 0.2 + front * 0.65 : 0.18 + front * 0.45) + signal * 0.2);
         ctx.fillStyle = signal > 0.4 ? ink : isHub ? lilac : cyan;
         ctx.beginPath();
-        ctx.arc(p.x, p.y, (isHub ? 2.2 : BASE_NODES[i].shell ? 1 : 1.5) + signal * 0.45, 0, Math.PI * 2);
+        ctx.arc(p.x, p.y, (isHub ? 2.2 : BASE_NODES[i].shell ? 1.35 : 1.1) + signal * 0.45, 0, Math.PI * 2);
         ctx.fill();
         if (isHub && p.z > 0) {
           ctx.globalAlpha = 0.18 + signal * 0.2;

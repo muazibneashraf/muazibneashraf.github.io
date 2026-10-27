@@ -5,7 +5,7 @@ import { flushSync } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { GlobeBurst } from "@/lib/globe-motion";
-import { drawNeuralSurface } from "@/lib/neural-globe-surface";
+import { drawNeuralGlow } from "@/lib/neural-globe-glow";
 import "./globe-motion.css";
 
 // Lives in the root layout: the same particles survive the route changing below.
@@ -71,7 +71,7 @@ export function GlobeBurstTransition() {
       const expansion = Math.max(0, clock - 0.22);
       const ignition = 1 + Math.min(1, clock / 0.3) ** 2 * 0.22;
       const fade = Math.max(0, 1 - expansion / 1.5);
-      drawNeuralSurface(ctx, burst.centerX, burst.centerY, burst.radius * ignition, palette, 1,
+      drawNeuralGlow(ctx, burst.centerX, burst.centerY, burst.radius * ignition, palette, 1,
         Math.max(0, 1 - clock / 0.4));
       const glow = ctx.createRadialGradient(burst.centerX, burst.centerY, 0, burst.centerX, burst.centerY, burst.radius * (1.2 + expansion));
       glow.addColorStop(0, palette.accent);
