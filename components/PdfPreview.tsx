@@ -4,6 +4,16 @@ import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from "re
 import type { PDFDocumentLoadingTask, PDFPageProxy, RenderTask } from "pdfjs-dist";
 import "./hero-resume-motion.css";
 
+type PdfLink = {
+  id: string;
+  url: string;
+  left: string;
+  top: string;
+  width: string;
+  height: string;
+  label: string;
+};
+
 function PdfPage({ page, width, name, total, root }: {
   page: PDFPageProxy; width: number; name: string; total: number; root: RefObject<HTMLDivElement | null>;
 }) {
@@ -13,6 +23,7 @@ function PdfPage({ page, width, name, total, root }: {
   const [ready, setReady] = useState(false);
   const [error, setError] = useState("");
   const [text, setText] = useState("");
+  const [links, setLinks] = useState<PdfLink[]>([]);
   const natural = page.getViewport({ scale: 1 });
   const height = width * natural.height / natural.width;
 
@@ -45,8 +56,37 @@ function PdfPage({ page, width, name, total, root }: {
         element.height = buffer.height;
         element.getContext("2d")!.drawImage(buffer, 0, 0);
         setReady(true);
-        const content = await page.getTextContent();
-        if (active) setText(content.items.flatMap(item => "str" in item ? [item.str] : []).join(" "));
+        const [content, rawAnnotations] = await Promise.all([
+          page.getTextContent(),
+          page.getAnnotations(),
+        ]);
+        if (!active) return;
+        setText(content.items.flatMap(item => "str" in item ? [item.str] : []).join(" "));
+
+        const vp = page.getViewport({ scale: 1 });
+        const parsedLinks: PdfLink[] = [];
+        for (const a of rawAnnotations) {
+          const targetUrl = a.url || a.unsafeUrl;
+          if (a.subtype === "Link" && targetUrl && /^(https?:|mailto:)/i.test(targetUrl) && Array.isArray(a.rect) && a.rect.length === 4) {
+            const [x1, y1, x2, y2] = a.rect;
+            const [p1x, p1y] = vp.convertToViewportPoint(x1, y1);
+            const [p2x, p2y] = vp.convertToViewportPoint(x2, y2);
+            const left = (Math.min(p1x, p2x) / vp.width) * 100;
+            const top = (Math.min(p1y, p2y) / vp.height) * 100;
+            const w = (Math.abs(p2x - p1x) / vp.width) * 100;
+            const h = (Math.abs(p2y - p1y) / vp.height) * 100;
+            parsedLinks.push({
+              id: a.id || `${p1x.toFixed(1)}-${p1y.toFixed(1)}`,
+              url: targetUrl,
+              left: `${left.toFixed(3)}%`,
+              top: `${top.toFixed(3)}%`,
+              width: `${w.toFixed(3)}%`,
+              height: `${h.toFixed(3)}%`,
+              label: a.overlaidText || targetUrl,
+            });
+          }
+        }
+        setLinks(parsedLinks);
       } catch (failure) {
         if (active && !(failure instanceof Error && failure.name === "RenderingCancelledException")) setError("This page could not render. You can download the original CV instead.");
       }
@@ -58,6 +98,30 @@ function PdfPage({ page, width, name, total, root }: {
     {error ? <p className="pdf-preview-message" role="alert">{error}</p> : <>
       {!ready && <p className="pdf-preview-message" role="status">Preparing your CV…</p>}
       <canvas ref={canvas} className="pdf-page-canvas" style={{ width, height }} role="img" aria-label={`${name} résumé, page ${page.pageNumber} of ${total}`} />
+      {ready && links.length > 0 && (
+        <div className="pdf-annotations-layer" aria-label="Document links">
+          {links.map((link) => (
+            <a
+              key={link.id}
+              href={link.url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="pdf-link-annotation"
+              style={{
+                left: link.left,
+                top: link.top,
+                width: link.width,
+                height: link.height,
+              }}
+              title={link.url.startsWith("mailto:") ? link.url.replace(/^mailto:/, "Send email to ") : `Open ${link.url}`}
+              aria-label={link.label ? `${link.label}: ${link.url}` : link.url}
+              onClick={(event) => {
+                event.stopPropagation();
+              }}
+            />
+          ))}
+        </div>
+      )}
       <p className="sr-only">{text}</p>
     </>}
   </div>;

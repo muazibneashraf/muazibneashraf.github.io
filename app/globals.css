@@ -710,6 +710,9 @@ section[id] { scroll-margin-top: 0; }
 .pdf-page-canvas { display: block; max-width: none; background: white; cursor: zoom-in; opacity: 1; transition: opacity .2s ease-out; }
 .pdf-page[aria-busy="true"] .pdf-page-canvas { opacity: 0; }
 .pdf-preview[data-reading="true"] .pdf-page-canvas { cursor: zoom-out; }
+.pdf-annotations-layer { position: absolute; inset: 0; pointer-events: none; z-index: 2; }
+.pdf-link-annotation { position: absolute; pointer-events: auto; cursor: pointer; border-radius: 3px; background: transparent; transition: background-color .15s ease, box-shadow .15s ease, outline .15s ease; }
+.pdf-link-annotation:hover, .pdf-link-annotation:focus-visible { background: rgba(6, 182, 212, 0.12); outline: 1.5px solid rgba(6, 182, 212, 0.45); box-shadow: 0 0 6px rgba(6, 182, 212, 0.2); }
 .pdf-preview-message { margin: 24px auto; padding: 16px; max-width: 60ch; color: var(--muted); font-size: 13px; text-align: center; }
 .pdf-page > .pdf-preview-message { position: absolute; inset: 24px 0 auto; color: #394861; }
 body:has(.cv-dialog[open]) .site-frame { filter: blur(8px); }

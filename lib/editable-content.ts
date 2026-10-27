@@ -20,7 +20,7 @@ export function withEditableContent(content: SiteContent): SiteContent {
   if (site.logoUrl === "/brand/logo-wordmark.png") site.logoUrl = "";
   if (["/brand/logo-symbol.png", "/brand/mark.svg"].includes(site.iconUrl)) site.iconUrl = "/brand/neuro-wave-pulse.svg";
   if (["/brand/logo-symbol.png", "/brand/mark.svg"].includes(site.faviconUrl)) site.faviconUrl = "/brand/neuro-wave-pulse.svg";
-  const resumeUrl = !content.identity?.resumeUrl || content.identity.resumeUrl.startsWith("/api/resume")
+  const resumeUrl = !content.identity?.resumeUrl || (process.env.GITHUB_PAGES && content.identity.resumeUrl.startsWith("/api/resume"))
     ? "/Muaz_Ibne_Ashraf_CV.pdf"
     : content.identity.resumeUrl;
   return {

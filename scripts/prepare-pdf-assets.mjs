@@ -14,15 +14,22 @@ for (const folder of ["cmaps", "standard_fonts", "wasm"])
 // Ensure static resume PDF is always present in public/
 const resumesDir = join(process.cwd(), "data", "resumes");
 if (existsSync(resumesDir)) {
+  const { stat } = await import("node:fs/promises");
   const files = await readdir(resumesDir);
   const jsonFiles = files.filter(f => f.endsWith(".json"));
   if (jsonFiles.length > 0) {
-    const latest = jsonFiles[jsonFiles.length - 1];
+    const statFiles = await Promise.all(jsonFiles.map(async f => ({
+      name: f,
+      mtime: (await stat(join(resumesDir, f))).mtimeMs
+    })));
+    statFiles.sort((a, b) => b.mtime - a.mtime);
+    const latest = statFiles[0].name;
     const raw = JSON.parse(await readFile(join(resumesDir, latest), "utf-8"));
     if (raw.base64) {
       const buf = Buffer.from(raw.base64, "base64");
       await writeFile(join(process.cwd(), "public", "Muaz_Ibne_Ashraf_CV.pdf"), buf);
       await writeFile(join(process.cwd(), "public", "resume.pdf"), buf);
+      await writeFile(join(process.cwd(), "public", "Muaz_Ibne_Ashraf_CV_Finalized.pdf"), buf);
     }
   }
 }

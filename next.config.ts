@@ -6,7 +6,17 @@ const nextConfig: NextConfig = {
   ...(isGithubPages ? {
     output: "export",
     images: { unoptimized: true },
-  } : {}),
+  } : {
+    async redirects() {
+      return [
+        {
+          source: "/internship",
+          destination: "/experience",
+          permanent: false,
+        },
+      ];
+    },
+  }),
 };
 
 export default nextConfig;

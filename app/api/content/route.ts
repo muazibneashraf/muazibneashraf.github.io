@@ -1,3 +1,4 @@
+import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
 import { getContent, saveContent } from "@/lib/content-store";
@@ -46,6 +47,7 @@ export async function PUT(request: Request) {
 
   try {
     await saveContent(content);
+    revalidatePath("/", "layout");
   } catch {
     return NextResponse.json(
       {
