@@ -4,6 +4,8 @@ import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
 import { getContent, saveContent } from "@/lib/content-store";
 import { isValidContent } from "@/lib/content-validation";
 
+export const dynamic = "force-dynamic";
+
 function sessionFrom(request: Request) {
   const cookie = request.headers.get("cookie") || "";
   return cookie
@@ -14,7 +16,11 @@ function sessionFrom(request: Request) {
 }
 
 export async function GET() {
-  return NextResponse.json(await getContent());
+  return NextResponse.json(await getContent(), {
+    headers: {
+      "Cache-Control": "no-store, max-age=0, must-revalidate",
+    },
+  });
 }
 
 export async function PUT(request: Request) {
