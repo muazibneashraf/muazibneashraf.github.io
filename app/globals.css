@@ -759,6 +759,8 @@ body:has(.cv-dialog[open]) .site-frame { filter: blur(8px); }
   .project-card h3 { font-size: 25px; }
   .project-visual { padding: 16px; height: 245px; }
   .about-grid { grid-template-columns: 1fr; gap: 32px; }
+  .about-grid > .education-card { order: 1; }
+  .about-grid > .about-copy { order: 2; }
   .about-portrait-frame { width: 160px; }
   .skills-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .capability-grid { grid-template-columns: 1fr; gap: 20px; }
