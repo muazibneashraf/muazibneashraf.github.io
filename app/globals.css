@@ -774,11 +774,20 @@ body:has(.cv-dialog[open]) .site-frame { filter: blur(8px); }
     --header-scroll-gap: 16px;
     --section-space: 65px;
   }
+  body {
+    background-attachment: scroll;
+    -webkit-overflow-scrolling: touch;
+  }
+  .system-narrative-container {
+    transform: translateZ(0);
+    will-change: opacity;
+  }
   .site-header { height: var(--header-height); }
   .menu-toggle { display: block; min-height: 40px; padding: 7px 13px; border: 1px solid var(--line); border-radius: 7px; background: var(--surface); font-size: 12px; }
-  .nav-links { display: none; position: absolute; top: 67px; left: 0; right: 0; padding: 22px var(--page-gutter); background: var(--chrome-surface); border-bottom: 1px solid var(--line); font-size: 14px; }
-  .nav-links.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 10px; }
-  .nav-links a { padding: 10px 12px; }
+  .nav-links { display: none; position: absolute; top: var(--header-height); left: 0; right: 0; padding: 20px var(--page-gutter); background: color-mix(in srgb, var(--surface) 96%, var(--bg)); border-bottom: 1px solid var(--line); font-size: 15px; box-shadow: 0 20px 40px -8px rgba(0, 0, 0, 0.7); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); z-index: 40; }
+  .nav-links.is-open { display: flex; flex-direction: column; align-items: stretch; gap: 8px; }
+  .nav-links a { padding: 12px 14px; border-radius: 8px; transition: background .15s ease, color .15s ease; }
+  .nav-links a:hover, .nav-links a:focus-visible { background: color-mix(in srgb, var(--accent) 12%, transparent); color: var(--accent); }
   .nav-links .nav-resume { margin-left: 0; }
   .nav-links .nav-resume::before { display: none; }
   .nav-links .nav-contact { text-align: center; }
@@ -787,16 +796,26 @@ body:has(.cv-dialog[open]) .site-frame { filter: blur(8px); }
   .hero-body { display: flex; flex-direction: column; align-items: stretch; padding: 36px 0 32px; min-height: 0; gap: 35px; }
   .hero .hero-copy h1 { max-width: 570px; font-size: clamp(43px, 9.5vw, 67px); letter-spacing: -.055em; text-wrap: initial; }
   .hero-role { font-size: 25px; margin-top: 22px; }
-  .network-visual { height: 455px; max-width: 500px; margin: auto; }
-  .network-visual canvas { height: 355px; }
+  .hero-actions { display: flex; gap: 12px; width: 100%; }
+  .hero-actions .button { flex: 1 1 0; min-height: 48px; padding: 13px 16px; text-align: center; }
+  .hero-socials { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+  .hero-socials a { display: inline-flex; align-items: center; justify-content: center; min-height: 38px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 20px; background: color-mix(in srgb, var(--surface) 60%, transparent); font-size: 11px; font-weight: 500; transition: border-color .2s, color .2s, background .2s; }
+  .hero-socials a:hover, .hero-socials a:focus-visible { border-color: var(--accent); color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); }
+  .network-visual { height: 470px; max-width: 500px; margin: auto; }
+  .network-visual canvas { height: 340px; }
   .visual-caption { font-size: 9px; left: 3px; right: 3px; }
-  .terminal-card { left: 4%; right: 2%; bottom: 22px; }
+  .terminal-card { left: 0; right: 0; bottom: 8px; border-radius: 12px; transform: none !important; }
+  .terminal-card:hover { transform: none !important; }
+  .motion-toggle { bottom: -28px; right: 0; min-height: 34px; padding: 4px 12px; font-size: 10px; }
   .network-node { font-size: 11px; }
   .hero-bottom { font-size: 9px; }
   .trace-section { padding-block: 40px; }
   .project-grid { gap: 22px; }
   .project-meta { font-size: 9px; }
   .project-card-copy { padding: 20px; }
+  .project-links { display: flex; gap: 10px; margin-top: 14px; flex-wrap: wrap; }
+  .project-links a { display: inline-flex; align-items: center; min-height: 38px; padding: 6px 14px; border: 1px solid var(--line); border-radius: 8px; font-size: 11px; }
+  .copy-email { min-height: 40px; padding: 8px 14px; }
   .research-panel { grid-template-columns: 1fr; }
   .research-flow { border-left: 0; border-top: 1px solid #433c5d; }
   .trace-heading { align-items: start; flex-direction: column; gap: 14px; margin-bottom: 16px; }

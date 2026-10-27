@@ -10,8 +10,8 @@ const PROTECTED = [
   ".hero-copy", ".hero-actions", ".network-visual", ".section-heading",
   ".project-card", ".about-copy", ".education-card", ".skill-group", ".research-panel", ".trace-workbench",
   ".experience-row", ".capability-card", ".stack-section",
-  ".page-intro", ".project-narrative", ".contact-details", "h1", "h2", "h3", "p",
-  "button", "a", "form", ".site-footer",
+  ".page-intro", ".project-narrative", ".contact-details", ".contact-form",
+  ".site-footer",
 ].join(",");
 
 function sectionForPath(path: string): NarrativeSection {
@@ -91,9 +91,11 @@ export function SystemNarrativeBackground() {
         else if (current && focal >= current.top - 48 && focal <= current.bottom + 48) next = section;
         else next = sections.find((s) => s.top <= focal && s.bottom > focal)?.id ?? section;
       }
-      section = next;
-      document.documentElement.dataset.narrativeSection = next;
-      canvas.parentElement!.dataset.activeSection = next;
+      if (next !== section) {
+        section = next;
+        document.documentElement.dataset.narrativeSection = next;
+        canvas.parentElement!.dataset.activeSection = next;
+      }
       visibleZones = zones.filter((z) => z.bottom > scroll - 64 && z.top < scroll + height + 64);
       updateFieldTarget();
     };
@@ -104,11 +106,11 @@ export function SystemNarrativeBackground() {
       width = canvas.clientWidth; height = canvas.clientHeight;
       const wrap = document.querySelector("#main .wrap");
       gutter = wrap ? parseFloat(getComputedStyle(wrap).paddingLeft) : 24;
-      ratio = Math.min(window.devicePixelRatio || 1, width < 768 ? 1.25 : 1.5);
+      ratio = Math.min(window.devicePixelRatio || 1, 2);
       const w = Math.round(width * ratio), h = Math.round(height * ratio);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
-      atmosphere.width = Math.max(1, Math.round(width / 4));
-      atmosphere.height = Math.max(1, Math.round(height / 4));
+      atmosphere.width = Math.max(1, Math.round(width / 2));
+      atmosphere.height = Math.max(1, Math.round(height / 2));
       lightTime = -1; scroll = window.scrollY;
       pageHeight = document.documentElement.scrollHeight;
       sections = SECTIONS.flatMap((id) => {
@@ -154,7 +156,22 @@ export function SystemNarrativeBackground() {
       introStage === "completed" ? 0.35 + 0.65 * segmentVisibility(ax, ay, bx, by) : 1;
 
     const drawAtmosphere = () => {
-      // Quarter-resolution light fields, refreshed at most 24 times per second.
+      const mobile = width < 768;
+      if (mobile) {
+        // Direct vector-smooth radial gradient on mobile - crystal clear, 0 pixelated blur
+        const time = system.clock;
+        const color = system.color;
+        const x = width * 0.55 + Math.sin(time * 0.065) * width * 0.08;
+        const y = height * 0.35 + Math.cos(time * 0.049) * height * 0.08;
+        const r = Math.max(width, height) * 0.5;
+        const glow = ctx.createRadialGradient(x, y, 0, x, y, r);
+        glow.addColorStop(0, `rgba(${color.join(",")},${system.light * 0.3})`);
+        glow.addColorStop(1, `rgba(${color.join(",")},0)`);
+        ctx.fillStyle = glow;
+        ctx.fillRect(0, 0, width, height);
+        return;
+      }
+      // Half-resolution light fields on desktop, refreshed at most 24 times per second.
       if (lightTime < 0 || system.clock - lightTime > 1 / 24) {
         lightTime = system.clock;
         const w = atmosphere.width, h = atmosphere.height, time = system.clock;
@@ -204,10 +221,10 @@ export function SystemNarrativeBackground() {
           const a = neuroField.nodes[edge.from];
           const b = neuroField.nodes[edge.to];
           const avgBrightness = (a.brightness + b.brightness) * 0.5;
-          const alpha = avgBrightness * 0.22 * introWeight * system.energy * fieldVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
+          const alpha = Math.max(0.08, avgBrightness * 0.35) * introWeight * system.energy * fieldVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
           if (alpha < 0.003) continue;
           ctx.strokeStyle = `rgba(85, 223, 252, ${alpha})`;
-          ctx.lineWidth = 0.75;
+          ctx.lineWidth = 1.0;
           ctx.beginPath();
           ctx.moveTo(a.screenX, a.screenY);
           ctx.lineTo(b.screenX, b.screenY);
@@ -223,34 +240,36 @@ export function SystemNarrativeBackground() {
 
           const px = a.screenX + (b.screenX - a.screenX) * p.progress;
           const py = a.screenY + (b.screenY - a.screenY) * p.progress;
-          const alpha = Math.sin(p.progress * Math.PI) * 0.9 * introWeight * system.energy * fieldVisibility(px, py, px, py);
+          const alpha = Math.sin(p.progress * Math.PI) * 0.95 * introWeight * system.energy * fieldVisibility(px, py, px, py);
           if (alpha < 0.01) continue;
 
           const col = p.colorType === "cyan" ? "85, 223, 252" : "178, 155, 255";
-          ctx.fillStyle = `rgba(${col}, ${alpha * 0.35})`;
+          ctx.strokeStyle = `rgba(${col}, ${alpha * 0.45})`;
+          ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.arc(px, py, 4.5, 0, Math.PI * 2);
-          ctx.fill();
-          ctx.fillStyle = `rgba(225, 250, 255, ${alpha * 0.95})`;
+          ctx.stroke();
+          ctx.fillStyle = `rgba(235, 250, 255, ${alpha * 0.95})`;
           ctx.beginPath();
-          ctx.arc(px, py, 1.4, 0, Math.PI * 2);
+          ctx.arc(px, py, 1.8, 0, Math.PI * 2);
           ctx.fill();
         }
 
         for (const n of neuroField.nodes) {
-          const alpha = n.brightness * (n.isHub ? 0.85 : 0.6) * introWeight * (0.4 + system.energy * 0.6) * fieldVisibility(n.screenX, n.screenY, n.screenX, n.screenY);
+          const alpha = Math.max(0.15, n.brightness * (n.isHub ? 0.9 : 0.7)) * introWeight * (0.4 + system.energy * 0.6) * fieldVisibility(n.screenX, n.screenY, n.screenX, n.screenY);
           if (alpha < 0.005) continue;
 
           if (n.isHub) {
-            ctx.fillStyle = `rgba(85, 223, 252, ${alpha * 0.16})`;
+            ctx.strokeStyle = `rgba(85, 223, 252, ${alpha * 0.4})`;
+            ctx.lineWidth = 1;
             ctx.beginPath();
-            ctx.arc(n.screenX, n.screenY, n.radius * 3.2, 0, Math.PI * 2);
-            ctx.fill();
+            ctx.arc(n.screenX, n.screenY, n.radius * 2.2, 0, Math.PI * 2);
+            ctx.stroke();
           }
 
-          ctx.fillStyle = n.isHub ? `rgba(215, 250, 255, ${alpha})` : `rgba(85, 223, 252, ${alpha})`;
+          ctx.fillStyle = n.isHub ? `rgba(235, 250, 255, ${alpha})` : `rgba(85, 223, 252, ${alpha})`;
           ctx.beginPath();
-          ctx.arc(n.screenX, n.screenY, n.radius * (mobile ? 0.85 : 1), 0, Math.PI * 2);
+          ctx.arc(n.screenX, n.screenY, n.radius, 0, Math.PI * 2);
           ctx.fill();
         }
       }

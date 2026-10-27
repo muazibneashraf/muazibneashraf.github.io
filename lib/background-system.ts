@@ -166,19 +166,19 @@ export function createNeuroField(): NeuroField {
     let homeY: number;
 
     if (isPeriphery) {
-      // Atmospheric nodes framing upper/lower gutters
-      homeX = 0.08 + random() * 0.38;
-      homeY = id < 5 ? 0.06 + random() * 0.16 : 0.78 + random() * 0.16;
+      // Atmospheric nodes framing upper/lower regions
+      homeX = 0.06 + random() * 0.88;
+      homeY = id < 5 ? 0.05 + random() * 0.18 : 0.76 + random() * 0.18;
     } else {
-      // Primary neural wave field on right / center-right
-      homeX = 0.44 + random() * 0.50;
-      homeY = 0.12 + random() * 0.76;
+      // Primary neural wave field distributed across the screen
+      homeX = 0.08 + ((id - 10) % 8) * 0.11 + (random() - 0.5) * 0.06;
+      homeY = 0.12 + Math.floor((id - 10) / 8) * 0.18 + (random() - 0.5) * 0.08;
     }
 
     const depth = 0.35 + random() * 0.65;
     const isHub = !isPeriphery && (id % 7 === 0);
-    const radius = isHub ? 2.8 : (isPeriphery ? 1.1 + random() * 0.4 : 1.6 + random() * 0.6);
-    const mobile = id >= 10 && id < 28;
+    const radius = isHub ? 2.8 : (isPeriphery ? 1.4 + random() * 0.4 : 1.8 + random() * 0.6);
+    const mobile = true;
 
     return {
       id,
@@ -209,7 +209,7 @@ export function createNeuroField(): NeuroField {
       const dx = nodes[i].homeX - nodes[j].homeX;
       const dy = nodes[i].homeY - nodes[j].homeY;
       const dist = Math.hypot(dx, dy);
-      if (dist > 0.04 && dist < 0.20) {
+      if (dist > 0.04 && dist < 0.23) {
         edges.push({ id: edgeId++, from: i, to: j });
         connectionCounts[i]++;
         connectionCounts[j]++;
