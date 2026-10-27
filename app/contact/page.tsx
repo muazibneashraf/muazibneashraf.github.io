@@ -6,6 +6,7 @@ import { ContactForm } from "@/components/ContactForm";
 import { CopyEmail } from "@/components/CopyEmail";
 import { getContent } from "@/lib/content-store";
 import { gmailComposeUrl } from "@/lib/gmail";
+export const revalidate = 0;
 export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: content.sections.contactPage.title.replace(/\.$/, ''), description: content.contact.intro }; }
 export default async function Contact() {
   const content = await getContent();

@@ -13,6 +13,9 @@ import {
   ContactSection,
 } from "@/components/PortfolioSections";
 import { getContent } from "@/lib/content-store";
+
+export const revalidate = 0;
+
 export default async function Home() {
   const content = await getContent();
   return (

@@ -3,6 +3,7 @@ import { promises as fs } from "node:fs";
 import path from "node:path";
 import fsSync from "node:fs";
 import os from "node:os";
+import { put, get } from "@vercel/blob";
 import { defaultContent } from "./default-content";
 import { normalizeImageCrop } from "./image-crop";
 import { withEditableContent } from "./editable-content";
@@ -35,6 +36,14 @@ function remoteConfig() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
   const token = process.env.UPSTASH_REDIS_REST_TOKEN;
   return url && token ? { url, token } : null;
+}
+
+function blobConfig() {
+  const token = process.env.BLOB_READ_WRITE_TOKEN;
+  const enabled =
+    (Boolean(process.env.VERCEL) || process.env.USE_BLOB_STORAGE === "true") &&
+    Boolean(token);
+  return enabled ? { token: token! } : null;
 }
 
 async function remoteCommand<T>(command: (string | number)[]): Promise<T> {
@@ -128,6 +137,19 @@ export const getContent = cache(async (): Promise<SiteContent> => {
     if (stored) return normalizeContent(JSON.parse(stored) as SiteContent);
     return normalizeContent(structuredClone(defaultContent));
   }
+  const blob = blobConfig();
+  if (blob) {
+    try {
+      const res = await get("data/portfolio-content.json", {
+        access: "private",
+        token: blob.token,
+      });
+      if (res) {
+        const text = await new Response(res.stream).text();
+        return normalizeContent(JSON.parse(text) as SiteContent);
+      }
+    } catch {}
+  }
   return normalizeContent(await readLocal(contentFile, defaultContent));
 });
 
@@ -139,12 +161,35 @@ export async function getUploadedResume(hash: string): Promise<UploadedResume | 
     const stored = await remoteCommand<string | null>(["GET", `muaz-portfolio:resume:${hash}`]);
     return stored ? JSON.parse(stored) as UploadedResume : null;
   }
+  const blob = blobConfig();
+  if (blob) {
+    try {
+      const res = await get(`data/resumes/${hash}.json`, {
+        access: "private",
+        token: blob.token,
+      });
+      if (res) {
+        const text = await new Response(res.stream).text();
+        return JSON.parse(text) as UploadedResume;
+      }
+    } catch {}
+  }
   return readLocal(path.join(dataDirectory, "resumes", `${hash}.json`), null);
 }
 
 export async function saveUploadedResume(resume: UploadedResume) {
   if (remoteConfig()) {
     await remoteCommand<string>(["SET", `muaz-portfolio:resume:${resume.hash}`, JSON.stringify(resume)]);
+    return;
+  }
+  const blob = blobConfig();
+  if (blob) {
+    await put(`data/resumes/${resume.hash}.json`, JSON.stringify(resume), {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token: blob.token,
+    });
     return;
   }
   if (process.env.VERCEL) throw new Error("Persistent storage is not configured.");
@@ -161,7 +206,20 @@ export async function saveContent(content: SiteContent) {
     await remoteCommand<string>(["SET", CONTENT_KEY, JSON.stringify(content)]);
     return;
   }
-  await writeLocal(contentFile, content);
+  const blob = blobConfig();
+  if (blob) {
+    await put("data/portfolio-content.json", JSON.stringify(content, null, 2), {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token: blob.token,
+    });
+  }
+  try {
+    await writeLocal(contentFile, content);
+  } catch (err) {
+    if (!blob) throw err;
+  }
 }
 
 export async function getMessages(): Promise<ContactMessage[]> {
@@ -169,7 +227,37 @@ export async function getMessages(): Promise<ContactMessage[]> {
     const stored = await remoteCommand<string | null>(["GET", MESSAGES_KEY]);
     return stored ? (JSON.parse(stored) as ContactMessage[]) : [];
   }
+  const blob = blobConfig();
+  if (blob) {
+    try {
+      const res = await get("data/messages.json", {
+        access: "private",
+        token: blob.token,
+      });
+      if (res) {
+        const text = await new Response(res.stream).text();
+        return JSON.parse(text) as ContactMessage[];
+      }
+    } catch {}
+  }
   return readLocal(messagesFile, []);
+}
+
+async function saveMessages(messages: ContactMessage[]) {
+  const blob = blobConfig();
+  if (blob) {
+    await put("data/messages.json", JSON.stringify(messages, null, 2), {
+      access: "private",
+      addRandomSuffix: false,
+      allowOverwrite: true,
+      token: blob.token,
+    });
+  }
+  try {
+    await writeLocal(messagesFile, messages);
+  } catch (err) {
+    if (!blob) throw err;
+  }
 }
 
 let messageWrite: Promise<void> = Promise.resolve();
@@ -188,7 +276,7 @@ export async function addMessage(message: ContactMessage) {
   }
   const write = messageWrite.then(async () => {
     const messages = await getMessages();
-    await writeLocal(messagesFile, [message, ...messages].slice(0, 250));
+    await saveMessages([message, ...messages].slice(0, 250));
   });
   messageWrite = write.catch(() => {});
   await write;
@@ -211,7 +299,7 @@ export async function deleteMessage(id: string): Promise<boolean> {
     const filtered = messages.filter((item) => item.id !== id);
     if (filtered.length !== messages.length) {
       deleted = true;
-      await writeLocal(messagesFile, filtered);
+      await saveMessages(filtered);
     }
   });
   messageWrite = write.catch(() => {});
@@ -239,7 +327,7 @@ export async function updateMessage(id: string, action: MessageAction): Promise<
     if (action === "unread") delete message.readAt;
     if (action === "archive") message.archivedAt = now;
     if (action === "restore") delete message.archivedAt;
-    await writeLocal(messagesFile, messages);
+    await saveMessages(messages);
     updated = message;
   });
   messageWrite = write.catch(() => {});

@@ -3,6 +3,7 @@ import { SiteFrame } from "@/components/SiteFrame";
 import { ResumeLink } from "@/components/ResumeOverlay";
 import { getContent } from "@/lib/content-store";
 
+export const revalidate = 0;
 export async function generateMetadata(): Promise<Metadata> {
   const { identity, site } = await getContent();
   return { title: site.navigation.resume, description: `View ${identity.name}’s CV, projects, technical skills, and education.` };

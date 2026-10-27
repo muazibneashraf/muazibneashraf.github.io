@@ -7,6 +7,7 @@ import { SiteFrame } from "@/components/SiteFrame";
 import { ProjectVisual } from "@/components/ProjectVisual";
 import { ProjectTransition } from "@/components/ProjectTransition";
 import { getContent } from "@/lib/content-store";
+export const revalidate = 0;
 export async function generateStaticParams() {
   const c = await getContent();
   return c.projects.map((p) => ({ slug: p.slug }));

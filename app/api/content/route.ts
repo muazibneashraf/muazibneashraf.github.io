@@ -48,6 +48,14 @@ export async function PUT(request: Request) {
   try {
     await saveContent(content);
     revalidatePath("/", "layout");
+    revalidatePath("/");
+    revalidatePath("/about");
+    revalidatePath("/projects");
+    revalidatePath("/experience");
+    revalidatePath("/extracurricular");
+    revalidatePath("/contact");
+    revalidatePath("/resume");
+    revalidatePath("/admin");
   } catch {
     return NextResponse.json(
       {
