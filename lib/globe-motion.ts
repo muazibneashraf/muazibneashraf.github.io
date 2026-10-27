@@ -50,4 +50,5 @@ export interface GlobeBurst {
   radius: number;
   points: { x: number; y: number; z: number }[];
   edges: [number, number][];
+  curves: { x: number; y: number }[];
 }

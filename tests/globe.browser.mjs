@@ -108,6 +108,11 @@ try {
   let center = await open(page);
   assert.equal(await page.locator(".globe-hint, .globe-charge-track").count(), 0, "no visible instructions or meter give away the Easter egg");
   assert.equal(await page.locator(".globe-warning").isVisible(), false);
+  const grab = page.getByRole("button", { name: "Spin the globe", exact: true });
+  await grab.focus();
+  await page.mouse.click(center.x, center.y);
+  assert.equal(await grab.evaluate(el => getComputedStyle(el).outlineStyle), "none", "clicking never draws an outer focus circle");
+  assert.equal(await grab.evaluate(el => document.activeElement === el), false, "pointer dragging does not leave keyboard focus behind");
   const before = await page.locator(".globe-stage").boundingBox();
   await page.mouse.move(center.x - 60, center.y); await page.mouse.move(center.x + 60, center.y);
   assert.equal(await speed(page), 0, "hover does not steer or accelerate the globe");

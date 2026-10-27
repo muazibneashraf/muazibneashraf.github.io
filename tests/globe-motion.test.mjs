@@ -7,9 +7,37 @@ const code = ts.transpileModule(readFileSync(new URL("../lib/globe-motion.ts", i
   compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
 }).outputText;
 const { createGlobeMotion, rotateGlobe, advanceGlobe } = await import(`data:text/javascript;base64,${Buffer.from(code).toString("base64")}`);
+const neuralCode = ts.transpileModule(readFileSync(new URL("../lib/neural-globe.ts", import.meta.url), "utf8"), {
+  compilerOptions: { module: ts.ModuleKind.ESNext, target: ts.ScriptTarget.ES2020 },
+}).outputText;
+const { NEURAL_GLOBE } = await import(`data:text/javascript;base64,${Buffer.from(neuralCode).toString("base64")}`);
 const evolve = (state, hz, seconds, enabled = true) => {
   for (let i = 0; i < hz * seconds; i++) advanceGlobe(state, 1 / hz, enabled);
 };
+
+test("neural paths stay inside a spherical volume and route signals between connected neurons", () => {
+  const graph = NEURAL_GLOBE, degree = graph.nodes.map(() => 0), unique = new Set();
+  assert.equal(graph.controls.length, graph.edges.length);
+  graph.nodes.forEach(node => assert.ok(Math.hypot(node.x, node.y, node.z) <= 1.000001));
+  graph.edges.forEach(([a, b], edge) => {
+    assert.ok(graph.nodes[a] && graph.nodes[b] && a !== b);
+    assert.ok(graph.nodes[a].x <= graph.nodes[b].x, "signals progress through the processing layers");
+    const key = [Math.min(a, b), Math.max(a, b)].join(":");
+    assert.ok(!unique.has(key)); unique.add(key);
+    degree[a]++; degree[b]++;
+    assert.ok(Object.values(graph.controls[edge]).every(Number.isFinite));
+  });
+  assert.ok(degree.every(value => value > 0), "no isolated neurons or dead visual fragments");
+  graph.outgoing.forEach((edges, node) => edges.forEach(edge => assert.equal(graph.edges[edge][0], node)));
+  const visited = new Set(), queue = graph.inputs.map(edge => graph.edges[edge][0]);
+  while (queue.length) {
+    const node = queue.pop();
+    if (visited.has(node)) continue;
+    visited.add(node);
+    for (const edge of graph.outgoing[node]) queue.push(graph.edges[edge][1]);
+  }
+  assert.ok([...visited].some(node => graph.nodes[node].x > 0.7 && !graph.nodes[node].shell), "activations reach the output layer");
+});
 
 test("screen-space dragging follows the hand in either direction and preserves a unit rotation", () => {
   const right = Object.assign(createGlobeMotion(), { x: 0, y: 0, z: 0, w: 1 });

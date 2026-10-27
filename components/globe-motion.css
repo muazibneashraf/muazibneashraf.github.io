@@ -2,7 +2,8 @@
 .interactive-network .globe-stage > canvas { position: absolute; left: -25%; top: -25%; width: 150%; height: 150%; pointer-events: none; }
 .globe-grab { position: absolute; border: 0; border-radius: 50%; padding: 0; background: transparent; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; z-index: 1; }
 .globe-grab:active, [data-spin-state="dragging"] .globe-grab { cursor: grabbing; }
-.globe-grab:focus-visible { outline: 1px dashed var(--accent); outline-offset: 10px; }
+.globe-grab:focus { outline: none; }
+.globe-grab:focus-visible::after { content: ""; position: absolute; top: 10px; left: calc(50% - 18px); width: 36px; height: 2px; border-radius: 2px; background: var(--accent); box-shadow: 0 0 10px color-mix(in srgb, var(--accent) 40%, transparent); }
 .globe-warning { position: absolute; top: 38px; left: 50%; max-width: 90%; width: max-content; z-index: 5; padding: 8px 14px; border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent); border-radius: 24px; background: var(--network-button-glass); backdrop-filter: blur(10px); color: var(--accent); font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 400; letter-spacing: .4px; line-height: 1.5; text-align: center; pointer-events: none; box-shadow: 0 8px 20px -12px rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.05); opacity: 0; visibility: hidden; transform: translate(-50%, 7px) scale(.97); transition: opacity .18s ease, visibility .18s ease, transform .24s cubic-bezier(.2,.8,.2,1), border-color .2s ease, box-shadow .2s ease; }
 .globe-warning::before { content: ""; display: inline-block; width: 5px; height: 5px; margin-right: 8px; vertical-align: 2px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px color-mix(in srgb, var(--accent) 40%, transparent); }
 .globe-warning[data-visible="true"] { opacity: 1; visibility: visible; transform: translate(-50%, 0) scale(1); }

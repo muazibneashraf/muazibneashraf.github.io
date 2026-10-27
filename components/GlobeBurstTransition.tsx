@@ -5,6 +5,7 @@ import { flushSync } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import type { GlobeBurst } from "@/lib/globe-motion";
+import { drawNeuralSurface } from "@/lib/neural-globe-surface";
 import "./globe-motion.css";
 
 // Lives in the root layout: the same particles survive the route changing below.
@@ -40,6 +41,7 @@ export function GlobeBurstTransition() {
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
     const theme = getComputedStyle(overlay);
     const palette = {
+      bg: theme.getPropertyValue("--bg").trim(), surface: theme.getPropertyValue("--surface").trim(),
       accent: theme.getPropertyValue("--accent").trim(),
       blue: theme.getPropertyValue("--blue").trim(), lilac: theme.getPropertyValue("--lilac").trim(),
       ink: theme.getPropertyValue("--ink").trim(),
@@ -69,6 +71,8 @@ export function GlobeBurstTransition() {
       const expansion = Math.max(0, clock - 0.22);
       const ignition = 1 + Math.min(1, clock / 0.3) ** 2 * 0.22;
       const fade = Math.max(0, 1 - expansion / 1.5);
+      drawNeuralSurface(ctx, burst.centerX, burst.centerY, burst.radius * ignition, palette, 1,
+        Math.max(0, 1 - clock / 0.4));
       const glow = ctx.createRadialGradient(burst.centerX, burst.centerY, 0, burst.centerX, burst.centerY, burst.radius * (1.2 + expansion));
       glow.addColorStop(0, palette.accent);
       glow.addColorStop(0.5, palette.blue);
@@ -77,14 +81,18 @@ export function GlobeBurstTransition() {
       ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height);
       ctx.globalAlpha = 1;
       const travel = 1.1 * Math.log(1 + expansion * 2.5);
-      for (const [a, b] of burst.edges) {
+      for (let edge = 0; edge < burst.edges.length; edge++) {
+        const [a, b] = burst.edges[edge];
         const p = points[a], q = points[b];
+        const curve = burst.curves[edge];
         ctx.strokeStyle = palette.accent;
         ctx.globalAlpha = Math.max(0, 0.45 - expansion * 1.5) * (0.55 + (p.z + q.z) * 0.2);
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(burst.centerX + p.dx * ignition + p.vx * travel, burst.centerY + p.dy * ignition + p.vy * travel);
-        ctx.lineTo(burst.centerX + q.dx * ignition + q.vx * travel, burst.centerY + q.dy * ignition + q.vy * travel);
+        ctx.quadraticCurveTo(burst.centerX + (curve.x - burst.centerX) * ignition + (p.vx + q.vx) * travel / 2,
+          burst.centerY + (curve.y - burst.centerY) * ignition + (p.vy + q.vy) * travel / 2,
+          burst.centerX + q.dx * ignition + q.vx * travel, burst.centerY + q.dy * ignition + q.vy * travel);
         ctx.stroke();
       }
       points.forEach((p, index) => {

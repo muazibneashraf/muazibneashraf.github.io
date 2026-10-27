@@ -5,6 +5,8 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Project, HeroSettings, SiteContent } from "@/lib/types";
 import { advanceGlobe, createGlobeMotion, rotateGlobe, type GlobeBurst } from "@/lib/globe-motion";
+import { NEURAL_GLOBE } from "@/lib/neural-globe";
+import { drawNeuralSurface } from "@/lib/neural-globe-surface";
 import "./hero-resume-motion.css";
 import "./globe-motion.css";
 
@@ -31,27 +33,9 @@ const NODE_LAYOUTS = [
 
 type NetworkFocus = (typeof NODE_LAYOUTS)[number]["focus"];
 
-// Pre-computed Fibonacci sphere geometry (computed once, 0 runtime allocation)
-const NODE_COUNT = 180;
-const BASE_NODES = Array.from({ length: NODE_COUNT }, (_, i) => {
-  const y = 1 - (i / (NODE_COUNT - 1)) * 2;
-  const r = Math.sqrt(Math.max(0, 1 - y * y));
-  const theta = i * Math.PI * (3 - Math.sqrt(5));
-  return { x: Math.cos(theta) * r, y, z: Math.sin(theta) * r };
-});
-
-const EDGES: [number, number][] = [];
-BASE_NODES.forEach((a, i) => {
-  for (let j = i + 1; j < NODE_COUNT; j++) {
-    const b = BASE_NODES[j];
-    if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 0.34) {
-      EDGES.push([i, j]);
-    }
-  }
-});
-
-// Focal hub nodes with enhanced luminescence
-const HUB_NODES = new Set([0, 24, 48, 72, 96, 120, 144, 168]);
+const BASE_NODES = NEURAL_GLOBE.nodes;
+const EDGES = NEURAL_GLOBE.edges;
+const NODE_COUNT = BASE_NODES.length;
 
 const GLOBE_WARNINGS = [
   ["Hold on!", "Whoa, easy!", "Hey! Slow down!"],
@@ -131,7 +115,6 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     let labelWidth = 0;
     let labelHeight = 0;
     let labeledFocus: NetworkFocus | null | undefined;
-    let focusTime = 0;
     let measuredFocus: NetworkFocus | null | undefined;
     const focusWeights: Record<NetworkFocus, number> = { backend: 0, fullstack: 0, research: 0 };
     const previewTarget = { x: 0, y: 0 };
@@ -142,11 +125,21 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       y: 0,
       z: 0,
     }));
+    const curves = EDGES.map(() => ({ x: 0, y: 0 }));
+    const activation = new Float32Array(NODE_COUNT);
+    const palette = getComputedStyle(container);
+    const cyan = palette.getPropertyValue("--accent").trim();
+    const blue = palette.getPropertyValue("--blue").trim();
+    const lilac = palette.getPropertyValue("--lilac").trim();
+    const ink = palette.getPropertyValue("--ink").trim();
+    const surface = palette.getPropertyValue("--surface").trim();
+    const background = palette.getPropertyValue("--bg").trim();
+    const surfaceTheme = { accent: cyan, blue, surface, bg: background };
 
     // Pre-allocated active packet pulses
-    const PULSE_COUNT = 8;
+    const PULSE_COUNT = 7;
     const pulses: DataPulse[] = Array.from({ length: PULSE_COUNT }, (_, i) => ({
-      edgeIdx: Math.floor((i * EDGES.length) / PULSE_COUNT) % EDGES.length,
+      edgeIdx: NEURAL_GLOBE.inputs[i % NEURAL_GLOBE.inputs.length],
       progress: i / PULSE_COUNT,
       speed: 0.007 + (i % 3) * 0.003,
       isCyan: i % 2 === 0,
@@ -158,6 +151,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       if (width === 0 || height === 0) return;
       const elapsed = lastFrame && !isPaused && !motion.matches ? Math.min(timestamp - lastFrame, 40) : 0;
       const delta = elapsed / 16;
+      const activationDecay = Math.exp(-elapsed * 0.0025);
       if (spin.dragging && timestamp - lastMove > 80) {
         spin.velocityX *= Math.exp(-12 * elapsed / 1000);
         spin.velocityY *= Math.exp(-12 * elapsed / 1000);
@@ -187,7 +181,6 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         container.dataset.spinState = bursting ? "bursting" : spin.dragging ? "dragging" : spin.charge > 0.06 ? "charging" : "idle";
         container.dataset.spinSpeed = Math.hypot(spin.velocityX, spin.velocityY).toFixed(2);
       }
-      focusTime += elapsed;
       const activeFocus = selectedRef.current;
       const focusBlend = motion.matches || isPaused ? 1 : 1 - Math.exp(-elapsed * .008);
       for (const focus of Object.keys(focusWeights) as NetworkFocus[]) {
@@ -257,33 +250,18 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         containerRef.current?.setAttribute("data-labels-ready", "true");
       }
 
-      // Atmosphere lives in the softly feathered CSS layer. A canvas-sized
-      // glow previously left a visible straight edge above the sphere.
-
-      // Quiet technical orbital paths framing the spherical cluster
-      const orbit = ctx.createLinearGradient(
-        centerX - radius,
-        centerY - radius,
-        centerX + radius,
-        centerY + radius,
-      );
-      orbit.addColorStop(0, "rgba(85, 223, 252, 0.45)");
-      orbit.addColorStop(0.5, "rgba(99, 135, 255, 0.28)");
-      orbit.addColorStop(1, "rgba(178, 155, 255, 0.4)");
-      ctx.strokeStyle = orbit;
-      ctx.lineWidth = 1.15;
+      ctx.globalAlpha = 0.16;
+      ctx.strokeStyle = cyan;
+      ctx.lineWidth = 0.75;
       ctx.lineCap = "round";
       ctx.lineJoin = "round";
-
       ctx.beginPath();
-      ctx.ellipse(centerX, centerY, radius * 1.22, radius * 0.46, -0.45, 0, Math.PI * 2);
-      ctx.closePath();
+      ctx.ellipse(centerX, centerY, radius * 1.17, radius * 0.38, -0.4, Math.PI, Math.PI * 2);
       ctx.stroke();
-
-      ctx.beginPath();
-      ctx.ellipse(centerX, centerY, radius * 0.56, radius * 1.1, -0.5, 0, Math.PI * 2);
-      ctx.closePath();
-      ctx.stroke();
+      // Directional material shading makes the whole object read as a 3D orb.
+      // The neural volume is then drawn within this translucent, rounded body.
+      drawNeuralSurface(ctx, centerX, centerY, radius, surfaceTheme, spin.charge);
+      ctx.globalAlpha = 1;
 
       const { x: qx, y: qy, z: qz, w: qw } = spin;
       const xx = 1 - 2 * (qy * qy + qz * qz), xy = 2 * (qx * qy - qz * qw), xz = 2 * (qx * qz + qy * qw);
@@ -297,11 +275,24 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const y2 = n.x * yx + n.y * yy + n.z * yz;
         const z2 = n.x * zx + n.y * zy + n.z * zz;
 
-        const perspective = 1 + z2 * 0.09;
+        // Perspective calibrated so the projected sphere keeps an exact round
+        // silhouette as it rotates, with foreshortening inside the volume.
+        const perspective = Math.sqrt(15) / (4 - z2);
         const pt = projected[i];
         pt.x = centerX + x1 * radius * perspective;
         pt.y = centerY + y2 * radius * perspective;
         pt.z = z2;
+        activation[i] *= activationDecay;
+      }
+
+      for (let e = 0; e < EDGES.length; e++) {
+        const n = NEURAL_GLOBE.controls[e];
+        const x = n.x * xx + n.y * xy + n.z * xz;
+        const y = n.x * yx + n.y * yy + n.z * yz;
+        const z = n.x * zx + n.y * zy + n.z * zz;
+        const perspective = Math.sqrt(15) / (4 - z);
+        curves[e].x = centerX + x * radius * perspective;
+        curves[e].y = centerY + y * radius * perspective;
       }
 
       // Render network edges with depth-based luminescence
@@ -313,20 +304,15 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const q = projected[j];
         const depth = (p.z + q.z + 2) / 4;
 
-        if (depth > 0.55) {
-          ctx.strokeStyle = `rgba(85, 223, 252, ${0.1 + depth * 0.4})`;
-          ctx.lineWidth = 0.95;
-        } else if (depth > 0.35) {
-          ctx.strokeStyle = `rgba(99, 135, 255, ${0.06 + depth * 0.22})`;
-          ctx.lineWidth = 0.7;
-        } else {
-          ctx.strokeStyle = `rgba(80, 110, 190, ${0.03 + depth * 0.12})`;
-          ctx.lineWidth = 0.55;
-        }
+        const shell = NEURAL_GLOBE.cortex[e];
+        const signal = Math.max(activation[i], activation[j]);
+        ctx.strokeStyle = shell ? blue : activeFocus === "research" ? lilac : cyan;
+        ctx.globalAlpha = (shell ? 0.055 + depth * depth * 0.27 : 0.075 + depth * depth * 0.5) + signal * 0.16;
+        ctx.lineWidth = shell ? 0.65 : 0.75 + signal * 0.35;
 
         ctx.beginPath();
         ctx.moveTo(p.x, p.y);
-        ctx.lineTo(q.x, q.y);
+        ctx.quadraticCurveTo(curves[e].x, curves[e].y, q.x, q.y);
         ctx.stroke();
       }
 
@@ -336,9 +322,14 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         if (!isPaused && !motion.matches) {
           pulse.progress += pulse.speed * delta;
           if (pulse.progress >= 1) {
+            const target = EDGES[pulse.edgeIdx][1];
+            activation[target] = 1;
+            const routes = NEURAL_GLOBE.outgoing[target];
             pulse.progress = 0;
-            pulse.edgeIdx = Math.floor(Math.random() * EDGES.length);
-            pulse.speed = 0.007 + Math.random() * 0.008;
+            pulse.edgeIdx = routes.length ? routes[Math.floor(Math.random() * routes.length)]
+              : NEURAL_GLOBE.inputs[Math.floor(Math.random() * NEURAL_GLOBE.inputs.length)];
+            pulse.speed = 0.007 + Math.random() * 0.006;
+            activation[EDGES[pulse.edgeIdx][0]] = 0.8;
           }
         }
 
@@ -348,24 +339,23 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const avgZ = (p.z + q.z) / 2;
 
         if (avgZ > -0.15) {
-          const px = p.x + (q.x - p.x) * pulse.progress;
-          const py = p.y + (q.y - p.y) * pulse.progress;
+          const t = pulse.progress, u = 1 - t, control = curves[pulse.edgeIdx];
+          const px = u * u * p.x + 2 * u * t * control.x + t * t * q.x;
+          const py = u * u * p.y + 2 * u * t * control.y + t * t * q.y;
           const alpha = Math.min(1, Math.max(0, (avgZ + 0.2) * 1.4));
 
           // Soft radiant bloom
-          ctx.fillStyle = pulse.isCyan
-            ? `rgba(85, 223, 252, ${0.32 * alpha})`
-            : `rgba(178, 155, 255, ${0.32 * alpha})`;
+          ctx.globalAlpha = 0.16 * alpha;
+          ctx.fillStyle = pulse.isCyan ? cyan : lilac;
           ctx.beginPath();
-          ctx.arc(px, py, 4.2, 0, Math.PI * 2);
+          ctx.arc(px, py, 3.8, 0, Math.PI * 2);
           ctx.fill();
 
           // High-luminance signal core
-          ctx.fillStyle = pulse.isCyan
-            ? `rgba(215, 250, 255, ${alpha})`
-            : `rgba(240, 230, 255, ${alpha})`;
+          ctx.globalAlpha = alpha * 0.9;
+          ctx.fillStyle = ink;
           ctx.beginPath();
-          ctx.arc(px, py, 1.7, 0, Math.PI * 2);
+          ctx.arc(px, py, 1.3, 0, Math.PI * 2);
           ctx.fill();
         }
       }
@@ -373,33 +363,35 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       // Render nodes with multi-tiered depth and hub glows
       for (let i = 0; i < NODE_COUNT; i++) {
         const p = projected[i];
-        const isHub = HUB_NODES.has(i);
+        const isHub = BASE_NODES[i].hub;
+        const signal = activation[i];
+        const front = Math.max(0, (p.z + 1) / 2);
 
         // Focal hub corona
-        if (isHub && p.z > 0.1) {
-          ctx.fillStyle = `rgba(85, 223, 252, ${0.12 + p.z * 0.18})`;
+        if ((isHub || signal > 0.1) && p.z > -0.1) {
+          ctx.globalAlpha = 0.08 + signal * 0.15 + focusAmount * 0.025;
+          ctx.fillStyle = cyan;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 7.5, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, 4 + signal * 2.5, 0, Math.PI * 2);
           ctx.fill();
         }
-
-        if (p.z > 0.3) {
-          ctx.fillStyle = `rgba(180, 245, 255, ${0.8 + p.z * 0.2})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, isHub ? 2.5 : 2.0, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (p.z > 0) {
-          ctx.fillStyle = `rgba(125, 195, 255, ${0.55 + p.z * 0.3})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.6, 0, Math.PI * 2);
-          ctx.fill();
-        } else {
-          ctx.fillStyle = `rgba(110, 140, 220, ${0.2 + (p.z + 1) * 0.25})`;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.0, 0, Math.PI * 2);
-          ctx.fill();
+        ctx.globalAlpha = Math.min(1, (BASE_NODES[i].shell ? 0.18 + front * 0.55 : 0.3 + front * 0.65) + signal * 0.2);
+        ctx.fillStyle = signal > 0.4 ? ink : isHub ? lilac : cyan;
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, (isHub ? 2.2 : BASE_NODES[i].shell ? 1 : 1.5) + signal * 0.45, 0, Math.PI * 2);
+        ctx.fill();
+        if (isHub && p.z > 0) {
+          ctx.globalAlpha = 0.18 + signal * 0.2;
+          ctx.strokeStyle = cyan; ctx.lineWidth = 0.6;
+          ctx.beginPath(); ctx.arc(p.x, p.y, 4.2 + signal, 0, Math.PI * 2); ctx.stroke();
         }
       }
+      ctx.globalAlpha = 0.2;
+      ctx.strokeStyle = cyan;
+      ctx.lineWidth = 0.75;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radius * 1.17, radius * 0.38, -0.4, 0, Math.PI);
+      ctx.stroke();
       ctx.globalAlpha = 1;
 
       if (spin.charge >= 1 && !bursting) {
@@ -416,6 +408,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
           centerX: bounds.left + centerX, centerY: bounds.top + centerY, radius,
           points: projected.map(point => ({ x: bounds.left + point.x, y: bounds.top + point.y, z: point.z })),
           edges: EDGES,
+          curves: curves.map(point => ({ x: bounds.left + point.x, y: bounds.top + point.y })),
         } }));
         return;
       }
@@ -443,7 +436,8 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     const onDown = (event: PointerEvent) => {
       if (bursting || activePointer !== null || !event.isPrimary || event.button !== 0) return;
       event.preventDefault();
-      grab.focus({ preventScroll: true });
+      // Pointer capture does not need DOM focus or a persistent focus outline.
+      if (document.activeElement === grab) grab.blur();
       grab.setPointerCapture(event.pointerId);
       activePointer = event.pointerId;
       spin.dragging = spin.interacted = true;
@@ -476,6 +470,9 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       container.dataset.spinState = spin.charge > 0.06 ? "charging" : "idle";
     };
     const onCancel = (event: PointerEvent) => { if (event.pointerId === activePointer) cancelDrag(); };
+    const onEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape" && activePointer !== null) { cancelDrag(); spin.charge = 0; }
+    };
     const onKey = (event: KeyboardEvent) => {
       if (bursting) return;
       if (event.key === "Enter" || event.key === " ") {
@@ -495,6 +492,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     grab.addEventListener("lostpointercapture", onCancel);
     grab.addEventListener("keydown", onKey);
     window.addEventListener("blur", cancelDrag);
+    window.addEventListener("keydown", onEscape);
     motionControlRef.current = (value) => { isPaused = value; if (value) cancelDrag(); restart(); };
     focusControlRef.current = restart;
 
@@ -538,6 +536,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       grab.removeEventListener("lostpointercapture", onCancel);
       grab.removeEventListener("keydown", onKey);
       window.removeEventListener("blur", cancelDrag);
+      window.removeEventListener("keydown", onEscape);
       motionControlRef.current = null;
       focusControlRef.current = null;
     };
