@@ -35,6 +35,7 @@ type NetworkFocus = (typeof NODE_LAYOUTS)[number]["focus"];
 
 const BASE_NODES = NEURAL_GLOBE.nodes;
 const EDGES = NEURAL_GLOBE.edges;
+const EDGE_TYPES = NEURAL_GLOBE.edgeTypes;
 const NODE_COUNT = BASE_NODES.length;
 
 const GLOBE_WARNINGS = [
@@ -306,7 +307,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         curves[e].y = (p.y + q.y) / 2;
       }
 
-      // Render network edges with depth-based luminescence (restoring the outer circled texture)
+      // Render network edges with depth-based luminescence (cortex circled texture + inner tesseract)
       const edgeCount = EDGES.length;
       ctx.globalAlpha = 1;
       for (let e = 0; e < edgeCount; e++) {
@@ -315,16 +316,33 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const q = projected[j];
         const depth = (p.z + q.z + 2) / 4;
         const signal = Math.max(activation[i], activation[j]);
+        const type = EDGE_TYPES[e];
 
-        if (depth > 0.55) {
-          ctx.strokeStyle = `rgba(85, 223, 252, ${0.1 + depth * 0.4 + signal * 0.2})`;
-          ctx.lineWidth = 0.95 + signal * 0.3;
-        } else if (depth > 0.35) {
-          ctx.strokeStyle = `rgba(99, 135, 255, ${0.06 + depth * 0.22 + signal * 0.15})`;
-          ctx.lineWidth = 0.7 + signal * 0.2;
+        if (type === "tesseract") {
+          // 4D hypercube neural core: dimensional geometric core lines
+          ctx.strokeStyle = depth > 0.45 ? cyan : lilac;
+          ctx.lineWidth = 1.15 + depth * 0.4 + signal * 0.35;
+          ctx.globalAlpha = 0.28 + depth * 0.5 + signal * 0.22;
+        } else if (type === "synapse") {
+          // Neural bridging synapses connecting tesseract to outer cortex
+          ctx.strokeStyle = lilac;
+          ctx.lineWidth = 0.75 + depth * 0.25 + signal * 0.2;
+          ctx.globalAlpha = 0.14 + depth * 0.3 + signal * 0.18;
         } else {
-          ctx.strokeStyle = `rgba(80, 110, 190, ${0.03 + depth * 0.12 + signal * 0.1})`;
-          ctx.lineWidth = 0.55;
+          // Outer spherical cortex lattice (clean circled texture)
+          if (depth > 0.55) {
+            ctx.strokeStyle = cyan;
+            ctx.lineWidth = 0.85 + signal * 0.3;
+            ctx.globalAlpha = 0.1 + depth * 0.38 + signal * 0.18;
+          } else if (depth > 0.35) {
+            ctx.strokeStyle = blue;
+            ctx.lineWidth = 0.65 + signal * 0.2;
+            ctx.globalAlpha = 0.06 + depth * 0.2 + signal * 0.14;
+          } else {
+            ctx.strokeStyle = blue;
+            ctx.lineWidth = 0.5;
+            ctx.globalAlpha = 0.03 + depth * 0.1 + signal * 0.08;
+          }
         }
 
         ctx.beginPath();
@@ -377,35 +395,47 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       for (let i = 0; i < NODE_COUNT; i++) {
         const p = projected[i];
         const isHub = BASE_NODES[i].hub;
+        const isTesseract = BASE_NODES[i].tesseract;
         const signal = activation[i];
+        const front = Math.max(0, (p.z + 1) / 2);
 
         // Focal hub corona
-        if (isHub && p.z > 0.1) {
-          ctx.globalAlpha = 0.12 + p.z * 0.18 + signal * 0.2;
-          ctx.fillStyle = cyan;
+        if (isHub && p.z > -0.1) {
+          ctx.globalAlpha = 0.1 + signal * 0.18 + front * 0.12;
+          ctx.fillStyle = isTesseract ? lilac : cyan;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, 7.5 + signal * 2, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, (isTesseract ? 6 : 7.5) + signal * 2, 0, Math.PI * 2);
           ctx.fill();
         }
 
-        if (p.z > 0.3) {
-          ctx.globalAlpha = Math.min(1, 0.8 + p.z * 0.2 + signal * 0.2);
+        if (isTesseract) {
+          // Tesseract vertices: dimensional geometric core nodes
+          ctx.globalAlpha = Math.min(1, 0.35 + front * 0.55 + signal * 0.25);
           ctx.fillStyle = isHub ? lilac : cyan;
           ctx.beginPath();
-          ctx.arc(p.x, p.y, isHub ? 2.5 : 2.0, 0, Math.PI * 2);
-          ctx.fill();
-        } else if (p.z > 0) {
-          ctx.globalAlpha = Math.min(1, 0.55 + p.z * 0.3 + signal * 0.15);
-          ctx.fillStyle = isHub ? lilac : blue;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, isHub ? 2.0 : 1.6, 0, Math.PI * 2);
+          ctx.arc(p.x, p.y, (isHub ? 2.4 : 1.7) + signal * 0.4, 0, Math.PI * 2);
           ctx.fill();
         } else {
-          ctx.globalAlpha = 0.2 + (p.z + 1) * 0.25;
-          ctx.fillStyle = blue;
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, 1.0, 0, Math.PI * 2);
-          ctx.fill();
+          // Cortex nodes
+          if (p.z > 0.3) {
+            ctx.globalAlpha = Math.min(1, 0.75 + p.z * 0.25 + signal * 0.2);
+            ctx.fillStyle = isHub ? lilac : cyan;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, isHub ? 2.4 : 1.8, 0, Math.PI * 2);
+            ctx.fill();
+          } else if (p.z > 0) {
+            ctx.globalAlpha = Math.min(1, 0.5 + p.z * 0.3 + signal * 0.15);
+            ctx.fillStyle = isHub ? lilac : blue;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, isHub ? 2.0 : 1.4, 0, Math.PI * 2);
+            ctx.fill();
+          } else {
+            ctx.globalAlpha = 0.18 + (p.z + 1) * 0.2;
+            ctx.fillStyle = blue;
+            ctx.beginPath();
+            ctx.arc(p.x, p.y, 1.0, 0, Math.PI * 2);
+            ctx.fill();
+          }
         }
       }
       ctx.globalAlpha = 1;
