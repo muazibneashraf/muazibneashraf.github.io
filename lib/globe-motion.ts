@@ -37,7 +37,7 @@ export function advanceGlobe(state: GlobeMotion, dt: number, automatic: boolean)
     if (Math.hypot(state.velocityX, state.velocityY) < 0.08) rotateGlobe(state, 0, -0.1 * dt);
   }
   const speed = Math.hypot(state.velocityX, state.velocityY);
-  const gain = state.interacted && speed > 3.5 ? Math.min(1.25, (speed - 3.5) / 6) : -0.26;
+  const gain = state.interacted && speed > 3.5 ? Math.min(0.45, (speed - 3.5) / 6) : -0.26;
   state.charge = Math.max(0, Math.min(1, state.charge + gain * dt));
   const growth = state.charge * state.charge * (3 - 2 * state.charge);
   state.scale += (1 + growth * 0.48 - state.scale) * (1 - Math.exp(-7 * dt));

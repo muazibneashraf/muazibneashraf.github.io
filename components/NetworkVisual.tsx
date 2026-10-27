@@ -53,6 +53,13 @@ BASE_NODES.forEach((a, i) => {
 // Focal hub nodes with enhanced luminescence
 const HUB_NODES = new Set([0, 24, 48, 72, 96, 120, 144, 168]);
 
+const GLOBE_WARNINGS = [
+  ["Hold on!", "Whoa, easy!", "Hey! Slow down!"],
+  ["Stop spinning it!", "I'm getting dizzy!", "This feels unsafe…"],
+  ["Stop!", "That's definitely too fast!", "Uh… we have a problem."],
+  ["Stop! It's gonna explode!", "Too late. Brace yourself!", "I warned you!"],
+] as const;
+
 interface DataPulse {
   edgeIdx: number;
   progress: number;
@@ -67,6 +74,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
   const containerRef = useRef<HTMLDivElement>(null);
   const stageRef = useRef<HTMLDivElement>(null);
   const grabRef = useRef<HTMLButtonElement>(null);
+  const warningRef = useRef<HTMLOutputElement>(null);
   const motionControlRef = useRef<((paused: boolean) => void) | null>(null);
   const focusControlRef = useRef<(() => void) | null>(null);
   const selectedRef = useRef<NetworkFocus | null>(null);
@@ -116,6 +124,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     let activePointer: number | null = null;
     let lastX = 0, lastY = 0, lastMove = 0, radiusAtGrab = 1, lastStatus = 0;
     let bursting = false;
+    let warningRun = 0, warningTier = -1, warningTime = 0;
     let visible = true;
     let lastFrame = 0;
     let isPaused = false;
@@ -154,6 +163,24 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         spin.velocityY *= Math.exp(-12 * elapsed / 1000);
       }
       advanceGlobe(spin, elapsed / 1000, !isPaused && !motion.matches);
+      const warning = warningRef.current;
+      if (warning) {
+        if (spin.charge < 0.08 || isPaused || motion.matches) {
+          warning.dataset.visible = "false";
+          warning.textContent = "";
+          warningTier = -1;
+        } else {
+          const tier = spin.charge < 0.3 ? 0 : spin.charge < 0.55 ? 1 : spin.charge < 0.78 ? 2 : 3;
+          if (warningTier === -1) warningRun++;
+          if (warningTier === -1 || (tier !== warningTier && timestamp - warningTime > 400)) {
+            warning.textContent = GLOBE_WARNINGS[tier][(warningRun - 1) % 3];
+            warning.dataset.level = String(tier);
+            warning.dataset.visible = "true";
+            warningTier = tier;
+            warningTime = timestamp;
+          }
+        }
+      }
       if (timestamp - lastStatus > 70 || timestamp === 0) {
         lastStatus = timestamp;
         container.style.setProperty("--globe-charge", spin.charge.toFixed(3));
@@ -527,12 +554,8 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         <span>{hero.visualCaption}</span>
         <span className="mint">{hero.visualHint}</span>
       </div>
-      <div className="globe-hint mono" id="globe-instructions">
-        <span>Drag to spin<span className="globe-fast-hint"> · faster to</span></span>
-        <Link href="/projects" aria-label="Explore all projects">explore projects ↗</Link>
-        <span className="globe-charge-track" aria-hidden="true" />
-        <span className="sr-only">Use arrow keys to rotate the globe, or Enter to open projects.</span>
-      </div>
+      <span className="sr-only" id="globe-instructions">Drag to rotate the globe, or use arrow keys. Press Enter to open projects.</span>
+      <output ref={warningRef} className="globe-warning mono" data-visible="false" aria-live="polite" aria-atomic="true" />
       <div ref={stageRef} className="globe-stage">
         <canvas
           ref={canvasRef}

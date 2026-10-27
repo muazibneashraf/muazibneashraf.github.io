@@ -42,7 +42,8 @@ async function spinToProjects(page, center, touch = false) {
   const cdp = touch ? await page.context().newCDPSession(page) : null;
   if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [start] });
   else { await page.mouse.move(start.x, start.y); await page.mouse.down(); }
-  let maxCharge = 0, maxSpeed = 0;
+  let maxCharge = 0, maxSpeed = 0, warningScreenshot = false;
+  const warnings = new Set();
   const started = performance.now();
   for (let i = 1; i <= 190; i++) {
     const angle = (performance.now() - started) / 1000 * 13;
@@ -50,16 +51,26 @@ async function spinToProjects(page, center, touch = false) {
     if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [p] });
     else await page.mouse.move(p.x, p.y);
     await page.waitForTimeout(16);
-    const state = await page.evaluate(() => ({ burst: !!document.querySelector(".globe-burst-overlay"), charge: Number(document.querySelector(".interactive-network")?.style.getPropertyValue("--globe-charge") || 0), speed: Number(document.querySelector(".interactive-network")?.dataset.spinSpeed || 0) }));
+    const state = await page.evaluate(() => ({ burst: !!document.querySelector(".globe-burst-overlay"), charge: Number(document.querySelector(".interactive-network")?.style.getPropertyValue("--globe-charge") || 0), speed: Number(document.querySelector(".interactive-network")?.dataset.spinSpeed || 0), warning: document.querySelector('.globe-warning[data-visible="true"]')?.textContent }));
     if (state.burst) break;
     maxCharge = Math.max(maxCharge, state.charge); maxSpeed = Math.max(maxSpeed, state.speed);
+    if (state.warning) warnings.add(state.warning);
+    if (!warningScreenshot && state.charge > 0.4) {
+      warningScreenshot = true;
+      await page.screenshot({ path: resolve(output, touch ? "mobile-warning.png" : "desktop-warning.png") });
+    }
   }
   if (cdp) { await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] }); await cdp.detach(); }
   else await page.mouse.up();
   assert.ok(maxCharge > 0.5, `fast spinning progressively charges the globe (charge=${maxCharge}, speed=${maxSpeed})`);
+  assert.ok(warnings.size >= 2, "progressively urgent warnings reveal the Easter egg only while spinning fast");
   await page.waitForSelector(".globe-burst-overlay");
   await page.screenshot({ path: resolve(output, touch ? "mobile-burst.png" : "desktop-burst.png") });
   await page.waitForURL("**/projects", { timeout: 15000 });
+  await page.waitForFunction(() => Number(document.querySelector(".globe-welcome")?.style.opacity || 0) > 0.95);
+  assert.equal((await page.locator(".globe-welcome").innerText()).replace(/\s+/g, " ").trim(), "Welcome to My Projects");
+  await page.screenshot({ path: resolve(output, touch ? "mobile-welcome.png" : "desktop-welcome.png") });
+  assert.equal(await page.locator(".globe-burst-overlay").count(), 1, "welcome stays above the already loaded projects page");
   await page.waitForSelector(".globe-burst-overlay", { state: "detached", timeout: 10000 });
   assert.ok(await page.locator(".archive-section").isVisible());
   assert.ok(await page.evaluate(() => document.querySelector(".system-narrative-canvas") === window.__globeBackground), "same background survives the transition");
@@ -67,13 +78,15 @@ async function spinToProjects(page, center, touch = false) {
   assert.ok(frames.some(f => f.path === "/projects" && f.overlay), "burst spans the route handoff");
   await page.screenshot({ path: resolve(output, touch ? "mobile-projects.png" : "desktop-projects.png") });
   const sorted = frames.slice(5).map(f => f.dt).sort((a, b) => a - b);
-  return { maxCharge, frameP95: sorted[Math.floor(sorted.length * 0.95)], maxFrame: Math.max(...sorted) };
+  return { maxCharge, warnings: [...warnings], frameP95: sorted[Math.floor(sorted.length * 0.95)], maxFrame: Math.max(...sorted) };
 }
 
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
   page.on("pageerror", error => report.errors.push(error.message));
   let center = await open(page);
+  assert.equal(await page.locator(".globe-hint, .globe-charge-track").count(), 0, "no visible instructions or meter give away the Easter egg");
+  assert.equal(await page.locator(".globe-warning").isVisible(), false);
   const before = await page.locator(".globe-stage").boundingBox();
   await page.mouse.move(center.x - 60, center.y); await page.mouse.move(center.x + 60, center.y);
   assert.equal(await speed(page), 0, "hover does not steer or accelerate the globe");

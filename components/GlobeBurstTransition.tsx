@@ -14,6 +14,7 @@ export function GlobeBurstTransition() {
   const routeRef = useRef(pathname);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const overlayRef = useRef<HTMLDivElement>(null);
+  const welcomeRef = useRef<HTMLDivElement>(null);
   const [burst, setBurst] = useState<GlobeBurst | null>(null);
   const [waiting, setWaiting] = useState(false);
 
@@ -37,7 +38,7 @@ export function GlobeBurstTransition() {
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx || !overlay) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
-    let frame = 0, last = 0, clock = 0, reveal = -1, navigated = false, offeredFallback = false;
+    let frame = 0, last = 0, clock = 0, reveal = -1, welcomeExit = -1, navigated = false, offeredFallback = false;
     const points = burst.points.map((point, index) => {
       const dx = point.x - burst.centerX, dy = point.y - burst.centerY;
       const length = Math.max(1, Math.hypot(dx, dy));
@@ -92,7 +93,19 @@ export function GlobeBurstTransition() {
         navigated = true;
         router.push("/projects", { transitionTypes: ["globe-burst"] });
       }
-      if (routeRef.current === "/projects" && clock > (reduced.matches ? 0 : 0.95) && reveal < 0) reveal = clock;
+      const welcome = welcomeRef.current;
+      if (welcome) {
+        // On a slow connection, hold the greeting until the destination is ready.
+        if (routeRef.current === "/projects" && clock > 2.55 && welcomeExit < 0) welcomeExit = clock;
+        const entrance = reduced.matches ? 0 : Math.min(1, Math.max(0, (clock - 0.9) / 0.5));
+        const exit = welcomeExit < 0 ? 0 : Math.min(1, (clock - welcomeExit) / 0.45);
+        const easeIn = entrance * entrance * (3 - 2 * entrance);
+        const easeOut = exit * exit * (3 - 2 * exit);
+        welcome.style.opacity = String(easeIn * (1 - easeOut));
+        welcome.style.transform = `translateY(${(1 - easeIn) * 14 - easeOut * 8}px) scale(${0.98 + easeIn * 0.02})`;
+        welcome.setAttribute("aria-hidden", String(entrance === 0 || exit === 1));
+      }
+      if (routeRef.current === "/projects" && (reduced.matches || (welcomeExit >= 0 && clock - welcomeExit > 0.35)) && reveal < 0) reveal = clock;
       if (reveal >= 0) {
         const progress = reduced.matches ? 1 : Math.min(1, (clock - reveal) / 0.7);
         overlay.style.opacity = String(1 - progress * progress * (3 - 2 * progress));
@@ -112,6 +125,9 @@ export function GlobeBurstTransition() {
   return <div ref={overlayRef} className="globe-burst-overlay" data-globe-transition="active" role="status" aria-live="polite">
     <canvas ref={canvasRef} aria-hidden="true" />
     <span className="sr-only">Opening projects</span>
+    <div ref={welcomeRef} className="globe-welcome" aria-hidden="true">
+      <h2><span>Welcome to</span>{" "}My Projects</h2>
+    </div>
     {waiting && <Link prefetch={false} className="globe-transition-fallback mono" href="/projects">Continue to projects →</Link>}
   </div>;
 }

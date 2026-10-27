@@ -39,8 +39,8 @@ test("only sustained fast interaction charges a burst; idle and slow spins never
   const slow = Object.assign(createGlobeMotion(), { dragging: true, interacted: true, velocityY: 2 });
   evolve(slow, 60, 30); assert.equal(slow.charge, 0); assert.equal(slow.scale, 1);
   const fast = Object.assign(createGlobeMotion(), { dragging: true, interacted: true, velocityY: 10 });
-  evolve(fast, 60, 0.5); assert.ok(fast.charge > 0.4 && fast.charge < 1); assert.ok(fast.scale > 1);
-  evolve(fast, 60, 1); assert.equal(fast.charge, 1);
+  evolve(fast, 60, 0.5); assert.ok(fast.charge > 0.1 && fast.charge < 0.4); assert.ok(fast.scale > 1);
+  evolve(fast, 60, 3); assert.equal(fast.charge, 1);
   const flick = Object.assign(createGlobeMotion(), { interacted: true, velocityY: 10 });
   evolve(flick, 60, 3); assert.ok(flick.charge < 1, "one incidental flick cannot navigate away");
 });
