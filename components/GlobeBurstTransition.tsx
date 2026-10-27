@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -38,6 +38,14 @@ export function GlobeBurstTransition() {
     const ctx = canvas?.getContext("2d");
     if (!canvas || !ctx || !overlay) return;
     const reduced = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const theme = getComputedStyle(overlay);
+    const palette = {
+      accent: theme.getPropertyValue("--accent").trim(),
+      blue: theme.getPropertyValue("--blue").trim(), lilac: theme.getPropertyValue("--lilac").trim(),
+      ink: theme.getPropertyValue("--ink").trim(),
+    };
+    document.documentElement.dataset.globeTransition = "active";
+    document.documentElement.style.setProperty("--globe-page-opacity", "1");
     let frame = 0, last = 0, clock = 0, reveal = -1, welcomeExit = -1, navigated = false, offeredFallback = false;
     const points = burst.points.map((point, index) => {
       const dx = point.x - burst.centerX, dy = point.y - burst.centerY;
@@ -55,20 +63,24 @@ export function GlobeBurstTransition() {
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, width, height);
       const cover = Math.min(1, Math.max(0, (clock - 0.18) / 0.48));
-      ctx.fillStyle = `rgba(6, 9, 19, ${cover * cover * (3 - 2 * cover)})`;
-      ctx.fillRect(0, 0, width, height);
+      const coverEase = cover * cover * (3 - 2 * cover);
+      // Fade only page content. The real network canvas remains visible below.
+      let pageOpacity = 1 - coverEase;
       const expansion = Math.max(0, clock - 0.22);
       const ignition = 1 + Math.min(1, clock / 0.3) ** 2 * 0.22;
       const fade = Math.max(0, 1 - expansion / 1.5);
       const glow = ctx.createRadialGradient(burst.centerX, burst.centerY, 0, burst.centerX, burst.centerY, burst.radius * (1.2 + expansion));
-      glow.addColorStop(0, `rgba(85,223,252,${0.17 * fade})`);
-      glow.addColorStop(0.5, `rgba(99,135,255,${0.11 * fade})`);
-      glow.addColorStop(1, "rgba(99,135,255,0)");
+      glow.addColorStop(0, palette.accent);
+      glow.addColorStop(0.5, palette.blue);
+      glow.addColorStop(1, "transparent");
+      ctx.globalAlpha = 0.14 * fade;
       ctx.fillStyle = glow; ctx.fillRect(0, 0, width, height);
+      ctx.globalAlpha = 1;
       const travel = 1.1 * Math.log(1 + expansion * 2.5);
       for (const [a, b] of burst.edges) {
         const p = points[a], q = points[b];
-        ctx.strokeStyle = `rgba(85,223,252,${Math.max(0, 0.45 - expansion * 1.5) * (0.55 + (p.z + q.z) * 0.2)})`;
+        ctx.strokeStyle = palette.accent;
+        ctx.globalAlpha = Math.max(0, 0.45 - expansion * 1.5) * (0.55 + (p.z + q.z) * 0.2);
         ctx.lineWidth = 0.8;
         ctx.beginPath();
         ctx.moveTo(burst.centerX + p.dx * ignition + p.vx * travel, burst.centerY + p.dy * ignition + p.vy * travel);
@@ -78,17 +90,21 @@ export function GlobeBurstTransition() {
       points.forEach((p, index) => {
         const x = burst.centerX + p.dx * ignition + p.vx * travel;
         const y = burst.centerY + p.dy * ignition + p.vy * travel;
-        ctx.strokeStyle = `rgba(85,223,252,${fade * Math.min(0.45, expansion)})`;
+        ctx.strokeStyle = palette.accent;
+        ctx.globalAlpha = fade * Math.min(0.45, expansion);
         ctx.lineWidth = 1;
         ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(x - p.vx * expansion * 0.07, y - p.vy * expansion * 0.07); ctx.stroke();
-        ctx.fillStyle = index % 4 === 0 ? `rgba(178,155,255,${fade})` : `rgba(180,245,255,${fade * (0.65 + p.z * 0.25)})`;
+        ctx.fillStyle = index % 4 === 0 ? palette.lilac : palette.ink;
+        ctx.globalAlpha = fade * (0.65 + p.z * 0.25);
         ctx.beginPath(); ctx.arc(x, y, index % 8 === 0 ? 2.6 : 1.4, 0, Math.PI * 2); ctx.fill();
       });
       if (expansion > 0) {
-        ctx.strokeStyle = `rgba(85,223,252,${Math.max(0, 0.35 - expansion * 0.4)})`;
+        ctx.strokeStyle = palette.accent;
+        ctx.globalAlpha = Math.max(0, 0.35 - expansion * 0.4);
         ctx.lineWidth = 1.2;
         ctx.beginPath(); ctx.arc(burst.centerX, burst.centerY, burst.radius * (1.05 + expansion * 2), 0, Math.PI * 2); ctx.stroke();
       }
+      ctx.globalAlpha = 1;
       if (!navigated && (clock > 0.66 || reduced.matches)) {
         navigated = true;
         router.push("/projects", { transitionTypes: ["globe-burst"] });
@@ -108,9 +124,12 @@ export function GlobeBurstTransition() {
       if (routeRef.current === "/projects" && (reduced.matches || (welcomeExit >= 0 && clock - welcomeExit > 0.35)) && reveal < 0) reveal = clock;
       if (reveal >= 0) {
         const progress = reduced.matches ? 1 : Math.min(1, (clock - reveal) / 0.7);
-        overlay.style.opacity = String(1 - progress * progress * (3 - 2 * progress));
+        const eased = progress * progress * (3 - 2 * progress);
+        overlay.style.opacity = String(1 - eased);
+        pageOpacity = 1 - coverEase * (1 - eased);
         if (progress === 1) { setBurst(null); return; }
       }
+      document.documentElement.style.setProperty("--globe-page-opacity", String(pageOpacity));
       if (clock > 4 && !offeredFallback && routeRef.current !== "/projects") {
         offeredFallback = true; setWaiting(true);
       }
@@ -118,11 +137,15 @@ export function GlobeBurstTransition() {
       frame = requestAnimationFrame(draw);
     };
     draw(performance.now());
-    return () => cancelAnimationFrame(frame);
+    return () => {
+      cancelAnimationFrame(frame);
+      delete document.documentElement.dataset.globeTransition;
+      document.documentElement.style.removeProperty("--globe-page-opacity");
+    };
   }, [burst, router]);
 
   if (!burst) return null;
-  return <div ref={overlayRef} className="globe-burst-overlay" data-globe-transition="active" role="status" aria-live="polite">
+  return <div ref={overlayRef} className="globe-burst-overlay" style={burst.theme as CSSProperties} data-globe-transition="active" role="status" aria-live="polite">
     <canvas ref={canvasRef} aria-hidden="true" />
     <span className="sr-only">Opening projects</span>
     <div ref={welcomeRef} className="globe-welcome" aria-hidden="true">

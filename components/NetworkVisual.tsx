@@ -408,7 +408,11 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         activePointer = null;
         container.dataset.spinState = "bursting";
         const bounds = stage.getBoundingClientRect();
+        const style = getComputedStyle(container);
+        const theme = Object.fromEntries(["--bg", "--surface", "--ink", "--muted", "--accent", "--line", "--blue", "--lilac", "--font-body", "--font-display", "--font-mono"]
+          .map(property => [property, style.getPropertyValue(property).trim()]));
         window.dispatchEvent(new CustomEvent<GlobeBurst>("muaz-globe-burst", { detail: {
+          theme,
           centerX: bounds.left + centerX, centerY: bounds.top + centerY, radius,
           points: projected.map(point => ({ x: bounds.left + point.x, y: bounds.top + point.y, z: point.z })),
           edges: EDGES,

@@ -44,6 +44,7 @@ export function advanceGlobe(state: GlobeMotion, dt: number, automatic: boolean)
 }
 
 export interface GlobeBurst {
+  theme: Record<string, string>;
   centerX: number;
   centerY: number;
   radius: number;

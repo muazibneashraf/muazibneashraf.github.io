@@ -4,7 +4,7 @@ import { resolve } from "node:path";
 import { chromium } from "playwright";
 
 const base = process.env.TEST_BASE_URL || "http://localhost:3002";
-const output = resolve("tmp/globe-verification");
+const output = resolve(process.env.TEST_OUTPUT_DIR || "tmp/globe-verification");
 await mkdir(output, { recursive: true });
 const browser = await chromium.launch({ channel: process.env.BROWSER_CHANNEL || "msedge", headless: true });
 const report = { errors: [], visits: [] };
@@ -64,14 +64,35 @@ async function spinToProjects(page, center, touch = false) {
   else await page.mouse.up();
   assert.ok(maxCharge > 0.5, `fast spinning progressively charges the globe (charge=${maxCharge}, speed=${maxSpeed})`);
   assert.ok(warnings.size >= 2, "progressively urgent warnings reveal the Easter egg only while spinning fast");
+  const warningTheme = await page.evaluate(() => {
+    const warning = getComputedStyle(document.querySelector(".globe-warning"));
+    const label = getComputedStyle(document.querySelector(".network-node"));
+    return { font: warning.fontFamily === label.fontFamily, weight: warning.fontWeight === label.fontWeight };
+  });
+  assert.deepEqual(warningTheme, { font: true, weight: true }, "warnings use the existing globe-label typography");
   await page.waitForSelector(".globe-burst-overlay");
   await page.screenshot({ path: resolve(output, touch ? "mobile-burst.png" : "desktop-burst.png") });
   await page.waitForURL("**/projects", { timeout: 15000 });
   await page.waitForFunction(() => Number(document.querySelector(".globe-welcome")?.style.opacity || 0) > 0.95);
-  assert.equal((await page.locator(".globe-welcome").innerText()).replace(/\s+/g, " ").trim(), "Welcome to My Projects");
+  assert.equal((await page.locator(".globe-welcome").textContent()).replace(/\s+/g, " ").trim(), "Welcome to My Projects");
   await page.screenshot({ path: resolve(output, touch ? "mobile-welcome.png" : "desktop-welcome.png") });
   assert.equal(await page.locator(".globe-burst-overlay").count(), 1, "welcome stays above the already loaded projects page");
+  const welcomeTheme = await page.evaluate(() => {
+    const welcome = getComputedStyle(document.querySelector(".globe-welcome h2"));
+    const heading = getComputedStyle(document.querySelector(".page-intro h1"));
+    const canvas = document.querySelector(".globe-burst-overlay canvas");
+    return {
+      font: welcome.fontFamily === heading.fontFamily,
+      weight: welcome.fontWeight === heading.fontWeight,
+      size: welcome.fontSize === heading.fontSize,
+      color: welcome.color === heading.color,
+      pageHidden: Number(getComputedStyle(document.querySelector(".site-frame")).opacity) < 0.01,
+      transparentCanvas: canvas.getContext("2d").getImageData(0, 0, 1, 1).data[3] < 20,
+    };
+  });
+  assert.deepEqual(welcomeTheme, { font: true, weight: true, size: true, color: true, pageHidden: true, transparentCanvas: true }, "welcome matches Projects typography and preserves the actual network background");
   await page.waitForSelector(".globe-burst-overlay", { state: "detached", timeout: 10000 });
+  assert.equal(await page.locator("html").getAttribute("data-globe-transition"), null, "transition restores normal page opacity and interaction");
   assert.ok(await page.locator(".archive-section").isVisible());
   assert.ok(await page.evaluate(() => document.querySelector(".system-narrative-canvas") === window.__globeBackground), "same background survives the transition");
   frames.push(...await page.evaluate(() => window.__globeFrames));

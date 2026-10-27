@@ -11,7 +11,7 @@ const PROTECTED = [
   ".project-card", ".about-copy", ".education-card", ".skill-group", ".research-panel", ".trace-workbench",
   ".experience-row", ".capability-card", ".stack-section",
   ".page-intro", ".project-narrative", ".contact-details", ".contact-form",
-  ".site-footer",
+  ".site-footer", ".globe-welcome h2",
 ].join(",");
 
 function sectionForPath(path: string): NarrativeSection {
