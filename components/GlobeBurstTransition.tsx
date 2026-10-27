@@ -23,6 +23,9 @@ export function GlobeBurstTransition() {
   useEffect(() => {
     const start = (event: Event) => {
       if (routeRef.current !== "/") return;
+      if (typeof window !== "undefined") {
+        window.getSelection()?.removeAllRanges();
+      }
       // Mount and paint the replacement before the source canvas disappears.
       flushSync(() => {
         setWaiting(false);

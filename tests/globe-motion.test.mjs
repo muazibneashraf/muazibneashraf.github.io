@@ -20,7 +20,7 @@ test("neural paths stay inside a spherical volume and route signals between conn
   assert.equal(graph.controls.length, graph.edges.length);
   graph.nodes.forEach(node => assert.ok(Math.hypot(node.x, node.y, node.z) <= 1.000001));
   const cortexRadii = graph.nodes.filter(node => node.shell).map(node => Math.hypot(node.x, node.y, node.z));
-  assert.ok(Math.max(...cortexRadii) - Math.min(...cortexRadii) > 0.06, "the node-built cortex has relief rather than a perfect spherical skin");
+  assert.ok(Math.max(...cortexRadii) - Math.min(...cortexRadii) < 0.001, "the cortex preserves a round spherical silhouette");
   graph.edges.forEach(([a, b], edge) => {
     assert.ok(graph.nodes[a] && graph.nodes[b] && a !== b);
     assert.ok(graph.nodes[a].x <= graph.nodes[b].x, "signals progress through the processing layers");
@@ -38,7 +38,7 @@ test("neural paths stay inside a spherical volume and route signals between conn
     visited.add(node);
     for (const edge of graph.outgoing[node]) queue.push(graph.edges[edge][1]);
   }
-  assert.ok([...visited].some(node => graph.nodes[node].x > 0.7 && !graph.nodes[node].shell), "activations reach the output layer");
+  assert.ok([...visited].some(node => graph.nodes[node].x > 0.7), "activations reach the output layer");
 });
 
 test("screen-space dragging follows the hand in either direction and preserves a unit rotation", () => {

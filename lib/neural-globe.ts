@@ -1,69 +1,65 @@
-type Neuron = { x: number; y: number; z: number; shell: boolean; hub: boolean };
-const CORTEX_NODES = 144;
+export interface Neuron {
+  x: number;
+  y: number;
+  z: number;
+  shell: boolean;
+  hub: boolean;
+}
 
-// An open, faceted cortex wraps seven processing layers. Its uneven, node-built
-// outline is part of the geometry, so it retains depth from every angle.
+export const CORTEX_NODES = 180;
+export const HUB_NODES = new Set([0, 24, 48, 72, 96, 120, 144, 168]);
+
+// A spherical 3D network with an outer circled lattice.
+// Nodes are distributed across the sphere using the Fibonacci golden spiral,
+// and neighboring nodes within threshold distance are connected.
+// This naturally produces the curved spiral tracks (outer circled texture)
+// and preserves a clean circular silhouette as the globe rotates.
 function createNeuralGlobe() {
   const nodes: Neuron[] = [];
-  const layers: number[][] = [];
   const edges: [number, number][] = [];
   const controls: { x: number; y: number; z: number }[] = [];
   const cortex: boolean[] = [];
   const facets: boolean[] = [];
-  const seen = new Set<string>();
-  const golden = Math.PI * (3 - Math.sqrt(5));
+
   for (let i = 0; i < CORTEX_NODES; i++) {
-    const y = 1 - 2 * (i + 0.5) / CORTEX_NODES;
-    const r = Math.sqrt(1 - y * y), angle = i * golden;
-    const relief = 0.95 + 0.035 * Math.sin(angle * 1.7 + y * 5) + 0.015 * Math.cos(angle * 0.7 - y * 6);
-    nodes.push({ x: Math.cos(angle) * r * relief, y: y * relief, z: Math.sin(angle) * r * relief, shell: true, hub: i % 29 === 0 });
+    const y = 1 - (i / (CORTEX_NODES - 1)) * 2;
+    const r = Math.sqrt(Math.max(0, 1 - y * y));
+    const theta = i * Math.PI * (3 - Math.sqrt(5));
+    nodes.push({
+      x: Math.cos(theta) * r,
+      y,
+      z: Math.sin(theta) * r,
+      shell: true,
+      hub: HUB_NODES.has(i),
+    });
   }
-  [5, 8, 12, 14, 12, 8, 5].forEach((count, layer) => {
-    const x = -0.78 + layer * 0.26;
-    const radius = Math.sqrt(1 - x * x) * 0.79;
-    const indexes: number[] = [];
-    for (let i = 0; i < count; i++) {
-      const r = Math.sqrt((i + 0.35) / count) * radius;
-      const angle = i * golden + layer * 0.34;
-      indexes.push(nodes.length);
-      nodes.push({ x, y: Math.cos(angle) * r, z: Math.sin(angle) * r, shell: false, hub: i === 0 || (layer === 3 && i === 7) });
+
+  for (let i = 0; i < CORTEX_NODES; i++) {
+    for (let j = i + 1; j < CORTEX_NODES; j++) {
+      const a = nodes[i], b = nodes[j];
+      if (Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z) < 0.34) {
+        const from = a.x <= b.x ? i : j;
+        const to = a.x <= b.x ? j : i;
+        edges.push([from, to]);
+        const p = nodes[from], q = nodes[to];
+        controls.push({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2, z: (p.z + q.z) / 2 });
+        cortex.push(true);
+        facets.push(true);
+      }
     }
-    layers.push(indexes);
-  });
-  const distance = (a: number, b: number) => {
-    const p = nodes[a], q = nodes[b];
-    return (p.x - q.x) ** 2 + (p.y - q.y) ** 2 + (p.z - q.z) ** 2;
-  };
-  const connect = (a: number, b: number, shell = false) => {
-    const key = `${Math.min(a, b)}:${Math.max(a, b)}`;
-    if (seen.has(key)) return;
-    seen.add(key);
-    if (nodes[a].x > nodes[b].x) [a, b] = [b, a];
-    edges.push([a, b]);
-    const p = nodes[a], q = nodes[b];
-    const bend = Math.sin(a * 1.7 + b * 0.9) * (shell ? 0.055 : 0.12);
-    if (p.shell && q.shell) {
-      // Straight structural chords create polygonal facets, not a smooth rim.
-      controls.push({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2, z: (p.z + q.z) / 2 });
-    } else controls.push({ x: (p.x + q.x) / 2, y: (p.y + q.y) / 2 + bend, z: (p.z + q.z) / 2 - bend * 0.7 });
-    cortex.push(shell);
-    facets.push(p.shell && q.shell);
-  };
-  for (let layer = 0; layer < layers.length - 1; layer++) {
-    const from = layers[layer], to = layers[layer + 1];
-    for (const a of from) to.slice().sort((b, c) => distance(a, b) - distance(a, c)).slice(0, 3).forEach(b => connect(a, b));
-    for (const b of to) connect(from.slice().sort((a, c) => distance(a, b) - distance(c, b))[0], b);
   }
-  const inner = layers.flat();
-  for (let i = 0; i < CORTEX_NODES; i++) {
-    connect(i, inner.slice().sort((a, b) => distance(i, a) - distance(i, b))[0], true);
-    const closest = Array.from({ length: CORTEX_NODES }, (_, j) => j).filter(j => j !== i)
-      .sort((a, b) => distance(i, a) - distance(i, b)).slice(0, 4);
-    closest.forEach(node => connect(i, node, true));
-  }
+
   const outgoing = nodes.map(() => [] as number[]);
   edges.forEach(([from], edge) => outgoing[from].push(edge));
-  const inputs = layers[0].flatMap(node => outgoing[node]);
+
+  const inputs: number[] = [];
+  nodes.forEach((n, i) => {
+    if (n.x < -0.5) {
+      outgoing[i].forEach(edge => inputs.push(edge));
+    }
+  });
+  if (inputs.length === 0) inputs.push(0);
+
   return { nodes, edges, controls, cortex, facets, outgoing, inputs };
 }
 

@@ -11,10 +11,12 @@
 .globe-warning[data-level="3"] { box-shadow: 0 0 24px -12px color-mix(in srgb, var(--accent) 45%, transparent); }
 .interactive-network[data-spin-state="bursting"] :is(.globe-stage, .network-node, .terminal-card, .globe-warning, .visual-caption, .motion-toggle) { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
 .interactive-network[data-spin-state="bursting"] .globe-stage { transition: none; }
-.globe-burst-overlay { position: fixed; inset: 0; z-index: 20000; overflow: hidden; touch-action: none; }
+.globe-burst-overlay { position: fixed; inset: 0; z-index: 20000; overflow: hidden; touch-action: none; -webkit-user-select: none; user-select: none; }
+.globe-burst-overlay ::selection, .globe-welcome ::selection, .globe-welcome *::selection { background: transparent; color: inherit; }
 html[data-globe-transition="active"] .site-frame { opacity: var(--globe-page-opacity, 1); pointer-events: none; }
 .globe-burst-overlay canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-.globe-welcome { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; color: var(--ink); font-family: var(--font-body); text-align: center; pointer-events: none; opacity: 0; transform: translateY(14px) scale(.98); will-change: opacity, transform; }
+.globe-welcome { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; color: var(--ink); font-family: var(--font-body); text-align: center; pointer-events: none; opacity: 0; transform: translateY(14px) scale(.98); will-change: opacity, transform; -webkit-user-select: none; user-select: none; }
+.globe-welcome * { -webkit-user-select: none; user-select: none; }
 .globe-welcome h2 { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 6vw, 78px); font-weight: 500; line-height: 1.12; letter-spacing: -3px; }
 .globe-welcome h2 span { display: block; margin-bottom: 16px; color: var(--accent); font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; line-height: 1.75; letter-spacing: 2px; text-transform: uppercase; }
 .globe-welcome::after { content: ""; justify-self: center; width: 74px; height: 1px; margin-top: 28px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
