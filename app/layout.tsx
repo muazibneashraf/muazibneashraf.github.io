@@ -26,7 +26,7 @@ const manrope = localFont({
 export async function generateMetadata(): Promise<Metadata> {
   const { site } = await getContent();
   return {
-    title: { default: site.title, template: '%s — ' + site.brand + site.brandAccent },
+    title: { default: site.title, template: '%s - ' + site.brand + site.brandAccent },
     description: site.description,
     openGraph: { title: site.title, description: site.description, type: 'website' },
     twitter: { card: 'summary', title: site.title, description: site.description },

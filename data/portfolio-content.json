@@ -671,9 +671,9 @@
   },
   "site": {
     "mark": "m",
-    "brand": "muaz",
-    "brandAccent": ".dev",
-    "title": "Muaz Ibne Ashraf",
+    "brand": "Muaz",
+    "brandAccent": ".tech",
+    "title": "Portfolio - Muaz Ibne Ashraf",
     "description": "Muaz Ibne Ashraf is a BRAC University Software Engineer building Flask backends, full-stack web applications, and applied AI research prototypes.",
     "githubUrl": "https://github.com/muazibneashraf",
     "githubLabel": "GitHub",
@@ -890,7 +890,7 @@
     },
     "contactPage": {
       "eyebrow": "CONTACT",
-      "title": "Get in touch",
+      "title": "Get in Touch",
       "intro": "",
       "detailsTitle": "Let’s connect"
     },

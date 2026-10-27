@@ -7,7 +7,7 @@ import {
 } from "@/components/PortfolioSections";
 import { getContent } from "@/lib/content-store";
 export const revalidate = 0;
-export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: content.about.title.replace(/\.$/, ''), description: content.about.lede }; }
+export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: "About", description: content.about.lede }; }
 export default async function About() {
   const content = await getContent();
   return (

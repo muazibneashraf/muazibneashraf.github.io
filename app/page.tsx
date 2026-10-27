@@ -12,9 +12,19 @@ import {
   ExperienceSection,
   ContactSection,
 } from "@/components/PortfolioSections";
+import type { Metadata } from "next";
 import { getContent } from "@/lib/content-store";
 
 export const revalidate = 0;
+
+export async function generateMetadata(): Promise<Metadata> {
+  const { site } = await getContent();
+  return {
+    title: {
+      absolute: site.title || "Portfolio - Muaz Ibne Ashraf",
+    },
+  };
+}
 
 export default async function Home() {
   const content = await getContent();

@@ -6,7 +6,7 @@ import {
 } from "@/components/PortfolioSections";
 import { getContent } from "@/lib/content-store";
 export const revalidate = 0;
-export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: content.extracurricular.title.replace(/\.$/, ''), description: content.extracurricular.intro }; }
+export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: "Leadership", description: content.extracurricular.intro }; }
 export default async function Experience() {
   const content = await getContent();
   return (

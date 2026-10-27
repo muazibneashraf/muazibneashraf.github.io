@@ -6,7 +6,7 @@ import { getContent } from "@/lib/content-store";
 export const dynamic = "force-dynamic";
 
 export const metadata: Metadata = {
-  title: "Portfolio Studio",
+  title: "Admin",
   robots: { index: false, follow: false },
 };
 

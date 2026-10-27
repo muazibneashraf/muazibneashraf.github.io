@@ -5,7 +5,7 @@ import { ProjectsArchive } from "@/components/ProjectsArchive";
 import { ContactSection } from "@/components/PortfolioSections";
 import { getContent } from "@/lib/content-store";
 export const revalidate = 0;
-export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: content.sections.projectsPage.title.replace(/\.$/, ''), description: content.sections.projectsPage.intro }; }
+export async function generateMetadata(): Promise<Metadata> { const content = await getContent(); return { title: "Projects", description: content.sections.projectsPage.intro }; }
 export default async function Projects() {
   const content = await getContent();
   return (
