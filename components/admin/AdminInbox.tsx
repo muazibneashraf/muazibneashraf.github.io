@@ -60,6 +60,20 @@ export function AdminInbox({ messages, onChange }: { messages: ContactMessage[];
     finally { mutating.current = false; setPending(false); }
   }
 
+  async function remove(message: ContactMessage) {
+    if (mutating.current) return;
+    if (!window.confirm(`Delete message from "${message.name}"? This cannot be undone.`)) return;
+    mutating.current = true; request.current?.abort(); setLoading(false); setPending(true);
+    try {
+      const response = await fetch(`/api/messages?id=${encodeURIComponent(message.id)}`, { method: "DELETE" });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error || "Could not delete this message.");
+      onChange(current => current.filter(item => item.id !== message.id));
+      setSelectedId(""); setError("");
+    } catch (failure) { setError(failure instanceof Error ? failure.message : "Could not delete this message."); }
+    finally { mutating.current = false; setPending(false); }
+  }
+
   const filtered = messages.filter(message => filter === "archived" ? !!message.archivedAt : !message.archivedAt && (filter !== "unread" || !message.readAt))
     .filter(message => `${message.name} ${message.email} ${message.subject} ${message.message}`.toLowerCase().includes(query.toLowerCase()));
   const selected = messages.find(message => message.id === selectedId) ?? filtered[0];
@@ -75,7 +89,7 @@ export function AdminInbox({ messages, onChange }: { messages: ContactMessage[];
       <article className="inbox-detail" aria-label="Message details">{selected ? <>
         <header><p className="eyebrow">{selected.archivedAt ? "Archived message" : selected.readAt ? "Read message" : "New message"}</p><h2>{selected.subject}</h2><p><strong>{selected.name}</strong> <span>{selected.email}</span></p><time dateTime={selected.createdAt}>{date(selected.createdAt)} · Dhaka time</time></header>
         <div className="inbox-message-body">{selected.message}</div>
-        <div className="inbox-message-actions"><button type="button" disabled={pending} onClick={() => void act(selected, selected.readAt ? "unread" : "read")}>{selected.readAt ? "Mark unread" : "Mark read"}</button><button type="button" disabled={pending} onClick={() => void act(selected, selected.archivedAt ? "restore" : "archive")}>{selected.archivedAt ? "Move to inbox" : "Archive message"}</button><CopyEmail key={selected.id} email={selected.email} /></div>
+        <div className="inbox-message-actions"><button type="button" disabled={pending} onClick={() => void act(selected, selected.readAt ? "unread" : "read")}>{selected.readAt ? "Mark unread" : "Mark read"}</button><button type="button" disabled={pending} onClick={() => void act(selected, selected.archivedAt ? "restore" : "archive")}>{selected.archivedAt ? "Move to inbox" : "Archive message"}</button><button type="button" className="inbox-delete-action" disabled={pending} onClick={() => void remove(selected)}>Delete message</button><CopyEmail key={selected.id} email={selected.email} /></div>
         <div className="inbox-reply"><label className="admin-field"><span>Your reply</span><textarea aria-label="Your reply" rows={5} placeholder="Write your reply…" value={drafts[selected.id] ?? ""} onChange={event => setDrafts(current => ({ ...current, [selected.id]: event.target.value }))} /></label><a className="inbox-reply-link" href={gmailComposeUrl(selected.email, { subject, body })} target="_blank" rel="noreferrer">Reply in Gmail</a><p>Opens a Gmail draft with the recipient, subject and your reply filled in.</p></div>
       </> : <div className="inbox-no-selection"><h2>Your inbox is clear</h2><p>Contact form enquiries will appear here. Refresh to check for new messages.</p></div>}</article>
     </div>

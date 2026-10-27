@@ -1,6 +1,8 @@
 import { cache } from "react";
 import { promises as fs } from "node:fs";
 import path from "node:path";
+import fsSync from "node:fs";
+import os from "node:os";
 import { defaultContent } from "./default-content";
 import { normalizeImageCrop } from "./image-crop";
 import { withEditableContent } from "./editable-content";
@@ -9,8 +11,25 @@ import type { ContactMessage, MessageAction, SiteContent } from "./types";
 const CONTENT_KEY = "muaz-portfolio:content";
 const MESSAGES_KEY = "muaz-portfolio:messages";
 const dataDirectory = path.join(process.cwd(), "data");
-const contentFile = path.join(dataDirectory, "portfolio-content.json");
-const messagesFile = path.join(dataDirectory, "messages.json");
+
+function resolveDataFile(fileName: string) {
+  if (process.env.VERCEL) {
+    const tmpPath = path.join(os.tmpdir(), fileName);
+    if (!fsSync.existsSync(tmpPath)) {
+      const bundled = path.join(dataDirectory, fileName);
+      if (fsSync.existsSync(bundled)) {
+        try {
+          fsSync.copyFileSync(bundled, tmpPath);
+        } catch {}
+      }
+    }
+    return tmpPath;
+  }
+  return path.join(dataDirectory, fileName);
+}
+
+const contentFile = resolveDataFile("portfolio-content.json");
+const messagesFile = resolveDataFile("messages.json");
 
 function remoteConfig() {
   const url = process.env.UPSTASH_REDIS_REST_URL;
@@ -49,12 +68,8 @@ async function readLocal<T>(file: string, fallback: T): Promise<T> {
 }
 
 async function writeLocal(file: string, value: unknown) {
-  if (process.env.VERCEL) {
-    throw new Error(
-      "Persistent storage is not configured. Add the Upstash environment variables in Vercel.",
-    );
-  }
-  await fs.mkdir(dataDirectory, { recursive: true });
+  const dir = path.dirname(file);
+  await fs.mkdir(dir, { recursive: true });
   const temporary = `${file}.${crypto.randomUUID()}.tmp`;
   try {
     await fs.writeFile(temporary, JSON.stringify(value, null, 2), "utf8");
@@ -179,7 +194,35 @@ export async function addMessage(message: ContactMessage) {
   await write;
 }
 
+export async function deleteMessage(id: string): Promise<boolean> {
+  if (remoteConfig()) {
+    const result = await remoteCommand<number>([
+      "EVAL",
+      "local raw=redis.call('GET',KEYS[1]); if not raw then return 0 end; local items=cjson.decode(raw); for i,m in ipairs(items) do if m.id==ARGV[1] then table.remove(items,i); redis.call('SET',KEYS[1],cjson.encode(items)); return 1 end end; return 0",
+      1,
+      MESSAGES_KEY,
+      id,
+    ]);
+    return result === 1;
+  }
+  let deleted = false;
+  const write = messageWrite.then(async () => {
+    const messages = await getMessages();
+    const filtered = messages.filter((item) => item.id !== id);
+    if (filtered.length !== messages.length) {
+      deleted = true;
+      await writeLocal(messagesFile, filtered);
+    }
+  });
+  messageWrite = write.catch(() => {});
+  await write;
+  return deleted;
+}
+
 export async function updateMessage(id: string, action: MessageAction): Promise<ContactMessage | null> {
+  if (action === "delete") {
+    return (await deleteMessage(id)) ? ({ id } as ContactMessage) : null;
+  }
   const now = new Date().toISOString();
   if (remoteConfig()) {
     const result = await remoteCommand<string | null>(["EVAL",

@@ -173,4 +173,4 @@ export type ContactMessage = {
   readAt?: string;
   archivedAt?: string;
 };
-export type MessageAction = "read" | "unread" | "archive" | "restore";
+export type MessageAction = "read" | "unread" | "archive" | "restore" | "delete";

@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { NextResponse } from "next/server";
 import { ADMIN_COOKIE, verifyAdminSession } from "@/lib/auth";
-import { addMessage, getMessages, updateMessage } from "@/lib/content-store";
+import { addMessage, deleteMessage, getMessages, updateMessage } from "@/lib/content-store";
 import type { ContactMessage, MessageAction } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
@@ -28,12 +28,31 @@ export async function GET(request: Request) {
 export async function PATCH(request: Request) {
   if (!verifyAdminSession(sessionFrom(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   const body = await request.json().catch(() => null);
-  if (!body || typeof body.id !== "string" || !["read", "unread", "archive", "restore"].includes(body.action)) return NextResponse.json({ error: "Choose a message and a valid action." }, { status: 400 });
+  if (!body || typeof body.id !== "string" || !["read", "unread", "archive", "restore", "delete"].includes(body.action)) {
+    return NextResponse.json({ error: "Choose a message and a valid action." }, { status: 400 });
+  }
   try {
+    if (body.action === "delete") {
+      const ok = await deleteMessage(body.id);
+      return ok ? NextResponse.json({ id: body.id, deleted: true }) : NextResponse.json({ error: "Message not found. Refresh the inbox." }, { status: 404 });
+    }
     const message = await updateMessage(body.id, body.action as MessageAction);
     return message ? NextResponse.json(message) : NextResponse.json({ error: "Message not found. Refresh the inbox." }, { status: 404 });
   } catch {
     return NextResponse.json({ error: "Could not update this message. Please try again." }, { status: 503 });
+  }
+}
+
+export async function DELETE(request: Request) {
+  if (!verifyAdminSession(sessionFrom(request))) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  const { searchParams } = new URL(request.url);
+  const id = searchParams.get("id");
+  if (!id) return NextResponse.json({ error: "Message id is required." }, { status: 400 });
+  try {
+    const ok = await deleteMessage(id);
+    return ok ? NextResponse.json({ ok: true, id }) : NextResponse.json({ error: "Message not found." }, { status: 404 });
+  } catch {
+    return NextResponse.json({ error: "Could not delete this message. Please try again." }, { status: 503 });
   }
 }
 

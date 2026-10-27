@@ -56,9 +56,15 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
     }
 
     try {
-      // Send directly to user's Gmail inbox via FormSubmit
-      const endpoint = `https://formsubmit.co/ajax/${encodeURIComponent(email)}`;
-      const response = await fetch(endpoint, {
+      // 1. Submit directly to our internal messages API
+      const apiPromise = fetch("/api/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, email: senderEmail, subject, message }),
+      });
+
+      // 2. Also forward to FormSubmit with a fast 4s timeout (never hangs the UI)
+      const formSubmitPromise = fetch(`https://formsubmit.co/ajax/${encodeURIComponent(email)}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -73,28 +79,23 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
           _template: "table",
           _captcha: "false",
         }),
-      });
+        signal: AbortSignal.timeout(4000),
+      }).catch(() => null);
 
-      // Also persist to local /admin inbox if server is running
-      void fetch("/api/messages", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email: senderEmail, subject, message }),
-      }).catch(() => {});
-
+      const response = await apiPromise;
       const result = await response.json().catch(() => null);
 
-      if (
-        response.ok &&
-        (result?.success === "true" ||
-          result?.success === true ||
-          result?.message?.includes("Activation") ||
-          result?.message?.includes("successfully"))
-      ) {
+      if (response.ok && (result?.ok || result?.success)) {
         form.reset();
         setStatus("sent");
       } else {
-        setStatus("error");
+        const fallbackRes = await formSubmitPromise;
+        if (fallbackRes && fallbackRes.ok) {
+          form.reset();
+          setStatus("sent");
+        } else {
+          setStatus("error");
+        }
       }
     } catch {
       setStatus("error");

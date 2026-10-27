@@ -1115,6 +1115,8 @@ fieldset.admin-editor:disabled {
 .inbox-detail time { font: 10px var(--font-mono); color: var(--muted); }
 .inbox-message-body { white-space: pre-wrap; overflow-wrap: anywhere; margin: 24px 0; padding-block: 22px; border-block: 1px solid var(--line); font-size: 14px; line-height: 1.8; }
 .inbox-message-actions { display: flex; flex-wrap: wrap; gap: 8px; }
+.inbox-message-actions .inbox-delete-action { color: var(--coral); border-color: color-mix(in srgb, var(--coral) 40%, var(--line)); cursor: pointer; transition: all .2s ease; }
+.inbox-message-actions .inbox-delete-action:hover { color: #fff; background: color-mix(in srgb, var(--coral) 25%, var(--surface)); border-color: var(--coral); }
 .inbox-reply { margin-top: 28px; }
 .inbox-reply-link { display: inline-flex; border: 1px solid color-mix(in srgb, var(--accent) 40%, var(--line)); border-radius: 8px; padding: 10px 16px; color: var(--accent); background: color-mix(in srgb, var(--accent) 10%, var(--surface)); font-size: 13px; }
 .inbox-reply > p, .inbox-no-selection p { color: var(--muted); font-size: 12px; line-height: 1.7; }
