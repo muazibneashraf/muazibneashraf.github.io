@@ -21,7 +21,7 @@ export default async function Resume() {
         </div>
         <div className="resume-actions">
           <ResumeLink className="button secondary">View résumé</ResumeLink>
-          <a className="button primary" href={url} download>Download CV (PDF)</a>
+          <a className="button primary" href={url} download="Muaz_Ibne_Ashraf_CV.pdf">Download CV (PDF)</a>
         </div>
       </header>
       <p className="resume-note">Read the CV in the site preview, or download the original PDF.</p>

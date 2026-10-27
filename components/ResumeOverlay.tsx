@@ -101,7 +101,7 @@ export function ResumeOverlay({
         }}
       >
         <div className="cv-dialog-actions" role="group" aria-label="Résumé controls">
-          <a className="button secondary" href={url} download>
+          <a className="button secondary" href={url} download="Muaz_Ibne_Ashraf_CV.pdf">
             Download CV
           </a>
           <button
