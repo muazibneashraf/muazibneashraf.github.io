@@ -21,7 +21,7 @@ export function withEditableContent(content: SiteContent): SiteContent {
   if (["/brand/logo-symbol.png", "/brand/mark.svg"].includes(site.iconUrl)) site.iconUrl = "/brand/neuro-wave-pulse.svg";
   if (["/brand/logo-symbol.png", "/brand/mark.svg"].includes(site.faviconUrl)) site.faviconUrl = "/brand/neuro-wave-pulse.svg";
   const resumeUrl = !content.identity?.resumeUrl || (process.env.GITHUB_PAGES && content.identity.resumeUrl.startsWith("/api/resume"))
-    ? "/Muaz_Ibne_Ashraf_CV.pdf"
+    ? "/Muaz_Ibne_Ashraf_CV.pdf?v=a4e67ba6"
     : content.identity.resumeUrl;
   return {
     ...content,

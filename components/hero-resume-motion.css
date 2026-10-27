@@ -10,6 +10,11 @@
 .interactive-network .network-preview-copy { animation: network-preview-arrival .36s cubic-bezier(.2,.8,.2,1) both; }
 @keyframes network-preview-arrival { from { opacity: 0; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
 
+/* Document link annotations layer and hover interaction */
+.pdf-annotations-layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 10; }
+.pdf-link-annotation { position: absolute; display: block; pointer-events: auto; cursor: pointer; border-radius: 3px; background: transparent; transition: background-color .15s ease, box-shadow .15s ease, outline .15s ease; }
+.pdf-link-annotation:hover, .pdf-link-annotation:focus-visible { background: rgba(6, 182, 212, 0.16) !important; outline: 2px solid rgba(6, 182, 212, 0.6) !important; box-shadow: 0 0 8px rgba(6, 182, 212, 0.3) !important; }
+
 /* The PDF is rerendered at its final pixel size; only its outer frame animates. */
 .cv-dialog .cv-dialog-document { transform-origin: top left; }
 .cv-dialog[open] .cv-dialog-actions > * { animation: resume-control-arrival .3s cubic-bezier(.2,.8,.2,1) .08s both; }
