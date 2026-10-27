@@ -51,6 +51,15 @@ interface DataPulse {
   isCyan: boolean;
 }
 
+interface SynapticRipple {
+  nodeIdx: number;
+  radius: number;
+  maxRadius: number;
+  speed: number;
+  active: boolean;
+  isCyan: boolean;
+}
+
 export function NetworkVisual({ projects, hero, identity }: { projects: Project[]; hero: HeroSettings; identity: SiteContent["identity"] }) {
   const router = useRouter();
   const networkNodes = NODE_LAYOUTS.map(node => ({...node, label: hero.nodes.find(item => item.id === node.focus)?.label ?? "", preferred: hero.nodes.find(item => item.id === node.focus)?.projectId ?? ""}));
@@ -134,12 +143,22 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     const ink = palette.getPropertyValue("--ink").trim();
     const glowTheme = { accent: cyan, blue };
 
-    // Pre-allocated active packet pulses
+    // Pre-allocated active packet pulses and synaptic ripple waves
     const PULSE_COUNT = 7;
     const pulses: DataPulse[] = Array.from({ length: PULSE_COUNT }, (_, i) => ({
       edgeIdx: NEURAL_GLOBE.inputs[i % NEURAL_GLOBE.inputs.length],
       progress: i / PULSE_COUNT,
       speed: 0.007 + (i % 3) * 0.003,
+      isCyan: i % 2 === 0,
+    }));
+
+    const RIPPLE_COUNT = 6;
+    const ripples: SynapticRipple[] = Array.from({ length: RIPPLE_COUNT }, (_, i) => ({
+      nodeIdx: 0,
+      radius: 0,
+      maxRadius: 26,
+      speed: 0.45,
+      active: false,
       isCyan: i % 2 === 0,
     }));
 
@@ -261,6 +280,21 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
 
       drawNeuralGlow(ctx, centerX, centerY, radius, glowTheme, spin.charge);
 
+      // Subtle holographic Fresnel perimeter aura (ethereal edge glow, keeping the core open and unsmoothed)
+      const fresnel = ctx.createRadialGradient(
+        centerX, centerY, radius * 0.88,
+        centerX, centerY, radius * 1.03
+      );
+      fresnel.addColorStop(0, "rgba(85, 223, 252, 0)");
+      fresnel.addColorStop(0.65, "rgba(85, 223, 252, 0.045)");
+      fresnel.addColorStop(0.85, "rgba(99, 135, 255, 0.055)");
+      fresnel.addColorStop(1, "rgba(178, 155, 255, 0)");
+      ctx.globalAlpha = 1;
+      ctx.fillStyle = fresnel;
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, radius * 1.03, 0, Math.PI * 2);
+      ctx.fill();
+
       const { x: qx, y: qy, z: qz, w: qw } = spin;
       const xx = 1 - 2 * (qy * qy + qz * qz), xy = 2 * (qx * qy - qz * qw), xz = 2 * (qx * qz + qy * qw);
       const yx = 2 * (qx * qy + qz * qw), yy = 1 - 2 * (qx * qx + qz * qz), yz = 2 * (qy * qz - qx * qw);
@@ -320,7 +354,43 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         ctx.stroke();
       }
 
-      // Render traveling data transmission signals
+      // Render synaptic action potential ripples expanding from stimulated nodes and hubs
+      for (let r = 0; r < RIPPLE_COUNT; r++) {
+        const rip = ripples[r];
+        if (!rip.active) continue;
+        if (!isPaused && !motion.matches) {
+          rip.radius += rip.speed * delta;
+          if (rip.radius >= rip.maxRadius) {
+            rip.active = false;
+            continue;
+          }
+        }
+
+        const pt = projected[rip.nodeIdx];
+        if (pt.z > -0.2) {
+          const progress = rip.radius / rip.maxRadius;
+          const fade = (1 - progress) * Math.min(1, Math.max(0, (pt.z + 0.3) * 1.2));
+
+          // Expanding primary ripple
+          ctx.globalAlpha = 0.22 * fade;
+          ctx.strokeStyle = rip.isCyan ? cyan : lilac;
+          ctx.lineWidth = 0.75;
+          ctx.beginPath();
+          ctx.arc(pt.x, pt.y, rip.radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // Delicate trailing echo ring
+          if (rip.radius > 6) {
+            ctx.globalAlpha = 0.11 * fade;
+            ctx.lineWidth = 0.5;
+            ctx.beginPath();
+            ctx.arc(pt.x, pt.y, rip.radius - 5, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+      }
+
+      // Render traveling data transmission signals with comet light trails
       for (let k = 0; k < PULSE_COUNT; k++) {
         const pulse = pulses[k];
         if (!isPaused && !motion.matches) {
@@ -335,6 +405,19 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
               : NEURAL_GLOBE.inputs[Math.floor(Math.random() * NEURAL_GLOBE.inputs.length)];
             pulse.speed = 0.007 + Math.random() * 0.006;
             activation[EDGES[pulse.edgeIdx][0]] = 0.8;
+
+            // Trigger action-potential ripple on arrival
+            if (projected[target].z > -0.2) {
+              const ripple = ripples.find((r) => !r.active);
+              if (ripple) {
+                ripple.active = true;
+                ripple.nodeIdx = target;
+                ripple.radius = 2;
+                ripple.maxRadius = BASE_NODES[target].hub ? 26 : 18;
+                ripple.speed = 0.5;
+                ripple.isCyan = pulse.isCyan;
+              }
+            }
           }
         }
 
@@ -343,21 +426,51 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const q = projected[j];
         const avgZ = (p.z + q.z) / 2;
 
-        if (avgZ > -0.15) {
-          const t = pulse.progress, u = 1 - t, control = curves[pulse.edgeIdx];
+        if (avgZ > -0.18) {
+          const t = pulse.progress, control = curves[pulse.edgeIdx];
+          const u = 1 - t;
           const px = u * u * p.x + 2 * u * t * control.x + t * t * q.x;
           const py = u * u * p.y + 2 * u * t * control.y + t * t * q.y;
-          const alpha = Math.min(1, Math.max(0, (avgZ + 0.2) * 1.4));
 
-          // Soft radiant bloom
-          ctx.globalAlpha = 0.22 * alpha;
-          ctx.fillStyle = pulse.isCyan ? cyan : lilac;
+          // Tail coordinates (samples along bezier curve behind the pulse head)
+          const t1 = Math.max(0, t - 0.035), u1 = 1 - t1;
+          const p1x = u1 * u1 * p.x + 2 * u1 * t1 * control.x + t1 * t1 * q.x;
+          const p1y = u1 * u1 * p.y + 2 * u1 * t1 * control.y + t1 * t1 * q.y;
+
+          const t2 = Math.max(0, t - 0.07), u2 = 1 - t2;
+          const p2x = u2 * u2 * p.x + 2 * u2 * t2 * control.x + t2 * t2 * q.x;
+          const p2y = u2 * u2 * p.y + 2 * u2 * t2 * control.y + t2 * t2 * q.y;
+
+          const alpha = Math.min(1, Math.max(0, (avgZ + 0.22) * 1.35));
+          const color = pulse.isCyan ? cyan : lilac;
+
+          // Luminous comet streak tail
+          ctx.strokeStyle = color;
+          ctx.lineCap = "round";
+
+          ctx.globalAlpha = 0.14 * alpha;
+          ctx.lineWidth = 1.7;
           ctx.beginPath();
-          ctx.arc(px, py, 3.8, 0, Math.PI * 2);
+          ctx.moveTo(p2x, p2y);
+          ctx.lineTo(p1x, p1y);
+          ctx.stroke();
+
+          ctx.globalAlpha = 0.35 * alpha;
+          ctx.lineWidth = 1.3;
+          ctx.beginPath();
+          ctx.moveTo(p1x, p1y);
+          ctx.lineTo(px, py);
+          ctx.stroke();
+
+          // Soft radiant bloom at pulse head
+          ctx.globalAlpha = 0.28 * alpha;
+          ctx.fillStyle = color;
+          ctx.beginPath();
+          ctx.arc(px, py, 4.0, 0, Math.PI * 2);
           ctx.fill();
 
           // High-luminance signal core
-          ctx.globalAlpha = alpha * 0.9;
+          ctx.globalAlpha = alpha * 0.95;
           ctx.fillStyle = ink;
           ctx.beginPath();
           ctx.arc(px, py, 1.4, 0, Math.PI * 2);
@@ -373,7 +486,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         const signal = activation[i];
         const front = Math.max(0, (p.z + 1) / 2);
 
-        // Focal hub corona
+        // Focal hub corona and star diffraction spikes
         if ((isHub || signal > 0.1) && p.z > -0.1) {
           ctx.globalAlpha = 0.09 + signal * 0.16 + front * 0.1;
           ctx.fillStyle = isShell ? cyan : lilac;
@@ -381,17 +494,34 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
           ctx.arc(p.x, p.y, (isShell ? 7 : 6) + signal * 2.2, 0, Math.PI * 2);
           ctx.fill();
 
-          // Prominent front hubs: subtle star sparkle
-          if (p.z > 0.35 && isHub) {
-            ctx.globalAlpha = 0.22 + front * 0.28;
+          // Prominent front hubs: clean 4-point star lens flares
+          if (p.z > 0.25 && isHub) {
+            const flareLen = (isShell ? 8.5 : 7.5) + signal * 2.5;
+            const flareAlpha = (0.24 + front * 0.42) * (0.8 + signal * 0.2);
             ctx.strokeStyle = isShell ? cyan : lilac;
-            ctx.lineWidth = 0.6;
+
+            // Horizontal & vertical primary diffraction spikes
+            ctx.globalAlpha = flareAlpha;
+            ctx.lineWidth = 0.75;
             ctx.beginPath();
-            ctx.moveTo(p.x - 6.5, p.y);
-            ctx.lineTo(p.x + 6.5, p.y);
-            ctx.moveTo(p.x, p.y - 6.5);
-            ctx.lineTo(p.x, p.y + 6.5);
+            ctx.moveTo(p.x - flareLen, p.y);
+            ctx.lineTo(p.x + flareLen, p.y);
+            ctx.moveTo(p.x, p.y - flareLen);
+            ctx.lineTo(p.x, p.y + flareLen);
             ctx.stroke();
+
+            // Diagonal micro-spikes for top front hubs
+            if (p.z > 0.45) {
+              const diagLen = flareLen * 0.45;
+              ctx.globalAlpha = flareAlpha * 0.5;
+              ctx.lineWidth = 0.5;
+              ctx.beginPath();
+              ctx.moveTo(p.x - diagLen, p.y - diagLen);
+              ctx.lineTo(p.x + diagLen, p.y + diagLen);
+              ctx.moveTo(p.x - diagLen, p.y + diagLen);
+              ctx.lineTo(p.x + diagLen, p.y - diagLen);
+              ctx.stroke();
+            }
           }
         }
 
