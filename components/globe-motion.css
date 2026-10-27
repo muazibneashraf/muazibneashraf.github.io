@@ -1,0 +1,21 @@
+.globe-stage { position: relative; height: 440px; }
+.interactive-network .globe-stage > canvas { position: absolute; left: -25%; top: -25%; width: 150%; height: 150%; pointer-events: none; }
+.globe-grab { position: absolute; border: 0; border-radius: 50%; padding: 0; background: transparent; cursor: grab; touch-action: none; -webkit-user-select: none; user-select: none; z-index: 1; }
+.globe-grab:active, [data-spin-state="dragging"] .globe-grab { cursor: grabbing; }
+.globe-grab:focus-visible { outline: 1px dashed var(--accent); outline-offset: 10px; }
+.globe-hint { position: absolute; top: 25px; left: 16px; right: 16px; display: flex; align-items: center; justify-content: flex-end; gap: 8px; z-index: 4; color: var(--muted); font-size: 9px; letter-spacing: .3px; pointer-events: none; }
+.globe-hint a { pointer-events: auto; color: var(--accent); text-underline-offset: 4px; }
+.globe-hint a:hover { text-decoration: underline; }
+.globe-charge-track { display: inline-block; width: 38px; height: 2px; border-radius: 2px; background: var(--line); overflow: hidden; }
+.globe-charge-track::after { content: ""; display: block; height: 100%; background: var(--accent); transform: scaleX(var(--globe-charge, 0)); transform-origin: left; }
+.interactive-network[data-spin-state="bursting"] :is(.globe-stage, .network-node, .terminal-card, .globe-hint, .visual-caption, .motion-toggle) { opacity: 0; pointer-events: none; transition: opacity .2s ease; }
+.interactive-network[data-spin-state="bursting"] .globe-stage { transition: none; }
+.globe-burst-overlay { position: fixed; inset: 0; z-index: 20000; overflow: hidden; touch-action: none; }
+.globe-burst-overlay canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+.globe-transition-fallback { position: absolute; left: 50%; top: 55%; transform: translateX(-50%); color: #55dffc; border: 1px solid #1e2c48; border-radius: 8px; padding: 12px 20px; background: #0e172a; }
+@media (min-width: 761px) { .hero .globe-stage { height: calc(var(--opening-scene-height) - 90px); } }
+@media (max-width: 760px) {
+  .globe-stage { height: 340px; }
+  .globe-hint { left: 3px; right: 3px; font-size: 8px; }
+}
+@media (prefers-reduced-motion: reduce) { .globe-charge-track, .globe-fast-hint { display: none; } }

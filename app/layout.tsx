@@ -3,6 +3,7 @@ import localFont from "next/font/local";
 import "./globals.css";
 import { getContent } from "@/lib/content-store";
 import { PublicBackground } from "@/components/PublicBackground";
+import { GlobeBurstTransition } from "@/components/GlobeBurstTransition";
 
 export const viewport: Viewport = {
   themeColor: "#060913",
@@ -51,7 +52,7 @@ export default function RootLayout({
           }}
         />
       </head>
-      <body><PublicBackground />{children}</body>
+      <body><PublicBackground />{children}<GlobeBurstTransition /></body>
     </html>
   );
 }

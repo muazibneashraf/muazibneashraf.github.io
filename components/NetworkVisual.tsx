@@ -2,8 +2,11 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Project, HeroSettings, SiteContent } from "@/lib/types";
+import { advanceGlobe, createGlobeMotion, rotateGlobe, type GlobeBurst } from "@/lib/globe-motion";
 import "./hero-resume-motion.css";
+import "./globe-motion.css";
 
 const NODE_LAYOUTS = [
   {
@@ -58,10 +61,12 @@ interface DataPulse {
 }
 
 export function NetworkVisual({ projects, hero, identity }: { projects: Project[]; hero: HeroSettings; identity: SiteContent["identity"] }) {
+  const router = useRouter();
   const networkNodes = NODE_LAYOUTS.map(node => ({...node, label: hero.nodes.find(item => item.id === node.focus)?.label ?? "", preferred: hero.nodes.find(item => item.id === node.focus)?.projectId ?? ""}));
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
-  const pointerRef = useRef({ targetX: 0, targetY: 0, currX: 0, currY: 0 });
+  const stageRef = useRef<HTMLDivElement>(null);
+  const grabRef = useRef<HTMLButtonElement>(null);
   const motionControlRef = useRef<((paused: boolean) => void) | null>(null);
   const focusControlRef = useRef<(() => void) | null>(null);
   const selectedRef = useRef<NetworkFocus | null>(null);
@@ -96,29 +101,21 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     }
   }, [paused]);
 
-  const handlePointerMove = (e: React.PointerEvent<HTMLDivElement>) => {
-    if (!containerRef.current) return;
-    const rect = containerRef.current.getBoundingClientRect();
-    const x = (e.clientX - rect.left) / rect.width;
-    const y = (e.clientY - rect.top) / rect.height;
-    pointerRef.current.targetX = Math.max(-1, Math.min(1, x * 2 - 1));
-    pointerRef.current.targetY = Math.max(-1, Math.min(1, y * 2 - 1));
-  };
-
-  const handlePointerLeave = () => {
-    pointerRef.current.targetX = 0;
-    pointerRef.current.targetY = 0;
-  };
-
   useEffect(() => {
     const canvas = canvasRef.current;
-    if (!canvas) return;
+    const stage = stageRef.current;
+    const grab = grabRef.current;
+    const container = containerRef.current;
+    if (!canvas || !stage || !grab || !container) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
+    const spin = createGlobeMotion();
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     let frame = 0;
-    let angle = 0.35;
+    let activePointer: number | null = null;
+    let lastX = 0, lastY = 0, lastMove = 0, radiusAtGrab = 1, lastStatus = 0;
+    let bursting = false;
     let visible = true;
     let lastFrame = 0;
     let isPaused = false;
@@ -147,13 +144,22 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
     }));
 
     const draw = (timestamp = 0) => {
-      const width = canvas.clientWidth;
-      const height = canvas.clientHeight;
+      const width = stage.clientWidth;
+      const height = stage.clientHeight;
       if (width === 0 || height === 0) return;
       const elapsed = lastFrame && !isPaused && !motion.matches ? Math.min(timestamp - lastFrame, 40) : 0;
       const delta = elapsed / 16;
-      const pointerBlend = 1 - Math.exp(-2.9 * elapsed / 1000);
-      angle += elapsed * 0.0001;
+      if (spin.dragging && timestamp - lastMove > 80) {
+        spin.velocityX *= Math.exp(-12 * elapsed / 1000);
+        spin.velocityY *= Math.exp(-12 * elapsed / 1000);
+      }
+      advanceGlobe(spin, elapsed / 1000, !isPaused && !motion.matches);
+      if (timestamp - lastStatus > 70 || timestamp === 0) {
+        lastStatus = timestamp;
+        container.style.setProperty("--globe-charge", spin.charge.toFixed(3));
+        container.dataset.spinState = bursting ? "bursting" : spin.dragging ? "dragging" : spin.charge > 0.06 ? "charging" : "idle";
+        container.dataset.spinSpeed = Math.hypot(spin.velocityX, spin.velocityY).toFixed(2);
+      }
       focusTime += elapsed;
       const activeFocus = selectedRef.current;
       const focusBlend = motion.matches || isPaused ? 1 : 1 - Math.exp(-elapsed * .008);
@@ -167,8 +173,8 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       const ratio = isMobile
         ? Math.min(window.devicePixelRatio || 1, 1.35)
         : Math.min(Math.max(window.devicePixelRatio || 1, 1.5), 2);
-      const targetW = Math.round(width * ratio);
-      const targetH = Math.round(height * ratio);
+      const targetW = Math.round(width * 1.5 * ratio);
+      const targetH = Math.round(height * 1.5 * ratio);
 
       if (canvas.width !== targetW || canvas.height !== targetH) {
         canvas.width = targetW;
@@ -176,18 +182,20 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       }
 
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
-      ctx.clearRect(0, 0, width, height);
+      ctx.clearRect(0, 0, width * 1.5, height * 1.5);
+      ctx.translate(width * 0.25, height * 0.25);
 
       // Use the canvas height for a prominent sphere; reserve side room for
       // the outer orbit on narrow screens instead of clipping its curve.
-      const radius = Math.min(width / 2.35, height * 0.48);
+      const baseRadius = Math.min(width / 2.35, height * 0.48);
+      const radius = baseRadius * spin.scale;
       const centerX = width / 2;
       const centerY = height / 2;
       if (measuredFocus !== activeFocus || width !== labelWidth || height !== labelHeight) {
         measuredFocus = activeFocus;
         const terminal = containerRef.current?.querySelector<HTMLElement>(".terminal-card");
         if (terminal) {
-          const bounds = terminal.getBoundingClientRect(), canvasBounds = canvas.getBoundingClientRect();
+          const bounds = terminal.getBoundingClientRect(), canvasBounds = stage.getBoundingClientRect();
           previewTarget.x = bounds.left + bounds.width * .7 - canvasBounds.left;
           previewTarget.y = Math.min(height - 4, bounds.top - canvasBounds.top);
         }
@@ -200,6 +208,10 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         labelWidth = width;
         labelHeight = height;
         labeledFocus = activeFocus;
+        grab.style.left = `${centerX - baseRadius}px`;
+        grab.style.top = `${centerY - baseRadius}px`;
+        grab.style.width = `${baseRadius * 2}px`;
+        grab.style.height = `${baseRadius * 2}px`;
         const terminalTop = containerRef.current?.querySelector<HTMLElement>(".terminal-card")?.offsetTop ?? height;
         const labelBottom = Math.min(height - 8, terminalTop - 12);
         const labels = NODE_LAYOUTS.map((n) => {
@@ -209,8 +221,8 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         for (const label of labels) {
           if (!label.button) continue;
           const angle = label.n.angle * Math.PI / 180;
-          const edgeX = centerX + Math.cos(angle) * radius;
-          const edgeY = centerY + Math.sin(angle) * radius;
+          const edgeX = centerX + Math.cos(angle) * baseRadius;
+          const edgeY = centerY + Math.sin(angle) * baseRadius;
           const left = label.n.side === "left" ? edgeX + 14 - label.width : edgeX - 14;
           label.button.style.left = `${Math.max(8, Math.min(width - label.width - 8, left))}px`;
           label.button.style.top = `${Math.max(24, Math.min(labelBottom - label.height, edgeY - label.height / 2))}px`;
@@ -246,26 +258,17 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       ctx.closePath();
       ctx.stroke();
 
-      // Smooth pointer parallax interpolation
-      pointerRef.current.currX +=
-        (pointerRef.current.targetX - pointerRef.current.currX) * pointerBlend;
-      pointerRef.current.currY +=
-        (pointerRef.current.targetY - pointerRef.current.currY) * pointerBlend;
-
-      const yaw = angle + pointerRef.current.currX * 0.35;
-      const pitch = 0.28 + pointerRef.current.currY * 0.22;
-      const cosYaw = Math.cos(yaw);
-      const sinYaw = Math.sin(yaw);
-      const cosPitch = Math.cos(pitch);
-      const sinPitch = Math.sin(pitch);
+      const { x: qx, y: qy, z: qz, w: qw } = spin;
+      const xx = 1 - 2 * (qy * qy + qz * qz), xy = 2 * (qx * qy - qz * qw), xz = 2 * (qx * qz + qy * qw);
+      const yx = 2 * (qx * qy + qz * qw), yy = 1 - 2 * (qx * qx + qz * qz), yz = 2 * (qy * qz - qx * qw);
+      const zx = 2 * (qx * qz - qy * qw), zy = 2 * (qy * qz + qx * qw), zz = 1 - 2 * (qx * qx + qy * qy);
 
       // Project 3D nodes into 2D view space
       for (let i = 0; i < NODE_COUNT; i++) {
         const n = BASE_NODES[i];
-        const x1 = n.x * cosYaw - n.z * sinYaw;
-        const z1 = n.x * sinYaw + n.z * cosYaw;
-        const y2 = n.y * cosPitch - z1 * sinPitch;
-        const z2 = n.y * sinPitch + z1 * cosPitch;
+        const x1 = n.x * xx + n.y * xy + n.z * xz;
+        const y2 = n.x * yx + n.y * yy + n.z * yz;
+        const z2 = n.x * zx + n.y * zy + n.z * zz;
 
         const perspective = 1 + z2 * 0.09;
         const pt = projected[i];
@@ -372,19 +375,96 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       }
       ctx.globalAlpha = 1;
 
+      if (spin.charge >= 1 && !bursting) {
+        bursting = true;
+        spin.dragging = false;
+        activePointer = null;
+        container.dataset.spinState = "bursting";
+        const bounds = stage.getBoundingClientRect();
+        window.dispatchEvent(new CustomEvent<GlobeBurst>("muaz-globe-burst", { detail: {
+          centerX: bounds.left + centerX, centerY: bounds.top + centerY, radius,
+          points: projected.map(point => ({ x: bounds.left + point.x, y: bounds.top + point.y, z: point.z })),
+          edges: EDGES,
+        } }));
+        return;
+      }
+
       // Schedule next frame when motion is enabled and visible
-      if (!isPaused && !motion.matches && visible && !document.hidden) {
+      if (!bursting && !isPaused && !motion.matches && visible && !document.hidden) {
         lastFrame = timestamp;
         frame = requestAnimationFrame(draw);
       }
     };
 
     const restart = () => {
+      if (bursting) return;
       cancelAnimationFrame(frame);
       lastFrame = 0;
       draw();
     };
-    motionControlRef.current = (value) => { isPaused = value; restart(); };
+    const cancelDrag = () => {
+      const pointer = activePointer;
+      activePointer = null;
+      spin.dragging = false;
+      spin.velocityX = spin.velocityY = 0;
+      if (pointer !== null && grab.hasPointerCapture(pointer)) grab.releasePointerCapture(pointer);
+    };
+    const onDown = (event: PointerEvent) => {
+      if (bursting || activePointer !== null || !event.isPrimary || event.button !== 0) return;
+      event.preventDefault();
+      grab.focus({ preventScroll: true });
+      grab.setPointerCapture(event.pointerId);
+      activePointer = event.pointerId;
+      spin.dragging = spin.interacted = true;
+      spin.velocityX = spin.velocityY = 0;
+      lastX = event.clientX; lastY = event.clientY; lastMove = performance.now();
+      radiusAtGrab = Math.min(stage.clientWidth / 2.35, stage.clientHeight * 0.48);
+      container.dataset.spinState = "dragging";
+      router.prefetch("/projects");
+    };
+    const onMove = (event: PointerEvent) => {
+      if (event.pointerId !== activePointer || bursting) return;
+      const now = performance.now(), dt = Math.max(1 / 240, (now - lastMove) / 1000);
+      const dx = -(event.clientY - lastY) * 1.35 / radiusAtGrab;
+      const dy = (event.clientX - lastX) * 1.35 / radiusAtGrab;
+      rotateGlobe(spin, dx, dy);
+      const limit = Math.max(1, Math.hypot(dx / dt, dy / dt) / 14);
+      const blend = 1 - Math.exp(-dt / 0.045);
+      spin.velocityX += (dx / dt / limit - spin.velocityX) * blend;
+      spin.velocityY += (dy / dt / limit - spin.velocityY) * blend;
+      lastX = event.clientX; lastY = event.clientY; lastMove = now;
+      if (isPaused || motion.matches) draw();
+    };
+    const onUp = (event: PointerEvent) => {
+      if (event.pointerId !== activePointer) return;
+      const stale = Math.max(0, performance.now() - lastMove - 50) / 1000;
+      spin.velocityX *= Math.exp(-12 * stale); spin.velocityY *= Math.exp(-12 * stale);
+      spin.dragging = false;
+      activePointer = null;
+      if (grab.hasPointerCapture(event.pointerId)) grab.releasePointerCapture(event.pointerId);
+      container.dataset.spinState = spin.charge > 0.06 ? "charging" : "idle";
+    };
+    const onCancel = (event: PointerEvent) => { if (event.pointerId === activePointer) cancelDrag(); };
+    const onKey = (event: KeyboardEvent) => {
+      if (bursting) return;
+      if (event.key === "Enter" || event.key === " ") {
+        event.preventDefault(); router.push("/projects", { transitionTypes: ["site-nav"] });
+      } else if (["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown"].includes(event.key)) {
+        event.preventDefault();
+        const x = event.key === "ArrowUp" ? 0.16 : event.key === "ArrowDown" ? -0.16 : 0;
+        const y = event.key === "ArrowRight" ? 0.16 : event.key === "ArrowLeft" ? -0.16 : 0;
+        rotateGlobe(spin, x, y);
+        if (isPaused || motion.matches) draw();
+      } else if (event.key === "Escape") { cancelDrag(); spin.charge = 0; }
+    };
+    grab.addEventListener("pointerdown", onDown);
+    grab.addEventListener("pointermove", onMove);
+    grab.addEventListener("pointerup", onUp);
+    grab.addEventListener("pointercancel", onCancel);
+    grab.addEventListener("lostpointercapture", onCancel);
+    grab.addEventListener("keydown", onKey);
+    window.addEventListener("blur", cancelDrag);
+    motionControlRef.current = (value) => { isPaused = value; if (value) cancelDrag(); restart(); };
     focusControlRef.current = restart;
 
     const observer = new IntersectionObserver(([entry]) => {
@@ -400,6 +480,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
 
     const handleVisibility = () => {
       if (document.hidden) {
+        cancelDrag();
         cancelAnimationFrame(frame);
       } else if (visible) {
         restart();
@@ -419,10 +500,17 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       window.removeEventListener("resize", restart);
       document.removeEventListener("visibilitychange", handleVisibility);
       motion.removeEventListener("change", restart);
+      grab.removeEventListener("pointerdown", onDown);
+      grab.removeEventListener("pointermove", onMove);
+      grab.removeEventListener("pointerup", onUp);
+      grab.removeEventListener("pointercancel", onCancel);
+      grab.removeEventListener("lostpointercapture", onCancel);
+      grab.removeEventListener("keydown", onKey);
+      window.removeEventListener("blur", cancelDrag);
       motionControlRef.current = null;
       focusControlRef.current = null;
     };
-  }, []);
+  }, [router]);
 
   return (
     <div
@@ -430,11 +518,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       className="network-visual interactive-network"
       data-motion={paused ? "paused" : "running"}
       data-network-mode={selected ?? "overview"}
-      style={{ touchAction: "pan-y" }}
-      onPointerMove={handlePointerMove}
-      onPointerLeave={handlePointerLeave}
-      onPointerUp={handlePointerLeave}
-      onPointerCancel={handlePointerLeave}
+      data-spin-state="idle"
       onKeyDown={(e) => {
         if (e.key === "Escape") setSelected(null);
       }}
@@ -443,11 +527,20 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         <span>{hero.visualCaption}</span>
         <span className="mint">{hero.visualHint}</span>
       </div>
-      <canvas
-        ref={canvasRef}
-        aria-label={selected ? `${node?.label ?? selected}: interactive focus mode` : "Animated interconnected spherical network"}
-        role="img"
-      />
+      <div className="globe-hint mono" id="globe-instructions">
+        <span>Drag to spin<span className="globe-fast-hint"> · faster to</span></span>
+        <Link href="/projects" aria-label="Explore all projects">explore projects ↗</Link>
+        <span className="globe-charge-track" aria-hidden="true" />
+        <span className="sr-only">Use arrow keys to rotate the globe, or Enter to open projects.</span>
+      </div>
+      <div ref={stageRef} className="globe-stage">
+        <canvas
+          ref={canvasRef}
+          aria-label={selected ? `${node?.label ?? selected}: interactive focus mode` : "Animated interconnected spherical network"}
+          role="img"
+        />
+        <button ref={grabRef} className="globe-grab" type="button" aria-label="Spin the globe" aria-describedby="globe-instructions" />
+      </div>
       {networkNodes.map((n) => (
         <button
           type="button"
