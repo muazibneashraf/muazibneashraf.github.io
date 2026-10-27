@@ -60,6 +60,26 @@ interface SynapticRipple {
   isCyan: boolean;
 }
 
+interface SatelliteRelay {
+  radiusMult: number;
+  angle: number;
+  speed: number;
+  tiltX: number;
+  tiltZ: number;
+  isCyan: boolean;
+  targetHubIdx: number;
+  pingPhase: number;
+}
+
+interface SpaceDust {
+  x: number;
+  y: number;
+  z: number;
+  size: number;
+  alpha: number;
+  speed: number;
+}
+
 export function NetworkVisual({ projects, hero, identity }: { projects: Project[]; hero: HeroSettings; identity: SiteContent["identity"] }) {
   const router = useRouter();
   const networkNodes = NODE_LAYOUTS.map(node => ({...node, label: hero.nodes.find(item => item.id === node.focus)?.label ?? "", preferred: hero.nodes.find(item => item.id === node.focus)?.projectId ?? ""}));
@@ -161,6 +181,28 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       active: false,
       isCyan: i % 2 === 0,
     }));
+
+    // Orbital satellite relays and deep space dust particles
+    const satellites: SatelliteRelay[] = [
+      { radiusMult: 1.22, angle: 0.8, speed: 0.0035, tiltX: -0.42, tiltZ: 0.25, isCyan: true, targetHubIdx: 12, pingPhase: 0 },
+      { radiusMult: 1.28, angle: 3.2, speed: -0.0028, tiltX: 0.5, tiltZ: -0.38, isCyan: false, targetHubIdx: 60, pingPhase: 2.1 },
+      { radiusMult: 1.18, angle: 4.9, speed: 0.0032, tiltX: -0.18, tiltZ: 0.65, isCyan: true, targetHubIdx: 108, pingPhase: 4.3 },
+    ];
+
+    const DUST_COUNT = 32;
+    const spaceDust: SpaceDust[] = Array.from({ length: DUST_COUNT }, (_, i) => {
+      const theta = (i * 2.399963) % (Math.PI * 2);
+      const phi = Math.acos(1 - 2 * ((i + 0.5) / DUST_COUNT));
+      const r = 1.08 + (i % 7) * 0.055;
+      return {
+        x: Math.sin(phi) * Math.cos(theta) * r,
+        y: Math.sin(phi) * Math.sin(theta) * r,
+        z: Math.cos(phi) * r,
+        size: 0.7 + (i % 3) * 0.35,
+        alpha: 0.15 + (i % 5) * 0.08,
+        speed: 0.0008 + (i % 4) * 0.0004,
+      };
+    });
 
     const draw = (timestamp = 0) => {
       const width = stage.clientWidth;
@@ -267,7 +309,7 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         containerRef.current?.setAttribute("data-labels-ready", "true");
       }
 
-      // Technical orbital path framing the spherical cluster (back arc)
+      // Dual technical orbital paths framing the spherical cluster (back arcs)
       ctx.globalAlpha = 0.16;
       ctx.strokeStyle = cyan;
       ctx.lineWidth = 0.75;
@@ -275,6 +317,13 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       ctx.lineJoin = "round";
       ctx.beginPath();
       ctx.ellipse(centerX, centerY, radius * 1.18, radius * 0.4, -0.42, Math.PI, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.globalAlpha = 0.12;
+      ctx.strokeStyle = lilac;
+      ctx.lineWidth = 0.65;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radius * 1.25, radius * 0.44, 0.52, Math.PI, Math.PI * 2);
       ctx.stroke();
       ctx.globalAlpha = 1;
 
@@ -299,6 +348,123 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       const xx = 1 - 2 * (qy * qy + qz * qz), xy = 2 * (qx * qy - qz * qw), xz = 2 * (qx * qz + qy * qw);
       const yx = 2 * (qx * qy + qz * qw), yy = 1 - 2 * (qx * qx + qz * qz), yz = 2 * (qy * qz - qx * qw);
       const zx = 2 * (qx * qz - qy * qw), zy = 2 * (qy * qz + qx * qw), zz = 1 - 2 * (qx * qx + qy * qy);
+
+      // Render ambient micro-dust particles in 3D space
+      ctx.fillStyle = cyan;
+      for (let d = 0; d < DUST_COUNT; d++) {
+        const dust = spaceDust[d];
+        if (!isPaused && !motion.matches) {
+          dust.x += dust.speed * delta * 0.2;
+          if (dust.x > 1.5) dust.x = -1.5;
+        }
+
+        const dx = dust.x * xx + dust.y * xy + dust.z * xz;
+        const dy = dust.x * yx + dust.y * yy + dust.z * yz;
+        const dz = dust.x * zx + dust.y * zy + dust.z * zz;
+
+        const persp = Math.sqrt(15) / (4 - dz);
+        const px = centerX + dx * radius * persp;
+        const py = centerY + dy * radius * persp;
+
+        if (dz > -0.6) {
+          ctx.globalAlpha = dust.alpha * Math.min(1, (dz + 0.8) * 0.65);
+          ctx.beginPath();
+          ctx.arc(px, py, dust.size * (persp > 1 ? 1.1 : 0.9), 0, Math.PI * 2);
+          ctx.fill();
+        }
+      }
+
+      // Compute 3D satellite positions and project to screen space
+      const satProjected = satellites.map((sat) => {
+        if (!isPaused && !motion.matches) {
+          sat.angle += sat.speed * delta;
+          sat.pingPhase += 0.04 * delta;
+        }
+
+        const cosA = Math.cos(sat.angle), sinA = Math.sin(sat.angle);
+        const cosT = Math.cos(sat.tiltX), sinT = Math.sin(sat.tiltX);
+        const x0 = cosA * sat.radiusMult;
+        const y0 = sinA * cosT * sat.radiusMult;
+        const z0 = sinA * sinT * sat.radiusMult;
+
+        const x1 = x0 * xx + y0 * xy + z0 * xz;
+        const y2 = x0 * yx + y0 * yy + z0 * yz;
+        const z2 = x0 * zx + y0 * zy + z0 * zz;
+
+        const vx0 = -sinA, vy0 = cosA * cosT, vz0 = cosA * sinT;
+        const vx1 = vx0 * xx + vy0 * xy + vz0 * xz;
+        const vy2 = vx0 * yx + vy0 * yy + vz0 * yz;
+        const wLen = Math.hypot(-vy2, vx1) || 1;
+        const wx = -vy2 / wLen, wy = vx1 / wLen;
+
+        const persp = Math.sqrt(15) / (4 - z2);
+        const sx = centerX + x1 * radius * persp;
+        const sy = centerY + y2 * radius * persp;
+
+        return { sat, sx, sy, sz: z2, wx, wy };
+      });
+
+      const drawSatellite = (item: (typeof satProjected)[0]) => {
+        const { sat, sx, sy, sz, wx, wy } = item;
+        const color = sat.isCyan ? cyan : lilac;
+        const depth = Math.min(1, Math.max(0, (sz + 1.2) * 0.45));
+
+        // Solar array wings
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.0;
+        ctx.globalAlpha = 0.35 + depth * 0.45;
+        ctx.beginPath();
+        ctx.moveTo(sx - wx * 4.5, sy - wy * 4.5);
+        ctx.lineTo(sx + wx * 4.5, sy + wy * 4.5);
+        ctx.stroke();
+
+        // Central satellite nucleus
+        ctx.globalAlpha = 0.9 * depth;
+        ctx.fillStyle = ink;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 2.2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.fillStyle = color;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 1.4, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Pulsing telemetry radio beacon
+        const beaconPulse = Math.sin(sat.pingPhase * 2) * 0.5 + 0.5;
+        ctx.globalAlpha = (0.15 + 0.25 * beaconPulse) * depth;
+        ctx.beginPath();
+        ctx.arc(sx, sy, 4.5 + beaconPulse * 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        // Laser telemetry beam downlink to surface hub
+        if (sz > -0.15) {
+          const hubPt = projected[sat.targetHubIdx];
+          if (hubPt && hubPt.z > -0.1) {
+            ctx.strokeStyle = color;
+            ctx.lineWidth = 0.75;
+            ctx.globalAlpha = (0.12 + 0.28 * beaconPulse) * Math.min(1, (sz + 0.4) * 1.1);
+            ctx.setLineDash([3, 4]);
+            ctx.beginPath();
+            ctx.moveTo(sx, sy);
+            ctx.lineTo(hubPt.x, hubPt.y);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Data reception point on target hub
+            ctx.fillStyle = color;
+            ctx.globalAlpha = 0.3 * beaconPulse;
+            ctx.beginPath();
+            ctx.arc(hubPt.x, hubPt.y, 3.2 + beaconPulse * 2, 0, Math.PI * 2);
+            ctx.fill();
+          }
+        }
+      };
+
+      // Draw back-satellites before the globe
+      for (const item of satProjected) {
+        if (item.sz <= 0) drawSatellite(item);
+      }
 
       // Project 3D nodes into 2D view space
       for (let i = 0; i < NODE_COUNT; i++) {
@@ -541,13 +707,25 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
         }
       }
 
-      // Technical orbital path framing the spherical cluster (front arc)
+      // Dual technical orbital paths framing the spherical cluster (front arcs)
       ctx.globalAlpha = 0.18;
       ctx.strokeStyle = cyan;
       ctx.lineWidth = 0.75;
       ctx.beginPath();
       ctx.ellipse(centerX, centerY, radius * 1.18, radius * 0.4, -0.42, 0, Math.PI);
       ctx.stroke();
+
+      ctx.globalAlpha = 0.14;
+      ctx.strokeStyle = lilac;
+      ctx.lineWidth = 0.65;
+      ctx.beginPath();
+      ctx.ellipse(centerX, centerY, radius * 1.25, radius * 0.44, 0.52, 0, Math.PI);
+      ctx.stroke();
+
+      // Draw front-satellites after the globe
+      for (const item of satProjected) {
+        if (item.sz > 0) drawSatellite(item);
+      }
       ctx.globalAlpha = 1;
 
       if (spin.charge >= 1 && !bursting) {
@@ -585,29 +763,80 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       lastFrame = 0;
       draw();
     };
+    let isTouch = false;
+    let touchStartX = 0;
+    let touchStartY = 0;
+    let touchDecided = false;
+
     const cancelDrag = () => {
       const pointer = activePointer;
       activePointer = null;
       spin.dragging = false;
       spin.velocityX = spin.velocityY = 0;
-      if (pointer !== null && grab.hasPointerCapture(pointer)) grab.releasePointerCapture(pointer);
+      isTouch = false;
+      touchDecided = false;
+      if (pointer !== null && grab.hasPointerCapture(pointer)) {
+        try { grab.releasePointerCapture(pointer); } catch {}
+      }
+      container.dataset.spinState = "idle";
     };
     const onDown = (event: PointerEvent) => {
       if (bursting || activePointer !== null || !event.isPrimary || event.button !== 0) return;
-      event.preventDefault();
-      // Pointer capture does not need DOM focus or a persistent focus outline.
-      if (document.activeElement === grab) grab.blur();
-      grab.setPointerCapture(event.pointerId);
+      isTouch = event.pointerType === "touch";
       activePointer = event.pointerId;
-      spin.dragging = spin.interacted = true;
-      spin.velocityX = spin.velocityY = 0;
-      lastX = event.clientX; lastY = event.clientY; lastMove = performance.now();
+      lastX = event.clientX;
+      lastY = event.clientY;
+      lastMove = performance.now();
       radiusAtGrab = Math.min(stage.clientWidth / 2.35, stage.clientHeight * 0.48);
-      container.dataset.spinState = "dragging";
-      router.prefetch("/projects");
+
+      if (document.activeElement === grab) grab.blur();
+
+      if (!isTouch) {
+        event.preventDefault();
+        try { grab.setPointerCapture(event.pointerId); } catch {}
+        spin.dragging = spin.interacted = true;
+        spin.velocityX = spin.velocityY = 0;
+        container.dataset.spinState = "dragging";
+        router.prefetch("/projects");
+      } else {
+        // Mobile touch: wait for initial gesture displacement to differentiate
+        // vertical thumb scrolling from horizontal globe spinning
+        touchStartX = event.clientX;
+        touchStartY = event.clientY;
+        touchDecided = false;
+        spin.dragging = false;
+      }
     };
     const onMove = (event: PointerEvent) => {
       if (event.pointerId !== activePointer || bursting) return;
+
+      if (isTouch && !touchDecided) {
+        const dxTotal = event.clientX - touchStartX;
+        const dyTotal = event.clientY - touchStartY;
+        const dist = Math.hypot(dxTotal, dyTotal);
+
+        if (dist > 7) {
+          touchDecided = true;
+          // Predominantly vertical thumb scroll gesture: let browser scroll the page!
+          if (Math.abs(dyTotal) > Math.abs(dxTotal) * 1.15) {
+            cancelDrag();
+            return;
+          } else {
+            // Horizontal swipe gesture: intentional globe rotation!
+            try { grab.setPointerCapture(event.pointerId); } catch {}
+            spin.dragging = spin.interacted = true;
+            spin.velocityX = spin.velocityY = 0;
+            container.dataset.spinState = "dragging";
+            router.prefetch("/projects");
+          }
+        } else {
+          return;
+        }
+      }
+
+      if (!spin.dragging) return;
+      if (isTouch && event.cancelable) event.preventDefault();
+
       const now = performance.now(), dt = Math.max(1 / 240, (now - lastMove) / 1000);
       const dx = -(event.clientY - lastY) * 1.35 / radiusAtGrab;
       const dy = (event.clientX - lastX) * 1.35 / radiusAtGrab;
@@ -625,7 +854,11 @@ export function NetworkVisual({ projects, hero, identity }: { projects: Project[
       spin.velocityX *= Math.exp(-12 * stale); spin.velocityY *= Math.exp(-12 * stale);
       spin.dragging = false;
       activePointer = null;
-      if (grab.hasPointerCapture(event.pointerId)) grab.releasePointerCapture(event.pointerId);
+      isTouch = false;
+      touchDecided = false;
+      if (grab.hasPointerCapture(event.pointerId)) {
+        try { grab.releasePointerCapture(event.pointerId); } catch {}
+      }
       container.dataset.spinState = spin.charge > 0.06 ? "charging" : "idle";
     };
     const onCancel = (event: PointerEvent) => { if (event.pointerId === activePointer) cancelDrag(); };
