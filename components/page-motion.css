@@ -15,7 +15,7 @@
 [data-profile-visible="true"] .education-entry:nth-child(1)::before { animation-delay: .9s; }
 [data-profile-visible="true"] .education-entry:nth-child(2)::before { animation-delay: 1.3s; }
 .education-journey > p { font-size: 12px; color: var(--muted); margin: 8px 0; }
-.education-journey > p.mint { color: var(--accent); font-size: 15px; }
+.education-journey > p.mint { color: var(--accent); font-size: clamp(12.5px, 3.4vw, 15px); }
 @keyframes portrait-trace { from { stroke-dashoffset: 1; opacity: .25; } to { stroke-dashoffset: 0; opacity: .9; } }
 @keyframes education-line { to { transform: scaleY(1); } }
 @keyframes education-milestone { from { background: var(--surface); transform: scale(.7); } to { background: var(--accent); transform: scale(1); } }

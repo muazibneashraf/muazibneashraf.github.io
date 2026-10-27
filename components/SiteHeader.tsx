@@ -9,10 +9,10 @@ import { BrandLogo } from "./BrandLogo";
 function scrollToSection(hash: string) {
   const target = document.getElementById(hash.slice(1));
   if (!target) return false;
-  const heading = target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target;
+  const scrollTarget = hash === "#about" ? target : (target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target);
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height ?? 80;
   window.scrollTo({
-    top: Math.max(0, heading.getBoundingClientRect().top + window.scrollY - headerHeight - 24),
+    top: Math.max(0, scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - 16),
     behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
   });
   return true;

@@ -133,12 +133,14 @@ export function AboutSection({
           <div className="education-journey">
           <div className="education-degree-row education-milestone">
             <h3>{education.Degree}</h3>
-            <span className="degree-date mono">{education.Graduation}</span>
           </div>
           <p className="mint">
             {education.Department}
           </p>
-          <p>{education.University || content.identity.university}</p>
+          <div className="education-institution-row">
+            <p>{education.University || content.identity.university}</p>
+            {education.Graduation && <span className="degree-date mono">{education.Graduation}</span>}
+          </div>
           {content.about.education
             .filter(
               (item) =>
