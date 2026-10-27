@@ -11,9 +11,13 @@ export function drawNeuralSurface(ctx: CanvasRenderingContext2D, x: number, y: n
   ctx.beginPath(); ctx.arc(x, y, radius * 1.1, 0, Math.PI * 2); ctx.fill();
   const material = ctx.createRadialGradient(x - radius * 0.38, y - radius * 0.42, 0,
     x + radius * 0.18, y + radius * 0.2, radius * 1.22);
-  material.addColorStop(0, theme.blue); material.addColorStop(0.52, theme.surface);
-  material.addColorStop(0.9, theme.bg); material.addColorStop(1, theme.bg);
-  ctx.globalAlpha = 0.74 * opacity; ctx.fillStyle = material;
+  material.addColorStop(0, theme.blue); material.addColorStop(0.62, theme.surface);
+  material.addColorStop(1, theme.surface);
+  ctx.globalAlpha = 0.42 * opacity; ctx.fillStyle = material;
+  ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
+  const glass = ctx.createRadialGradient(x - radius * 0.12, y - radius * 0.18, radius * 0.4, x, y, radius);
+  glass.addColorStop(0, "transparent"); glass.addColorStop(0.72, theme.blue); glass.addColorStop(1, theme.accent);
+  ctx.globalAlpha = 0.055 * opacity; ctx.fillStyle = glass;
   ctx.beginPath(); ctx.arc(x, y, radius, 0, Math.PI * 2); ctx.fill();
   const light = ctx.createRadialGradient(x - radius * 0.4, y - radius * 0.45, 0, x, y, radius);
   light.addColorStop(0, theme.accent); light.addColorStop(0.65, "transparent"); light.addColorStop(1, "transparent");
