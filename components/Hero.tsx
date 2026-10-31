@@ -116,8 +116,9 @@ export function Hero({ content }: { content: SiteContent }) {
     const arrivedViaClientNavigation = navigation && new URL(navigation.name).pathname !== "/";
     const isLegacyReload = (window.performance as unknown as { navigation?: { type?: number } })?.navigation?.type === 1;
     const isRefresh = navigation?.type === "reload" || isLegacyReload;
+    const hasSectionTarget = Boolean(location.hash && location.hash !== "#top" && document.getElementById(location.hash.slice(1)));
     if (isRefresh) document.documentElement.dataset.introBypass = "true";
-    if (documentIntroCompleted || isRefresh || arrivedViaClientNavigation || motion.matches || new URLSearchParams(location.search).has("backgroundDebug")) {
+    if (documentIntroCompleted || isRefresh || arrivedViaClientNavigation || hasSectionTarget || motion.matches || new URLSearchParams(location.search).has("backgroundDebug")) {
       schedule(finishIntro, 0);
     } else {
       history.scrollRestoration = "manual";

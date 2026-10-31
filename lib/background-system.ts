@@ -22,6 +22,25 @@ export function damp(current: number, target: number, rate: number, dt: number) 
   return current + (target - current) * -Math.expm1(-rate * dt);
 }
 
+export function createScrollMotion(position: number) {
+  return { position, velocity: 0 };
+}
+
+// Critically damped: retargeting preserves velocity, including on wheel reversals.
+// This follows native scrolling; it never changes the document's scroll position.
+export function advanceScrollMotion(state: ReturnType<typeof createScrollMotion>, target: number, seconds: number) {
+  const dt = Math.max(0, Math.min(seconds, .05)), omega = 8;
+  const offset = state.position - target;
+  const impulse = (state.velocity + omega * offset) * dt;
+  const decay = Math.exp(-omega * dt);
+  state.position = target + (offset + impulse) * decay;
+  state.velocity = (state.velocity - omega * impulse) * decay;
+}
+
+export function easeVisibility(current: number, target: number, seconds: number) {
+  return damp(current, target, target < current ? 9 : 3, Math.max(0, Math.min(seconds, .05)));
+}
+
 export function createBackgroundSystem() {
   let seed = 0x05032026;
   const random = () => {
@@ -121,6 +140,8 @@ export interface NeuroNode {
   homeY: number;
   x: number;
   y: number;
+  velocityX: number;
+  velocityY: number;
   screenX: number;
   screenY: number;
   phase: number;
@@ -186,6 +207,8 @@ export function createNeuroField(): NeuroField {
       homeY,
       x: homeX,
       y: homeY,
+      velocityX: 0,
+      velocityY: 0,
       screenX: 0,
       screenY: 0,
       phase: random() * Math.PI * 2,
@@ -233,7 +256,8 @@ export function advanceNeuroField(
   field: NeuroField,
   seconds: number,
   clock: number,
-  mobile: boolean
+  mobile: boolean,
+  section: NarrativeSection = "hero"
 ) {
   const dt = Math.max(0, Math.min(seconds, 0.05));
 
@@ -242,8 +266,17 @@ export function advanceNeuroField(
     const w2 = Math.sin(node.homeX * 2.4 - node.homeY * 3.2 + clock * 0.55);
     const waveVal = (w1 * 0.58 + w2 * 0.42 + 1) * 0.5;
 
-    node.x = node.homeX + Math.sin(clock * node.speed + node.phase) * 0.010 * node.depth + Math.cos(w1) * 0.005;
-    node.y = node.homeY + Math.cos(clock * node.speed * 0.85 + node.phase) * 0.013 * node.depth + Math.sin(w2) * 0.005;
+    const target = neuralSectionTarget(node, section, mobile);
+    const targetX = target.x + Math.sin(clock * node.speed + node.phase) * .010 * node.depth;
+    const targetY = target.y + Math.cos(clock * node.speed * .85 + node.phase) * .013 * node.depth;
+    const omega = 4.8, decay = Math.exp(-omega * dt);
+    const offsetX = node.x - targetX, offsetY = node.y - targetY;
+    const impulseX = (node.velocityX + omega * offsetX) * dt;
+    const impulseY = (node.velocityY + omega * offsetY) * dt;
+    node.x = targetX + (offsetX + impulseX) * decay;
+    node.y = targetY + (offsetY + impulseY) * decay;
+    node.velocityX = (node.velocityX - omega * impulseX) * decay;
+    node.velocityY = (node.velocityY - omega * impulseY) * decay;
     node.brightness = 0.32 + waveVal * 0.68;
   }
 
@@ -256,5 +289,27 @@ export function advanceNeuroField(
       }
     }
   }
+}
+
+// A fixed population travels between compositions; its identities and signals persist.
+export function neuralSectionTarget(node: Pick<NeuroNode, "id" | "homeX" | "homeY">, section: NarrativeSection, mobile: boolean) {
+  const id = node.id, angle = id * 2.3999632297;
+  if (section === "skills" || section === "capabilities") {
+    const layer = Math.floor(id / 6), row = id % 6;
+    return { x: .12 + layer * .125, y: .28 + row * .09 + Math.sin(layer * .9) * .035 };
+  }
+  if (section === "research" || section === "trace") {
+    const stage = Math.floor(id / 7), port = id % 7;
+    return { x: .1 + stage * .16, y: .48 + (port - 3) * .037 + Math.sin(stage * 1.2) * .12 };
+  }
+  if (section === "work") {
+    const cluster = id % 4, ring = .035 + Math.floor(id / 4) * .006;
+    return { x: (cluster % 2 ? .79 : .2) + Math.cos(angle) * ring, y: (cluster < 2 ? .23 : .77) + Math.sin(angle) * ring * (mobile ? .8 : 1.2) };
+  }
+  if (section === "contact") {
+    const branch = id % 7, step = Math.floor(id / 7) / 5;
+    return { x: .18 + step * .61, y: .5 + (branch - 3) * .092 * (1 - step * .9) };
+  }
+  return { x: node.homeX, y: node.homeY };
 }
 

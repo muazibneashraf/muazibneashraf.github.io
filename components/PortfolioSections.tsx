@@ -10,7 +10,7 @@ import { CopyEmail } from "./CopyEmail";
 import { AboutDetails } from "./AboutDetails";
 import { CroppedImage } from "./CroppedImage";
 import { ProfileMotion, PortraitFrameTrace } from "./ProfileMotion";
-import { SkillMotion } from "./SkillMotion";
+import { SkillEvidence } from "./SkillEvidence";
 import { ResearchSequence } from "./ResearchSequence";
 
 export function SectionHeading({
@@ -180,23 +180,7 @@ export function SkillsSection({ content }: { content: SiteContent }) {
         title={content.sections.skills.title}
       />
       {content.sections.skills.intro && <p className="section-lede">{content.sections.skills.intro}</p>}
-      <div className="skills-grid">
-        {groups
-          .filter((group) => group.items.length)
-          .map((group, index) => (
-            <div className="skill-group" key={group.id}>
-              <SkillMotion kind={group.id} index={index} />
-              <h3>{group.name}</h3>
-              <div className="skill-items">
-                {group.items.map((skill) => (
-                  <span key={skill}>
-                    {skill}
-                  </span>
-                ))}
-              </div>
-            </div>
-          ))}
-      </div>
+      <SkillEvidence groups={groups} projects={content.projects.map(({ id, slug, title, category, stack, walkthroughSteps }) => ({ id, slug, title, category, stack, walkthroughSteps: walkthroughSteps?.map(({ tech }) => ({ tech })) }))} />
     </section>
   );
 }
@@ -206,10 +190,10 @@ export function ResearchSection({ content }: { content: SiteContent }) {
   if (!thesis) return null;
   return (
     <section id="research" className="section research-section wrap">
-      <SectionHeading eyebrow={content.sections.research.eyebrow} title={content.sections.research.title} />
-      {content.sections.research.intro && <p className="section-lede">{content.sections.research.intro}</p>}
       <div className="research-panel">
         <div className="research-copy">
+          <SectionHeading eyebrow={content.sections.research.eyebrow} title={content.sections.research.title} />
+          {content.sections.research.intro && <p className="section-lede">{content.sections.research.intro}</p>}
           <span className="research-badge mono">{content.sections.research.badge}</span>
           <h3>{thesis.title}</h3>
           <p className="research-subtitle">

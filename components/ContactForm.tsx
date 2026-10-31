@@ -4,6 +4,7 @@ import { useState, type FormEvent, type ReactNode } from "react";
 import { gmailComposeUrl } from "@/lib/gmail";
 import type { ContentSections } from "@/lib/types";
 import "./page-motion.css";
+import "./neural-finale.css";
 
 function ContactField({ children }: { children: ReactNode }) {
   return <span className="contact-field">
@@ -88,11 +89,13 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
       if (response.ok && (result?.ok || result?.success)) {
         form.reset();
         setStatus("sent");
+        window.dispatchEvent(new Event("muaz-contact-delivered"));
       } else {
         const fallbackRes = await formSubmitPromise;
         if (fallbackRes && fallbackRes.ok) {
           form.reset();
           setStatus("sent");
+          window.dispatchEvent(new Event("muaz-contact-delivered"));
         } else {
           setStatus("error");
         }
@@ -158,6 +161,12 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
         <span key={status} className="contact-submit-label">{status === "sending" ? copy.sendingLabel : copy.submitLabel}</span>
         <SendIndicator status={status} />
       </button>
+      <div className="contact-feedback">
+      {status === "sent" && <svg className="contact-success-route" viewBox="0 0 600 64" preserveAspectRatio="none" aria-hidden="true">
+        <path className="delivery-track" d="M580 0V12Q580 24 568 24H28Q12 24 12 40V49H29" />
+        <path className="delivery-packet" d="M580 0V12Q580 24 568 24H28Q12 24 12 40V49H29" pathLength="1" />
+        <circle className="delivery-receiver" cx="12" cy="49" r="4" />
+      </svg>}
       <p className="form-status" aria-live="polite">
         {status === "sent" && <>
           <svg className="contact-status-icon" viewBox="0 0 20 20" aria-hidden="true"><path className="contact-confirmation" pathLength="1" d="m4 10 4 4L16 6" /></svg>
@@ -179,6 +188,7 @@ export function ContactForm({ email, copy }: { email: string; copy: ContentSecti
           </>
         )}
       </p>
+      </div>
     </form>
   );
 }

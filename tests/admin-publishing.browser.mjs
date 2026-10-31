@@ -39,7 +39,7 @@ try{
  for(const selector of ['.site-header .nav-resume','.hero .button.secondary','.education-card .text-link']){
   await page.locator(selector).click();await page.locator('dialog[open]').waitFor();
   assert.equal(await page.locator('dialog .pdf-preview').getAttribute('data-pdf-url'),url);
-  await page.locator('dialog .pdf-preview-viewport[aria-busy="false"]').waitFor();
+  await page.locator('dialog .pdf-page[aria-busy="false"] canvas').first().waitFor();
   assert.equal(await page.locator('dialog object, dialog iframe, dialog embed').count(),0);
   await page.getByRole('button',{name:'Close résumé',exact:true}).click();
  }

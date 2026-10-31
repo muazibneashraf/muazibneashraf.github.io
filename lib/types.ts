@@ -14,7 +14,7 @@ export type SiteSettings = {
   mark: string; markAccent: string; brand: string; brandAccent: string; title: string; description: string;
   githubUrl: string; githubLabel: string; linkedinLabel: string; emailLabel: string; backToTop: string;
   logoUrl: string; iconUrl: string; faviconUrl: string; logoCrop: ImageCrop; iconCrop: ImageCrop;
-  navigation: { about: string; projects: string; experience: string; capabilities: string; resume: string; contact: string };
+  navigation: { about: string; projects: string; skills: string; experience: string; capabilities: string; resume: string; contact: string };
 };
 export type HeroSettings = {
   primaryLabel: string; primaryUrl: string; resumeLabel: string; scrollLabel: string; marqueeLead: string; marqueeTrail: string;

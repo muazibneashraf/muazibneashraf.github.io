@@ -10,11 +10,13 @@ export function SiteFrame({
   content,
   children,
   openResume = false,
+  home = false,
 }: {
   content: SiteContent;
   children: ReactNode;
   hideFooterCallout?: boolean;
   openResume?: boolean;
+  home?: boolean;
 }) {
   const style = siteThemeStyle(content.theme);
   return (
@@ -24,11 +26,11 @@ export function SiteFrame({
       theme={content.theme}
       initiallyOpen={openResume}
     >
-      <div className="site-frame" style={style}>
+      <div className={`site-frame${home ? " site-frame--home" : ""}`} style={style}>
         <a className="skip-link" href="#main">
           Skip to content
         </a>
-        <SiteHeader site={content.site} />
+        <SiteHeader site={content.site} hasJobExperience={content.internship.items.length > 0} />
         <ViewTransition
           name="site-page"
           default="none"

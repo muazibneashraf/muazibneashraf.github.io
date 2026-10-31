@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "./intro.css";
+@import "./refinement.css";
 
 /* Shared palette. SiteFrame exposes the editable theme on the public site. */
 :root {
@@ -17,9 +18,11 @@
   --max-content-width: 1480px;
   --frame-gutter: clamp(16px, 2.5vw, 48px);
   --page-gutter: max(clamp(24px, 4vw, 48px), calc((100vw - var(--max-content-width)) / 2));
-  --font-body: var(--font-manrope, Arial), sans-serif;
-  --font-display: var(--font-space-grotesk, Arial), sans-serif;
-  --font-mono: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+  --font-body: var(--font-geist-sans), Arial, sans-serif;
+  --font-display: var(--font-geist-sans), Arial, sans-serif;
+  --font-mono: var(--font-geist-mono), Consolas, monospace;
+  --default-font-family: var(--font-geist-sans), Arial, sans-serif;
+  --default-mono-font-family: var(--font-geist-mono), Consolas, monospace;
   --header-height: 80px;
   --header-scroll-gap: 20px;
   --scroll-offset: calc(var(--header-height) + var(--header-scroll-gap));
@@ -293,7 +296,7 @@ section[id] { scroll-margin-top: 0; }
 .education-prior { border-top: 1px solid color-mix(in srgb, var(--line) 75%, transparent); margin-top: 24px; padding-top: 22px; }
 .education-entry > div { display: flex; justify-content: space-between; font-size: 12px; }
 .education-prior strong { font-weight: 500; }
-.education-prior > div span { color: var(--muted); font: 11px Consolas, monospace; }
+.education-prior > div span { color: var(--muted); font: 11px var(--font-mono); }
 .education-prior p { font-size: 11px; color: var(--muted); margin: 4px 0 20px; }
 .about-copy > p.about-eyebrow { color: var(--accent); font: 600 11px/1.75 var(--font-mono); letter-spacing: 2px; margin: 0 0 16px; }
 .about-toggle { display: flex; width: fit-content; min-height: 44px; margin-top: 24px; background: transparent; border: 0; padding: 0; font-family: var(--font-body); cursor: pointer; }
@@ -606,13 +609,13 @@ section[id] { scroll-margin-top: 0; }
 .contact-bottom { display: flex; justify-content: space-between; align-items: start; gap: 60px; }
 .contact-bottom > p { max-width: 490px; color: #d4e1ff; font-size: 14px; line-height: 1.85; margin: 0; }
 .contact-email { font-size: 19px; letter-spacing: -.5px; color: #fff; overflow-wrap: anywhere; }
-.copy-email { display: block; border: 0; background: none; color: #c5d9ff; font: 11px Consolas, monospace; padding: 10px 0; }
+.copy-email { display: block; border: 0; background: none; color: #c5d9ff; font: 11px var(--font-mono); padding: 10px 0; }
 .copy-email:hover { color: #fff; }
 .site-footer { background: var(--chrome-surface); display: flex; align-items: center; gap: 25px; padding: 28px var(--frame-gutter); position: relative; z-index: 1; border-top: 1px solid var(--line); color: var(--muted); font-size: 11px; }
 .site-footer p { margin-right: auto; }
 .site-footer a:hover { color: var(--accent); }
 .footer-brand { font-size: 19px; color: var(--ink); font-weight: 700; }
-.footer-location { font: 10px Consolas, monospace; }
+.footer-location { font: 10px var(--font-mono); }
 
 /* Archive, contact and project detail pages */
 .page-intro { padding-top: 75px; padding-bottom: 45px; }
@@ -633,7 +636,7 @@ section[id] { scroll-margin-top: 0; }
 .contact-details dl { display: grid; grid-template-columns: 1fr 1fr; gap: 0 24px; margin: 20px 0; }
 .contact-details dl > div { padding: 12px 0; border-top: 1px solid var(--line); }
 .contact-details dl > div:last-child { grid-column: 1 / -1; }
-.contact-details dt { font: 11px Consolas, monospace; color: var(--accent); margin-bottom: 6px; }
+.contact-details dt { font: 11px var(--font-mono); color: var(--accent); margin-bottom: 6px; }
 .contact-details dd { margin: 0; font-size: 14px; color: var(--muted); overflow-wrap: anywhere; }
 .contact-details dd a + a { margin-left: 25px; }
 .contact-form { padding: 32px; border: 1px solid var(--line); background: var(--surface); border-radius: 16px; align-self: start; }

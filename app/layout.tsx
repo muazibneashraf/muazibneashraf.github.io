@@ -10,17 +10,17 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-const spaceGrotesk = localFont({
-  src: "./fonts/space-grotesk-latin.woff2",
-  variable: "--font-space-grotesk",
-  weight: "300 700",
+const geistSans = localFont({
+  src: "./fonts/geist-sans-variable.woff2",
+  variable: "--font-geist-sans",
+  weight: "100 900",
   display: "block",
 });
 
-const manrope = localFont({
-  src: "./fonts/manrope-latin.woff2",
-  variable: "--font-manrope",
-  weight: "200 800",
+const geistMono = localFont({
+  src: "./fonts/geist-mono-variable.woff2",
+  variable: "--font-geist-mono",
+  weight: "100 900",
   display: "block",
 });
 
@@ -41,7 +41,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${spaceGrotesk.variable} ${manrope.variable}`}
+      className={`${geistSans.variable} ${geistMono.variable}`}
       suppressHydrationWarning
       style={{ colorScheme: "dark", backgroundColor: "#060913" }}
     >

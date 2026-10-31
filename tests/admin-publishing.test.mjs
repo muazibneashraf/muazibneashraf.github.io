@@ -19,6 +19,9 @@ test('authenticated résumé publishing and job edits reach the public website',
   assert.equal((await fetch(base+'/api/resume',{method:'POST'})).status,401);
   assert.equal((await fetch(base+'/api/resume?v=../../secret')).status,404);
   const original=await(await fetch(base+'/api/content')).json();
+  const emptyHome=await(await fetch(base)).text();
+  assert.doesNotMatch(emptyHome, /id="job-experience"|href="\/#job-experience"|>Experience<\/a>/, 'empty jobs stay out of the public home and navigation');
+  assert.equal(new URL((await fetch(base+'/experience')).url).pathname, '/', 'an empty job archive returns to the homepage');
   const login=await fetch(base+'/api/auth/login',{method:'POST',headers:{'content-type':'application/json'},body:JSON.stringify({password:'publishing-test'})});
   const cookie=login.headers.get('set-cookie').split(';')[0];
   const upload=async(bytes,name='updated-cv.pdf')=>{const form=new FormData();form.set('file',new Blob([bytes],{type:'application/pdf'}),name);return fetch(base+'/api/resume',{method:'POST',headers:{cookie},body:form});};
@@ -35,12 +38,16 @@ test('authenticated résumé publishing and job edits reach the public website',
   assert.equal((await fetch(base+'/api/content',{method:'PUT',headers:{cookie,'content-type':'application/json'},body:JSON.stringify(changed)})).status,200);
   for(const route of ['/','/experience']){
    const html=await(await fetch(base+route)).text();assert.match(html,/Verified Studio/);assert.match(html,/Built the verified public workflow/);assert.match(html,/Reliable delivery/);
+   assert.match(html, /job-experience/, 'admin-published jobs reveal the section and its navigation');
   }
   const legacy=await fetch(base+'/internship');assert.equal(legacy.status,200);assert.equal(new URL(legacy.url).pathname,'/experience');
   const resume=await(await fetch(base+'/resume')).text();assert.ok(resume.includes(`href="${url}"`));assert.ok(!resume.includes('src="/resume-preview.webp"'));
   const second=await upload(Buffer.concat([pdf,Buffer.from('\n%new version\n')]));const next=await second.json();assert.notEqual(next.url,url);
   assert.equal((await(await fetch(base+'/api/content')).json()).identity.resumeUrl,url,'second draft keeps first published document');
   assert.deepEqual(Buffer.from(await(await fetch(base+url)).arrayBuffer()),pdf,'prior résumé version remains intact');
+  changed.internship.items=[];
+  assert.equal((await fetch(base+'/api/content',{method:'PUT',headers:{cookie,'content-type':'application/json'},body:JSON.stringify(changed)})).status,200);
+  assert.doesNotMatch(await(await fetch(base)).text(), /id="job-experience"|>Experience<\/a>/, 'removing all jobs hides the section again');
  }finally{
   if(server&&server.exitCode===null){const done=once(server,'exit');server.kill();await done;}
   for(const name of ['.next','node_modules','public'])await rm(join(fixture,name),{force:true});

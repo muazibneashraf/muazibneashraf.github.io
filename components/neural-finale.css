@@ -1,0 +1,14 @@
+.neural-signature { display: grid; place-items: center; width: 40px; height: 32px; flex: 0 0 auto; }
+.neural-signature .brand-art--compact { width: 32px; height: 32px; opacity: 0; transform: translateY(3px); transition: opacity .65s ease, transform .85s cubic-bezier(.2,.7,.2,1); }
+.neural-signature[data-assembled="true"] .brand-art--compact { opacity: 1; transform: none; }
+.contact-feedback { min-height: 86px; position: relative; }
+.contact-form .contact-feedback .form-status { margin: 0; padding-top: 28px; font-size: 12px; min-height: 76px; }
+.contact-form[data-status="sent"] .contact-feedback .form-status { padding-top: 39px; padding-left: 32px; color: var(--accent); }
+.contact-success-route { position: absolute; top: -8px; left: 0; width: 100%; height: 64px; overflow: visible; color: var(--accent); pointer-events: none; }
+.delivery-track { stroke: currentColor; fill: none; stroke-width: .7; opacity: .18; vector-effect: non-scaling-stroke; }
+.delivery-packet { stroke: currentColor; fill: none; stroke-width: 2; stroke-dasharray: .08 .92; stroke-dashoffset: 1; animation: delivery-travel 1.4s ease-out both; vector-effect: non-scaling-stroke; }
+.delivery-receiver { fill: currentColor; animation: delivery-arrive .7s 1.1s ease-out both; }
+@keyframes delivery-travel { 0% { opacity: 0; } 10%, 85% { opacity: 1; } to { stroke-dashoffset: -.08; opacity: 0; } }
+@keyframes delivery-arrive { from { opacity: 0; } to { opacity: .9; } }
+html[data-motion-paused="true"] .neural-signature .brand-art--compact { transition: none; }
+@media (prefers-reduced-motion: reduce) { .neural-signature .brand-art--compact { opacity: 1; transform: none; transition: none; } .delivery-packet { display: none; } .delivery-receiver { opacity: .9; } }

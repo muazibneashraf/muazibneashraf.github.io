@@ -1,5 +1,6 @@
 import type { SiteContent } from "@/lib/types";
 import { BackToTop } from "./BackToTop";
+import { NeuralSignature } from "./NeuralSignature";
 export function SiteFooter({
   content,
 }: {
@@ -8,6 +9,7 @@ export function SiteFooter({
 }) {
   return (
     <footer className="site-footer">
+      <NeuralSignature site={content.site} />
       <p>
         © {new Date().getFullYear()} {content.identity.name}
       </p>

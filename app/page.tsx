@@ -29,7 +29,7 @@ export async function generateMetadata(): Promise<Metadata> {
 export default async function Home() {
   const content = await getContent();
   return (
-    <SiteFrame content={content}>
+    <SiteFrame content={content} home>
       <Hero content={content} />
       {content.home.marquee.length > 0 && <div className="stack-section">
         <div className="stack-captions">
@@ -39,14 +39,16 @@ export default async function Home() {
         <div className="stack-strip"><TechMarquee items={content.home.marquee} /></div>
       </div>}
       <AboutSection content={content} />
-      <SkillsSection content={content} />
       <WorkSection content={content} />
+      <SkillsSection content={content} />
       <BuildTrace projects={content.projects} settings={content.sections.walkthrough} />
       <ResearchSection content={content} />
       <JobExperienceSection content={content} />
       <ExperienceSection content={content} />
-      <Capabilities content={content} />
-      <ContactSection content={content} />
+      <div className="home-finale">
+        <Capabilities content={content} />
+        <ContactSection content={content} />
+      </div>
     </SiteFrame>
   );
 }

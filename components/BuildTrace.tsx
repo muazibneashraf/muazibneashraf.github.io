@@ -109,7 +109,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
             <span className="trace-mode mono">{settings.modeLabel}</span>
           </div>
 
-          <div className="trace-track-scroll"><div ref={track} className="trace-track" style={{gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`, minWidth: steps.length * 105 + 40}}>
+          <div className="trace-track-scroll"><div ref={track} className="trace-track" style={{gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`, minWidth: steps.length * 132 + 48}}>
             <div className="trace-track-rail" aria-hidden="true" />
             <div
               className="trace-track-progress"
@@ -137,7 +137,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
             </span>
           </div></div>
 
-          <div className="trace-inspector" aria-live="polite">
+          <div className="trace-inspector" data-has-payload={Boolean(activeStep.payload)} aria-live="polite">
             <div className="trace-step-count mono">
               <span>STAGE</span>
               <strong>{String(stepIndex + 1).padStart(2, "0")}</strong>
@@ -152,8 +152,9 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
                   {activeStep.tech.join(" · ")}
                 </p>
               )}
-              {activeStep.payload && (
-                <div className="trace-payload-preview">
+            </div>
+            {activeStep.payload && (
+                <div className="trace-payload-preview" key={activeStep.id}>
                   <div className="trace-payload-bar mono">
                     <span className="mint">◈ ILLUSTRATIVE STAGE SCHEMA</span>
                     <span>JSON</span>
@@ -162,8 +163,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
                     <code>{JSON.stringify(activeStep.payload, null, 2)}</code>
                   </pre>
                 </div>
-              )}
-            </div>
+            )}
             <div className="trace-controls">
               <button
                 className="button secondary"

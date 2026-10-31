@@ -17,7 +17,7 @@ export function ProjectVisual({ project }: { project: Project }) {
   </div>;
 
   const portfolio = config.kind === "studio", icu = config.kind === "icu", community = config.kind === "community";
-  const diagramLabels = icu ? [...config.labels.slice(0, 6), config.labels[6] ?? "AI analysis", config.labels[7] ?? "CNN + LSTM"] : config.labels;
+  const diagramLabels = icu ? [...config.labels.slice(0, 6), config.labels[6] ?? "AI analysis", config.labels[7] ?? "CNN + LSTM", project.walkthroughSteps?.[4]?.title ?? config.labels[8] ?? "Report review"] : config.labels;
   const visual = portfolio ? "visual-lottery visual-portfolio" : icu ? "visual-icu" : community ? "visual-lifeline" : "visual-lottery";
   const diagram = icu ? <IcuDiagram labels={diagramLabels} />
     : community ? <CommunityDiagram labels={config.labels} />

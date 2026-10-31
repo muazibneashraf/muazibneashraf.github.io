@@ -17,7 +17,7 @@ html[data-globe-transition="active"] .site-frame { opacity: var(--globe-page-opa
 .globe-burst-overlay canvas { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
 .globe-welcome { position: absolute; inset: 0; display: grid; place-content: center; padding: 24px; color: var(--ink); font-family: var(--font-body); text-align: center; pointer-events: none; opacity: 0; transform: translateY(14px) scale(.98); will-change: opacity, transform; -webkit-user-select: none; user-select: none; }
 .globe-welcome * { -webkit-user-select: none; user-select: none; }
-.globe-welcome h2 { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 6vw, 78px); font-weight: 500; line-height: 1.12; letter-spacing: -3px; }
+.globe-welcome h2 { margin: 0; font-family: var(--font-display); font-size: clamp(44px, 6vw, 78px); font-weight: 500; line-height: 1.12; letter-spacing: -.035em; }
 .globe-welcome h2 span { display: block; margin-bottom: 16px; color: var(--accent); font-family: var(--font-mono, monospace); font-size: 11px; font-weight: 600; line-height: 1.75; letter-spacing: 2px; text-transform: uppercase; }
 .globe-welcome::after { content: ""; justify-self: center; width: 74px; height: 1px; margin-top: 28px; background: linear-gradient(90deg, transparent, var(--accent), transparent); }
 .globe-transition-fallback { position: absolute; left: 50%; top: calc(50% + 140px); transform: translateX(-50%); color: var(--accent); border: 1px solid var(--line); border-radius: 8px; padding: 12px 20px; background: var(--surface); }
@@ -25,6 +25,6 @@ html[data-globe-transition="active"] .site-frame { opacity: var(--globe-page-opa
 @media (max-width: 760px) {
   .globe-stage { height: 340px; }
   .globe-warning { top: 31px; font-size: 11px; }
-  .globe-welcome h2 { font-size: 48px; letter-spacing: -2px; }
+  .globe-welcome h2 { font-size: 48px; letter-spacing: -.035em; }
 }
 @media (prefers-reduced-motion: reduce) { .globe-warning { display: none; } }

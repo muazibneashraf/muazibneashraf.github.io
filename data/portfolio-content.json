@@ -666,8 +666,8 @@
     "muted": "#9AAAC7",
     "accent": "#55DFFC",
     "line": "#1E2C48",
-    "displayFont": "var(--font-space-grotesk), Arial, sans-serif",
-    "bodyFont": "var(--font-manrope), Arial, sans-serif"
+    "displayFont": "var(--font-geist-sans), Arial, sans-serif",
+    "bodyFont": "var(--font-geist-sans), Arial, sans-serif"
   },
   "site": {
     "mark": "m",
@@ -683,6 +683,7 @@
     "navigation": {
       "about": "About",
       "projects": "Projects",
+      "skills": "Skills",
       "experience": "Experience",
       "capabilities": "Capabilities",
       "resume": "Résumé",
@@ -743,7 +744,7 @@
   },
   "sections": {
     "work": {
-      "eyebrow": "SELECTED PROJECTS",
+      "eyebrow": "PROJECTS",
       "title": "Explore the work",
       "intro": "",
       "actionLabel": "All projects"

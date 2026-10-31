@@ -13,6 +13,7 @@
     "navigation": {
       "about": "About",
       "projects": "Projects",
+      "skills": "Skills",
       "experience": "Experience",
       "capabilities": "Capabilities",
       "resume": "Résumé",
@@ -73,7 +74,7 @@
   },
   "sections": {
     "work": {
-      "eyebrow": "SELECTED PROJECTS",
+      "eyebrow": "PROJECTS",
       "title": "Explore the work",
       "intro": "",
       "actionLabel": "All projects"

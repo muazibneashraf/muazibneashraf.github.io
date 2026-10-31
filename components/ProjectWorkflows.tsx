@@ -13,18 +13,20 @@ export function IcuDiagram({ labels }: { labels: string[] }) {
     [{ x: 437, y: 99 }],
   ];
   return (
-    <svg className="project-diagram icu-workflow" viewBox="0 0 480 200" aria-hidden="true">
+    <svg className="project-diagram icu-workflow" viewBox="0 0 490 300" aria-hidden="true">
       <g className="icu-stage-guides" fill="none" stroke="currentColor">
-        <path d="M9 174H466" />
+        <path d="M9 174H466M397 174V280H341" />
         {[41, 140, 246, 397].map((x, i) => <g key={x}>
           <circle cx={x} cy="174" r="3" />
           <text x={x} y="192" textAnchor="middle">0{i + 1}</text>
         </g>)}
+        <circle cx="341" cy="280" r="3" /><text x="326" y="284" textAnchor="end">05</text>
       </g>
       <g className="icu-connectors" fill="none" stroke="currentColor" strokeWidth="1.2">
         <path data-edge="report-ocr" d="M74 99H101m-4-4 4 4-4 4" />
         <path data-edge="ocr-values" d="M180 99H210m-4-4 4 4-4 4" />
         <path data-edge="values-ai" d="M282 99H328m-4-4 4 4-4 4" />
+        <path data-edge="ai-review" d="M466 99H477V230H440m4-4-4 4 4 4" />
       </g>
       <g className="icu-document" data-node="Lab Report">
         <path className="icu-panel" d="M17 43H57L74 60V146H9V51Q9 43 17 43Z" />
@@ -38,6 +40,7 @@ export function IcuDiagram({ labels }: { labels: string[] }) {
       <FlowPacket path="M74 99H101" duration={2.6} delay={-1.1} />
       <FlowPacket path="M180 99H210" duration={2.8} delay={-1.8} />
       <FlowPacket path="M282 99H328" duration={3.1} delay={-0.5} />
+      <FlowPacket path="M466 99H477V230H440" duration={3.4} delay={-1.4} />
       <g className="icu-extraction" data-node="OCR Extraction">
         <rect className="icu-panel" x="101" y="64" width="79" height="70" rx="10" />
         <text className="icu-ocr-title" x="140.5" y="90" textAnchor="middle">{labels[2]}</text>
@@ -66,6 +69,12 @@ export function IcuDiagram({ labels }: { labels: string[] }) {
         <FlowPacket path="M349 77L378 112L407 99L437 99" duration={2.9} delay={-1.2} />
         {layers.flatMap((layer, i) => layer.map((node, j) => <circle key={`${i}-${j}`} className="icu-neuron" cx={node.x} cy={node.y} r={i === 3 ? 4.5 : 3.2} style={{ animationDelay: `${i * .6 + j * .2}s` }} />))}
         <text className="icu-model-label" x="397" y="149" textAnchor="middle">{labels[7] ?? "CNN + LSTM"}</text>
+      </g>
+      <g className="icu-review" data-node="Report review">
+        <rect className="icu-panel" x="242" y="200" width="198" height="60" rx="10" />
+        <path d="M260 213H278L285 220V247H260ZM278 213V220H285" fill="none" stroke="currentColor" strokeWidth="1.2" />
+        <path d="m266 231 4 4 8-9" className="icu-review-check" fill="none" stroke="currentColor" strokeWidth="2" pathLength="1" />
+        <text x="355" y="234" textAnchor="middle">{labels[8] ?? "Report review"}</text>
       </g>
     </svg>
   );

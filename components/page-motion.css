@@ -22,10 +22,10 @@
 
 /* The contact action sends a short signal toward its destination. */
 .contact-heading { position: relative; }
-.contact-signal { flex: 1; height: 40px; min-width: 40px; max-width: 320px; color: var(--accent); overflow: visible; pointer-events: none; }
+.contact-signal { flex: 1; height: 40px; min-width: 40px; max-width: 320px; color: var(--accent); overflow: visible; pointer-events: none; opacity: .65; transition: opacity .25s ease; }
 .contact-signal > path { stroke: currentColor; opacity: .2; fill: none; }
-.contact-signal-beam { stroke: currentColor; stroke-width: 2; stroke-linecap: round; fill: none; stroke-dasharray: 1; stroke-dashoffset: 1; opacity: 0; animation: contact-signal-send 4.5s cubic-bezier(.2, .6, .4, 1) infinite; }
-.contact-heading:hover .contact-signal-beam, .contact-heading:focus-within .contact-signal-beam { animation: contact-signal-send 1.5s cubic-bezier(.2, .6, .4, 1) infinite; }
+.contact-signal-beam { stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; fill: none; stroke-dasharray: .1 .9; stroke-dashoffset: 0; opacity: 0; animation: contact-signal-send 3.6s linear infinite; }
+.contact-heading:has(.contact-arrow:is(:hover, :focus-visible)) .contact-signal { opacity: 1; }
 .contact-field { position: relative; display: block; margin-top: 8px; }
 .contact-field input, .contact-field textarea { margin-top: 0; transition: background .2s ease, border-color .2s ease; }
 .contact-field-border { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; overflow: visible; }
@@ -48,7 +48,7 @@
 .copy-email { display: flex; align-items: center; gap: 8px; }
 .copy-email > svg { width: 14px; height: 14px; fill: none; stroke: currentColor; stroke-width: 1.5; stroke-linecap: round; stroke-linejoin: round; }
 .copy-email[data-copied="true"] > svg path { stroke-dasharray: 1; animation: contact-check .4s ease-out both; }
-@keyframes contact-signal-send { 0% { stroke-dashoffset: 1; opacity: 0; } 15% { opacity: 1; } 70% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: -1; opacity: 0; } }
+@keyframes contact-signal-send { 0% { stroke-dashoffset: 0; opacity: 0; } 12% { opacity: 1; } 78% { opacity: 1; } 100% { stroke-dashoffset: -1; opacity: 0; } }
 @keyframes contact-progress { 0% { transform: translateX(-30%) scaleX(.3); } 100% { transform: translateX(130%) scaleX(.3); } }
 @keyframes contact-send-dot { 0%, 75%, 100% { opacity: .3; } 40% { opacity: 1; } }
 @keyframes contact-label-in { from { opacity: .3; transform: translateY(4px); } to { opacity: 1; transform: none; } }

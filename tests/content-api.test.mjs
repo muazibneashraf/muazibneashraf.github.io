@@ -93,8 +93,8 @@ test(
       ].map((match) => match[1]);
       assert.deepEqual(sections, [
         "about",
-        "skills",
         "work",
+        "skills",
         "trace",
         "research",
         "experience",

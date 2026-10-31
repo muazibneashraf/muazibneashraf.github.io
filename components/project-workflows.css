@@ -1,7 +1,7 @@
 /* A document scanner and a firing neural network form the research workflow. */
 .icu-workflow text { fill: #e4dcfa; font-size: 14px; }
 .icu-workflow .icu-panel { fill: #211d3b; stroke: #9f8ccf; stroke-width: 1; }
-.icu-stage-guides { opacity: .24; stroke-width: .6; }
+.icu-stage-guides { opacity: .4; stroke-width: .6; }
 .icu-stage-guides circle { fill: currentColor; stroke: none; }
 .icu-workflow .icu-stage-guides text { fill: currentColor; stroke: none; font-size: 9px; }
 .icu-connectors { opacity: .6; }
@@ -17,6 +17,8 @@
 .icu-workflow .icu-model-label { font-size: 13px; fill: #bca8e6; letter-spacing: .8px; }
 .icu-synapse { opacity: .2; animation: icu-synapse 3s ease-in-out infinite; }
 .icu-neuron { fill: #b89aea; stroke: #e5d4ff; stroke-width: .8; animation: icu-fire 3s ease-in-out infinite; transform-box: fill-box; transform-origin: center; }
+.icu-review-check { stroke-dasharray: 1; animation: icu-review 4.5s ease-in-out infinite; }
+@keyframes icu-review { 0%, 15% { stroke-dashoffset: 1; opacity: .35; } 45%, 85% { stroke-dashoffset: 0; opacity: 1; } 100% { stroke-dashoffset: 0; opacity: .35; } }
 @keyframes icu-scan {
   0%, 100% { transform: translateY(-10px); opacity: 0; }
   12% { opacity: .9; }

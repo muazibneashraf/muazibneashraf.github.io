@@ -5,6 +5,7 @@ import { CroppedImage } from "./CroppedImage";
 
 export function JobExperienceSection({ content, standalone = false }: { content: SiteContent; standalone?: boolean }) {
   const experience = content.internship;
+  if (!experience.items.length) return null;
   return <section id="job-experience" className="section job-experience-section wrap">
     <SectionHeading eyebrow={experience.eyebrow} title={experience.title} as={standalone ? "h1" : "h2"}
       extra={!standalone && <Link className="text-link" href="/experience">{experience.linkLabel}</Link>} />

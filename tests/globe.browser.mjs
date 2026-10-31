@@ -38,7 +38,9 @@ async function spinToProjects(page, center, touch = false) {
     };
     requestAnimationFrame(record);
   });
-  const start = { x: center.x + center.radius * 0.55, y: center.y };
+  // Begin touch horizontally so the existing vertical page-scroll gesture remains available.
+  const initialAngle = touch ? -Math.PI / 2 : 0;
+  const start = { x: center.x + Math.cos(initialAngle) * center.radius * 0.55, y: center.y + Math.sin(initialAngle) * center.radius * 0.55 };
   const cdp = touch ? await page.context().newCDPSession(page) : null;
   if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: [start] });
   else { await page.mouse.move(start.x, start.y); await page.mouse.down(); }
@@ -46,7 +48,7 @@ async function spinToProjects(page, center, touch = false) {
   const warnings = new Set();
   const started = performance.now();
   for (let i = 1; i <= 190; i++) {
-    const angle = (performance.now() - started) / 1000 * 13;
+    const angle = initialAngle + (performance.now() - started) / 1000 * 13;
     const p = { x: center.x + Math.cos(angle) * center.radius * 0.55, y: center.y + Math.sin(angle) * center.radius * 0.55 };
     if (cdp) await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: [p] });
     else await page.mouse.move(p.x, p.y);
@@ -76,6 +78,8 @@ async function spinToProjects(page, center, touch = false) {
   await page.waitForFunction(() => Number(document.querySelector(".globe-welcome")?.style.opacity || 0) > 0.95);
   assert.equal((await page.locator(".globe-welcome").textContent()).replace(/\s+/g, " ").trim(), "Welcome to My Projects");
   await page.screenshot({ path: resolve(output, touch ? "mobile-welcome.png" : "desktop-welcome.png") });
+  await page.waitForSelector('.globe-burst-overlay[data-scene="filaments"]');
+  await page.screenshot({ path: resolve(output, touch ? "mobile-welcome-ribbons.png" : "desktop-welcome-ribbons.png") });
   assert.equal(await page.locator(".globe-burst-overlay").count(), 1, "welcome stays above the already loaded projects page");
   const welcomeTheme = await page.evaluate(() => {
     const welcome = getComputedStyle(document.querySelector(".globe-welcome h2"));

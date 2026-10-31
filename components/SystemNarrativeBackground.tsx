@@ -2,7 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { advanceBackground, createBackgroundSystem, damp, SECTION_THEMES, segmentClearance, type NarrativeSection, type SafeRect, createNeuroField, advanceNeuroField } from "@/lib/background-system";
+import { advanceBackground, createBackgroundSystem, damp, SECTION_THEMES, segmentClearance, type NarrativeSection, type SafeRect, createNeuroField, advanceNeuroField, createScrollMotion, advanceScrollMotion, easeVisibility } from "@/lib/background-system";
 
 export type { NarrativeSection } from "@/lib/background-system";
 const SECTIONS = Object.keys(SECTION_THEMES) as NarrativeSection[];
@@ -11,7 +11,7 @@ const PROTECTED = [
   ".project-card", ".about-copy", ".education-card", ".skill-group", ".research-panel", ".trace-workbench",
   ".experience-row", ".capability-card", ".stack-section",
   ".page-intro", ".project-narrative", ".contact-details", ".contact-form",
-  ".site-footer", ".globe-welcome h2",
+  ".site-footer", ".globe-welcome h2", ".skill-catalog", ".evidence-panel", ".contact-page-intro", ".contact-heading h2", ".contact-arrow", ".contact-bottom",
 ].join(",");
 
 function sectionForPath(path: string): NarrativeSection {
@@ -63,9 +63,14 @@ export function SystemNarrativeBackground() {
     let paused = document.querySelector(".interactive-network")?.getAttribute("data-motion") === "paused";
     let section: NarrativeSection = sectionForPath(routeRef.current);
     let scroll = window.scrollY;
+    const scrollMotion = createScrollMotion(scroll);
+    const fieldNodeVisibility = new Float32Array(neuroField.nodes.length).fill(1);
+    const fieldEdgeVisibility = new Float32Array(neuroField.edges.length).fill(1);
+    const fieldPulseVisibility = new Float32Array(neuroField.pulses.length).fill(1);
     let zones: SafeRect[] = [], visibleZones: SafeRect[] = [];
     let sections: { id: NarrativeSection; top: number; bottom: number }[] = [];
     let pageHeight = 0, headerBottom = 80;
+    let skillEnergy = 0;
     let disposed = false;
     const canAnimate = () => !paused && !motion.matches && !document.hidden;
 
@@ -76,17 +81,18 @@ export function SystemNarrativeBackground() {
       const hero = sections.find(item => item.id === "hero");
       if (!hero) { targetIntroWeight = 0; return; }
       const start = Math.max(0, hero.bottom - headerBottom - height * 0.25);
-      const progress = Math.max(0, Math.min(1, (scroll - start) / Math.max(160, height * 0.4)));
+      const progress = Math.max(0, Math.min(1, (scrollMotion.position - start) / Math.max(160, height * 0.4)));
       targetIntroWeight = 0.65 * progress * progress * (3 - 2 * progress);
     };
 
     const selectSection = () => {
       let next = sectionForPath(routeRef.current);
       if (routeRef.current === "/") {
-        const focal = scroll + height * 0.42;
+        const narrativeScroll = scrollMotion.position;
+        const focal = narrativeScroll + height * 0.42;
         const current = sections.find((s) => s.id === section);
-        if (scroll < 100) next = "hero";
-        else if (scroll + height >= pageHeight - 70) next = "contact";
+        if (narrativeScroll < 100) next = "hero";
+        else if (narrativeScroll + height >= pageHeight - 70) next = "contact";
         // A dead band keeps either scroll direction stable at boundaries.
         else if (current && focal >= current.top - 48 && focal <= current.bottom + 48) next = section;
         else next = sections.find((s) => s.top <= focal && s.bottom > focal)?.id ?? section;
@@ -144,16 +150,16 @@ export function SystemNarrativeBackground() {
       let distance = Math.max(0, Math.min(ay, by) - headerBottom - 8);
       for (const z of visibleZones) {
         // Broad phase avoids exact-distance work outside the feather region.
-        if (Math.max(ax, bx) < z.left - 24 || Math.min(ax, bx) > z.right + 24 || Math.max(ay, by) + scroll < z.top - 24 || Math.min(ay, by) + scroll > z.bottom + 24) continue;
+        if (Math.max(ax, bx) < z.left - 72 || Math.min(ax, bx) > z.right + 72 || Math.max(ay, by) + scroll < z.top - 72 || Math.min(ay, by) + scroll > z.bottom + 72) continue;
         distance = Math.min(distance, segmentClearance(ax, ay + scroll, bx, by + scroll, z));
         if (distance === 0) return 0;
       }
-      const t = Math.min(1, distance / 24);
+      const t = Math.min(1, distance / 72);
       return t * t * (3 - 2 * t);
     };
     // Keep the full intro composition, then soften it behind reading content.
     const fieldVisibility = (ax: number, ay: number, bx: number, by: number) =>
-      introStage === "completed" ? 0.35 + 0.65 * segmentVisibility(ax, ay, bx, by) : 1;
+      introStage === "completed" ? 0.1 + 0.9 * segmentVisibility(ax, ay, bx, by) : 1;
 
     const drawAtmosphere = () => {
       const mobile = width < 768;
@@ -194,11 +200,14 @@ export function SystemNarrativeBackground() {
       if (!width || !height) return;
       const mobile = width < 768;
       if (dt > 0) {
-        advanceBackground(system, dt, section, mobile, scroll);
+        advanceScrollMotion(scrollMotion, scroll, dt);
+        selectSection();
+        advanceBackground(system, dt, section, mobile, scrollMotion.position);
         if (introWeight > 0.001 || targetIntroWeight > 0.001) {
-          advanceNeuroField(neuroField, dt, system.clock, mobile);
+          advanceNeuroField(neuroField, dt, system.clock, mobile, section);
           introWeight = damp(introWeight, targetIntroWeight, 2.4, dt);
         }
+        skillEnergy = damp(skillEnergy, 0, 2, dt);
       }
       if (motion.matches) {
         introWeight = targetIntroWeight;
@@ -206,6 +215,8 @@ export function SystemNarrativeBackground() {
         system.color = [...target.color]; system.secondary = [...target.secondary];
         system.light = target.light; system.energy = target.energy; lightTime = -1;
       }
+      const blendVisibility = (current: number, target: number) =>
+        canAnimate() ? easeVisibility(current, target, dt) : target;
       ctx.setTransform(ratio, 0, 0, ratio, 0, 0);
       ctx.clearRect(0, 0, width, height); drawAtmosphere();
       ctx.save();
@@ -221,7 +232,8 @@ export function SystemNarrativeBackground() {
           const a = neuroField.nodes[edge.from];
           const b = neuroField.nodes[edge.to];
           const avgBrightness = (a.brightness + b.brightness) * 0.5;
-          const alpha = Math.max(0.08, avgBrightness * 0.35) * introWeight * system.energy * fieldVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
+          const visibility = fieldEdgeVisibility[edge.id] = blendVisibility(fieldEdgeVisibility[edge.id], fieldVisibility(a.screenX, a.screenY, b.screenX, b.screenY));
+          const alpha = Math.max(0.08, avgBrightness * 0.35) * introWeight * (system.energy + skillEnergy * .25) * visibility;
           if (alpha < 0.003) continue;
           ctx.strokeStyle = `rgba(85, 223, 252, ${alpha})`;
           ctx.lineWidth = 1.0;
@@ -231,7 +243,8 @@ export function SystemNarrativeBackground() {
           ctx.stroke();
         }
 
-        for (const p of neuroField.pulses) {
+        for (let i = 0; i < neuroField.pulses.length; i++) {
+          const p = neuroField.pulses[i];
           if (p.progress > 1) continue;
           const edge = neuroField.edges[p.edgeIdx];
           if (!edge) continue;
@@ -240,7 +253,8 @@ export function SystemNarrativeBackground() {
 
           const px = a.screenX + (b.screenX - a.screenX) * p.progress;
           const py = a.screenY + (b.screenY - a.screenY) * p.progress;
-          const alpha = Math.sin(p.progress * Math.PI) * 0.95 * introWeight * system.energy * fieldVisibility(px, py, px, py);
+          const visibility = fieldPulseVisibility[i] = blendVisibility(fieldPulseVisibility[i], fieldVisibility(px, py, px, py));
+          const alpha = Math.sin(p.progress * Math.PI) * 0.95 * introWeight * system.energy * visibility;
           if (alpha < 0.01) continue;
 
           const col = p.colorType === "cyan" ? "85, 223, 252" : "178, 155, 255";
@@ -256,7 +270,8 @@ export function SystemNarrativeBackground() {
         }
 
         for (const n of neuroField.nodes) {
-          const alpha = Math.max(0.15, n.brightness * (n.isHub ? 0.9 : 0.7)) * introWeight * (0.4 + system.energy * 0.6) * fieldVisibility(n.screenX, n.screenY, n.screenX, n.screenY);
+          const visibility = fieldNodeVisibility[n.id] = blendVisibility(fieldNodeVisibility[n.id], fieldVisibility(n.screenX, n.screenY, n.screenX, n.screenY));
+          const alpha = Math.max(0.15, n.brightness * (n.isHub ? 0.9 : 0.7)) * introWeight * (0.4 + system.energy * 0.6) * visibility;
           if (alpha < 0.005) continue;
 
           if (n.isHub) {
@@ -273,7 +288,6 @@ export function SystemNarrativeBackground() {
           ctx.fill();
         }
       }
-      const blend = dt > 0 ? Math.min(dt, 0.05) : 0;
       const color = system.color.map(Math.round).join(",");
       for (const n of system.nodes) {
         // Peripheral clusters occupy the actual gutters, including at 1440px.
@@ -282,14 +296,14 @@ export function SystemNarrativeBackground() {
         n.screenX = n.ambient ? n.x * width : center + (n.x - n.anchorX) * Math.min(width, gutter * 10);
         n.screenY = (n.y - system.parallax * n.depth) * height;
         const target = n.clearance = segmentVisibility(n.screenX, n.screenY, n.screenX, n.screenY);
-        n.visibility = motion.matches ? target : damp(n.visibility, target, 7, blend);
+        n.visibility = blendVisibility(n.visibility, target);
       }
       for (const edge of system.edges) {
         const a = system.nodes[edge.from], b = system.nodes[edge.to];
         const target = edge.clearance = segmentVisibility(a.screenX, a.screenY, b.screenX, b.screenY);
-        edge.visibility = motion.matches ? target : damp(edge.visibility, target, 7, blend);
+        edge.visibility = blendVisibility(edge.visibility, target);
         const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? 0.75 : 1) : edge.density);
-        const alpha = Math.min(edge.visibility, edge.clearance) * density * system.energy * 0.3;
+        const alpha = edge.visibility * density * system.energy * 0.3;
         if (alpha < 0.002) continue;
         ctx.strokeStyle = `rgba(${color},${alpha})`; ctx.lineWidth = 0.85;
         ctx.beginPath(); ctx.moveTo(a.screenX, a.screenY); ctx.lineTo(b.screenX, b.screenY); ctx.stroke();
@@ -298,7 +312,7 @@ export function SystemNarrativeBackground() {
         if (p.progress > 1) continue; // Independent quiet intervals between signals.
         const edge = system.edges[p.edgeId], a = system.nodes[edge.from], b = system.nodes[edge.to];
         const density = Math.min(a.density, b.density) * (motion.matches ? (mobile ? 0.75 : 1) : edge.density);
-        const alpha = Math.sin(p.progress * Math.PI) ** 2 * Math.min(edge.visibility, edge.clearance) * density * system.energy;
+        const alpha = Math.sin(p.progress * Math.PI) ** 2 * edge.visibility * density * system.energy;
         if (alpha < 0.005) continue;
         const x = a.screenX + (b.screenX - a.screenX) * p.progress;
         const y = a.screenY + (b.screenY - a.screenY) * p.progress;
@@ -310,7 +324,7 @@ export function SystemNarrativeBackground() {
       for (const n of system.nodes) {
         const density = motion.matches ? (mobile ? 0.85 : 1) : n.density;
         const brightness = 0.84 + Math.sin(system.clock * n.speed * 1.7 + n.phase) * 0.16;
-        const alpha = Math.min(n.visibility, n.clearance) * density * brightness * (n.ambient ? 0.18 : 0.68) * (0.4 + system.energy * 0.6);
+        const alpha = n.visibility * density * brightness * (n.ambient ? 0.18 : 0.68) * (0.4 + system.energy * 0.6);
         if (alpha < 0.003) continue;
         if (!n.ambient && n.radius > 2) {
           ctx.fillStyle = `rgba(${color},${alpha * 0.12})`;
@@ -346,16 +360,21 @@ export function SystemNarrativeBackground() {
     };
     const onScroll = () => {
       scroll = window.scrollY;
+      if (canAnimate()) return;
       if (!scrollFrame) scrollFrame = requestAnimationFrame(() => {
-        scrollFrame = 0; selectSection();
-        if (!canAnimate() && !document.hidden) { lightTime = -1; draw(0); }
+        scrollFrame = 0;
+        if (!canAnimate() && !document.hidden) {
+          scrollMotion.position = scroll; scrollMotion.velocity = 0;
+          selectSection(); lightTime = -1; draw(0);
+        }
       });
     };
 
     // Opt-in diagnostics: snapshots only on request, no per-frame DOM writes.
     const inspect = (event: Event) => {
       (event as CustomEvent).detail?.({ section, paused, reduced: motion.matches, running: !!frame,
-        system: structuredClone(system), neuroField: structuredClone(neuroField), fieldWeight: introWeight, targetFieldWeight: targetIntroWeight, width, height });
+        system: structuredClone(system), neuroField: structuredClone(neuroField), fieldWeight: introWeight, targetFieldWeight: targetIntroWeight, width, height,
+        scroll: { actual: scroll, ...scrollMotion }, fieldVisibility: { nodes: [...fieldNodeVisibility], edges: [...fieldEdgeVisibility], pulses: [...fieldPulseVisibility] } });
     };
     const debug = new URLSearchParams(window.location.search).has("backgroundDebug");
     if (debug) canvas.addEventListener("muaz-background-inspect", inspect);
@@ -373,6 +392,9 @@ export function SystemNarrativeBackground() {
     window.addEventListener("scroll", onScroll, { passive: true });
     window.addEventListener("resize", requestMeasure);
     window.addEventListener("muaz-trace-step", requestMeasure);
+    const onSkillSelect = () => { skillEnergy = canAnimate() ? 1 : 0; };
+    window.addEventListener("muaz-skill-select", onSkillSelect);
+    window.addEventListener("muaz-contact-delivered", onSkillSelect);
     window.addEventListener("muaz-motion-state", onMotion);
     const onIntroState = (event: Event) => {
       const detail = (event as CustomEvent<{ state?: string }>).detail;
@@ -406,6 +428,8 @@ export function SystemNarrativeBackground() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", requestMeasure);
       window.removeEventListener("muaz-trace-step", requestMeasure);
+      window.removeEventListener("muaz-skill-select", onSkillSelect);
+      window.removeEventListener("muaz-contact-delivered", onSkillSelect);
       window.removeEventListener("muaz-motion-state", onMotion);
       window.removeEventListener("muaz-intro-state", onIntroState);
       document.removeEventListener("visibilitychange", syncMotion);

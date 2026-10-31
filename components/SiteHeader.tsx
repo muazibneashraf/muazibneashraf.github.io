@@ -9,16 +9,17 @@ import { BrandLogo } from "./BrandLogo";
 function scrollToSection(hash: string) {
   const target = document.getElementById(hash.slice(1));
   if (!target) return false;
-  const scrollTarget = hash === "#about" ? target : (target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target);
+  const framed = getComputedStyle(target).getPropertyValue("--section-framed").trim() === "1";
+  const scrollTarget = framed ? target : (target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target);
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height ?? 80;
   window.scrollTo({
-    top: Math.max(0, scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - 16),
+    top: Math.max(0, scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - (framed ? 0 : 16)),
     behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
   });
   return true;
 }
 
-export function SiteHeader({ site }: { site: SiteSettings }) {
+export function SiteHeader({ site, hasJobExperience = false }: { site: SiteSettings; hasJobExperience?: boolean }) {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
   const pathname = usePathname();
@@ -80,7 +81,8 @@ export function SiteHeader({ site }: { site: SiteSettings }) {
   const links = [
     { href: "/#about", section: "about", label: site.navigation.about },
     { href: "/projects", section: "work", label: site.navigation.projects },
-    { href: "/#job-experience", section: "job-experience", label: site.navigation.experience },
+    { href: "/#skills", section: "skills", label: site.navigation.skills },
+    ...(hasJobExperience ? [{ href: "/#job-experience", section: "job-experience", label: site.navigation.experience }] : []),
     { href: "/#capabilities", section: "capabilities", label: site.navigation.capabilities },
   ];
   return (
