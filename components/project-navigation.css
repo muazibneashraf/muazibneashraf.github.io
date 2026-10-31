@@ -33,7 +33,7 @@ html:active-view-transition-type(project-open) .project-detail .page-intro > p:n
 html:active-view-transition-type(project-open) .project-detail .detail-actions { animation: project-copy-arrive 160ms ease-out 280ms both; }
 @keyframes project-copy-arrive { from { opacity: 0; } to { opacity: 1; } }
 
-/* The indicator is shared between buttons; the selected label remains text. */
+/* Keep selection paint behind live labels; a shared snapshot can cover them. */
 .project-filters button { position: relative; isolation: isolate; }
 .project-filters button[aria-pressed="true"] { background: transparent; border-color: transparent; }
 .project-filters button .project-filter-indicator {
@@ -45,11 +45,13 @@ html:active-view-transition-type(project-open) .project-detail .detail-actions {
   border-radius: inherit;
   background: color-mix(in srgb, var(--accent) 12%, var(--bg));
   pointer-events: none;
+  opacity: 0;
+  transition: opacity .18s ease;
 }
+.project-filters button[aria-pressed="true"] .project-filter-indicator { opacity: 1; }
+.project-filters button :is(.project-filter-label, .project-filter-count) { position: relative; z-index: 1; }
 .project-filters button .project-filter-label { margin-left: 0; font-size: inherit; }
 .project-filters button:focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
-::view-transition-group(.project-filter-selection) { animation-duration: 320ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
-::view-transition-old(.project-filter-selection), ::view-transition-new(.project-filter-selection) { mix-blend-mode: normal; height: 100%; }
 ::view-transition-group(.project-filter-move) { animation-duration: 420ms; animation-timing-function: cubic-bezier(.22, 1, .36, 1); }
 ::view-transition-old(.project-filter-move), ::view-transition-new(.project-filter-move) { mix-blend-mode: normal; }
 ::view-transition-new(.project-filter-enter) { animation: project-filter-arrive 340ms cubic-bezier(.22, 1, .36, 1) both; }
@@ -63,9 +65,6 @@ html[data-motion-paused="true"]::view-transition-old(.project-shared-art),
 html[data-motion-paused="true"]::view-transition-new(.project-shared-art),
 html[data-motion-paused="true"]::view-transition-old(.project-shared-title),
 html[data-motion-paused="true"]::view-transition-new(.project-shared-title),
-html[data-motion-paused="true"]::view-transition-group(.project-filter-selection),
-html[data-motion-paused="true"]::view-transition-old(.project-filter-selection),
-html[data-motion-paused="true"]::view-transition-new(.project-filter-selection),
 html[data-motion-paused="true"]::view-transition-group(.project-filter-move),
 html[data-motion-paused="true"]::view-transition-old(.project-filter-move),
 html[data-motion-paused="true"]::view-transition-new(.project-filter-move),
@@ -75,6 +74,9 @@ html[data-motion-paused="true"]:active-view-transition-type(project-open) .proje
 html[data-motion-paused="true"]:active-view-transition-type(project-open) .project-detail .detail-actions { animation: none !important; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-group(.project-shared-art), ::view-transition-group(.project-shared-title),
-  ::view-transition-group(.project-filter-selection), ::view-transition-group(.project-filter-move),
+  ::view-transition-group(.project-filter-move),
   ::view-transition-old(.project-filter-exit), ::view-transition-new(.project-filter-enter) { animation: none !important; }
 }
+
+html[data-motion-paused="true"] .project-filter-indicator { transition: none; }
+@media (prefers-reduced-motion: reduce) { .project-filter-indicator { transition: none; } }

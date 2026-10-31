@@ -15,7 +15,7 @@
       "zoom": 100,
       "fit": "cover"
     },
-    "resumeUrl": "/Muaz_Ibne_Ashraf_CV.pdf?v=a4e67ba6"
+    "resumeUrl": "/Muaz_Ibne_Ashraf_CV.pdf?v=a4e67ba66a00"
   },
   "home": {
     "eyebrow": "Hello, world. I’m",
@@ -110,10 +110,6 @@
     ],
     "education": [
       {
-        "label": "Degree",
-        "value": "B.Sc. in Computer Science"
-      },
-      {
         "label": "University",
         "value": "BRAC University"
       },
@@ -124,6 +120,10 @@
       {
         "label": "Graduation",
         "value": "September 2026"
+      },
+      {
+        "label": "Degree",
+        "value": "B.Sc. in Computer Science"
       }
     ],
     "skills": [
@@ -161,7 +161,15 @@
       "SQLite",
       "PostgreSQL",
       "TypeScript",
-      "Next.js"
+      "Next.js",
+      "Vite",
+      "Firebase",
+      "pandas",
+      "scikit-learn",
+      "U-Net",
+      "Flex",
+      "Bison",
+      "PyOpenGL"
     ],
     "statement": "I like understanding how things work, then making them work better."
   },
@@ -377,8 +385,8 @@
       "title": "Admission Lottery",
       "year": "2026",
       "category": "Backend",
-      "summary": "A modular Flask web application for college admission lottery workflows, with a structured backend and deployment configuration.",
-      "description": "College Admission Lottery Foundation is my personal web application. The project brings together a modular Python/Flask backend, frontend assets, an API and migration structure, environment configuration, and Render deployment configuration.",
+      "summary": "A Flask application for college admission and lottery workflows.",
+      "description": "I built this project around a Flask backend, separate page assets and database migrations. The repository includes the application routes, configuration and Render deployment setup.",
       "stack": [
         "Python",
         "Flask",
@@ -386,16 +394,16 @@
         "Database migrations",
         "Render"
       ],
-      "repository": "https://github.com/muazibneashraf/College_Admission_Lottery_Foundation",
+      "repository": "https://github.com/muazibneashraf/College_Admission_System",
       "liveUrl": "",
       "role": "Personal project",
-      "challenge": "Organize an admission lottery application into a maintainable web project with clear application and deployment structure.",
+      "challenge": "Keep the admission workflow, database changes and deployment setup in a structure I can maintain.",
       "outcomes": [
-        "Built a modular Python/Flask application with dedicated frontend assets.",
-        "Organized the API and database migration structure alongside environment configuration.",
-        "Prepared Render deployment configuration for the application."
+        "Separated the Flask application code from its page assets and configuration.",
+        "Organized the API routes and database migrations.",
+        "Prepared the application configuration for Render."
       ],
-      "limitations": "A personal project focused on Flask application structure and deployment configuration.",
+      "limitations": "A personal web application. The repository contains the source and deployment configuration.",
       "flow": [
         "Web interface",
         "Flask application",
@@ -419,7 +427,7 @@
         "zoom": 100,
         "fit": "cover"
       },
-      "featured": true,
+      "featured": false,
       "aspect": "landscape",
       "videoUrl": "",
       "gallery": [],
@@ -474,8 +482,8 @@
       "title": "Portfolio & Content Studio",
       "year": "2026",
       "category": "Full-stack",
-      "summary": "An interactive technical portfolio with a protected content studio, editable case studies, and a contact inbox.",
-      "description": "A personal portfolio built with Next.js, React, TypeScript, and CSS. Server-rendered pages read shared portfolio data, while an authenticated admin studio maintains content through an API. The interface combines a canvas network animation with interactive project walkthroughs.",
+      "summary": "The site you're on, with an admin panel for updating projects, page text and my CV.",
+      "description": "I built this portfolio with Next.js, React and TypeScript. Project pages, the homepage and the admin panel share the same content. I can update that content and read contact messages without editing the page components.",
       "stack": [
         "Next.js",
         "React",
@@ -483,16 +491,16 @@
         "CSS",
         "REST API"
       ],
-      "repository": "",
+      "repository": "https://github.com/muazibneashraf/muazibneashraf.github.io",
       "liveUrl": "/",
       "role": "Personal portfolio project",
-      "challenge": "Make technical work easy for recruiters to assess while keeping content editable without changing components.",
+      "challenge": "Keep the site easy to update while giving visitors a clear view of my work.",
       "outcomes": [
-        "Connected the homepage introduction, headline, tagline, and technology strip to the same data used by the admin content API.",
-        "Built project case studies, a filterable archive, contact form and inbox, and a downloadable résumé into a responsive interface.",
-        "Implemented signed admin sessions, local JSON persistence and optional Redis storage, plus animated technical visuals with motion controls."
+        "Connected the homepage, project pages and admin panel to shared content.",
+        "Built the project archive, contact inbox and in-page CV viewer.",
+        "Added the interactive globe, project diagrams and motion controls."
       ],
-      "limitations": "A personal portfolio built with Next.js and TypeScript, with an admin panel for updating content.",
+      "limitations": "I maintain the content through the admin panel and the application code in the linked repository.",
       "flow": [
         "Admin studio",
         "Authenticated API",
@@ -516,7 +524,7 @@
         "zoom": 100,
         "fit": "cover"
       },
-      "featured": true,
+      "featured": false,
       "aspect": "landscape",
       "videoUrl": "",
       "gallery": [],
@@ -564,6 +572,734 @@
           "payload": "{\n  \"rendering\": \"Next.js dynamic SSR\",\n  \"route\": \"/projects/portfolio-platform\",\n  \"hydration\": \"ready\"\n}"
         }
       ]
+    },
+    {
+      "id": "customer-churn",
+      "slug": "customer-churn",
+      "title": "Customer Churn Prediction",
+      "year": "2025",
+      "category": "AI / ML",
+      "summary": "A group project comparing five machine-learning models for predicting customer churn.",
+      "description": "We worked with consumer data to predict whether a customer would leave a service. We cleaned the data, prepared the features and compared five classifiers using the same train/test split. The report brings together our results and the reasoning behind the comparison.",
+      "stack": [
+        "Python",
+        "scikit-learn",
+        "pandas",
+        "NumPy",
+        "Matplotlib",
+        "Jupyter"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/CSE422",
+      "liveUrl": "",
+      "role": "Group project",
+      "challenge": "Prepare a mix of numerical and categorical data, then compare the models fairly.",
+      "outcomes": [
+        "Prepared numerical and categorical features for a binary churn-prediction task.",
+        "Compared Logistic Regression, Decision Tree, Neural Network, KNN and Naive Bayes classifiers.",
+        "Documented the dataset, preprocessing, model training and comparison in a jointly authored course report."
+      ],
+      "limitations": "A group project built around a consumer dataset. The results come from the course dataset.",
+      "flow": [
+        "Consumer data",
+        "Preprocessing",
+        "Model comparison",
+        "Evaluation"
+      ],
+      "credits": [
+        {
+          "label": "Project type",
+          "value": "Group project"
+        }
+      ],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": true,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "customer-churn-step-1",
+          "title": "Consumer data",
+          "detail": "Inspect demographic, purchasing and membership features with a binary Churn target.",
+          "tech": [
+            "Python",
+            "scikit-learn",
+            "pandas"
+          ],
+          "payload": "{\n  \"stage\": \"Consumer data\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Customer Churn Prediction\"\n}"
+        },
+        {
+          "id": "customer-churn-step-2",
+          "title": "Preprocessing",
+          "detail": "Handle missing values, encode categorical features and scale numerical columns.",
+          "tech": [
+            "Python",
+            "scikit-learn",
+            "pandas"
+          ],
+          "payload": "{\n  \"stage\": \"Preprocessing\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Customer Churn Prediction\"\n}"
+        },
+        {
+          "id": "customer-churn-step-3",
+          "title": "Model comparison",
+          "detail": "Train and compare supervised classifiers on a consistent data split.",
+          "tech": [
+            "Python",
+            "scikit-learn",
+            "pandas"
+          ],
+          "payload": "{\n  \"stage\": \"Model comparison\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Customer Churn Prediction\"\n}"
+        },
+        {
+          "id": "customer-churn-step-4",
+          "title": "Evaluation",
+          "detail": "Review classification metrics and the model-comparison report.",
+          "tech": [
+            "Python",
+            "scikit-learn",
+            "pandas"
+          ],
+          "payload": "{\n  \"stage\": \"Evaluation\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Customer Churn Prediction\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "CLASSIFIER COMPARISON",
+        "description": "AI / ML",
+        "footer": "FEATURES / CLASSIFIERS",
+        "labels": [
+          "Consumer data",
+          "Preprocessing",
+          "Model comparison",
+          "Evaluation"
+        ]
+      }
+    },
+    {
+      "id": "compiler-toolchain",
+      "slug": "compiler-toolchain",
+      "title": "Compiler Front End & Intermediate Code",
+      "year": "",
+      "category": "Systems",
+      "summary": "A small compiler for a C-like language, built across three Flex and Bison labs.",
+      "description": "I built this in stages: first the scanner and parser, then symbol tables and semantic checks, followed by an abstract syntax tree and intermediate-code generation. Each lab builds on the previous one, so the source shows how the compiler developed.",
+      "stack": [
+        "C++",
+        "Flex",
+        "Bison",
+        "Compiler design"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/CSE420",
+      "liveUrl": "",
+      "role": "Compiler project",
+      "challenge": "Track variables and scope, catch invalid programs and turn supported expressions into intermediate code.",
+      "outcomes": [
+        "Defined token recognition and grammar rules with Flex and Bison.",
+        "Implemented scoped symbol-table structures and semantic error reporting across successive lab stages.",
+        "Added AST node structures and three-address-code generation in the later submission."
+      ],
+      "limitations": "The compiler handles a small C-like language. The repository keeps each stage separately.",
+      "flow": [
+        "Source",
+        "Lexer / parser",
+        "AST + symbols",
+        "Intermediate code"
+      ],
+      "credits": [],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": false,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "compiler-toolchain-step-1",
+          "title": "Source",
+          "detail": "Read a program written in the supported C-like language subset.",
+          "tech": [
+            "C++",
+            "Flex",
+            "Bison"
+          ],
+          "payload": "{\n  \"stage\": \"Source\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Compiler Front End & Intermediate Code\"\n}"
+        },
+        {
+          "id": "compiler-toolchain-step-2",
+          "title": "Lexer / parser",
+          "detail": "Recognize tokens and apply the Flex/Bison grammar.",
+          "tech": [
+            "C++",
+            "Flex",
+            "Bison"
+          ],
+          "payload": "{\n  \"stage\": \"Lexer / parser\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Compiler Front End & Intermediate Code\"\n}"
+        },
+        {
+          "id": "compiler-toolchain-step-3",
+          "title": "AST + symbols",
+          "detail": "Track scoped symbols, report semantic errors and build AST nodes.",
+          "tech": [
+            "C++",
+            "Flex",
+            "Bison"
+          ],
+          "payload": "{\n  \"stage\": \"AST + symbols\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Compiler Front End & Intermediate Code\"\n}"
+        },
+        {
+          "id": "compiler-toolchain-step-4",
+          "title": "Intermediate code",
+          "detail": "Translate supported AST constructs into three-address intermediate code.",
+          "tech": [
+            "C++",
+            "Flex",
+            "Bison"
+          ],
+          "payload": "{\n  \"stage\": \"Intermediate code\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Compiler Front End & Intermediate Code\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "FROM SOURCE TO CODE",
+        "description": "Systems",
+        "footer": "TOKENS / AST / IR",
+        "labels": [
+          "Source",
+          "Lexer / parser",
+          "AST + symbols",
+          "Intermediate code"
+        ]
+      }
+    },
+    {
+      "id": "minivsfs",
+      "slug": "minivsfs",
+      "title": "MiniVSFS File System Tools",
+      "year": "",
+      "category": "Systems",
+      "summary": "Two C programs: one builds a filesystem image, the other adds files to it.",
+      "description": "We worked directly with the disk layout: a superblock, inode table, allocation bitmaps and directory entries. The file-adder finds free space, writes the file and updates the metadata.",
+      "stack": [
+        "C",
+        "File systems",
+        "CRC32",
+        "CLI"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/CSE321/MiniVSFS_Group9_Submission",
+      "liveUrl": "",
+      "role": "File systems project",
+      "challenge": "Write file contents and update the filesystem metadata without leaving them out of sync.",
+      "outcomes": [
+        "Implemented image creation with configurable image size and inode count.",
+        "Represented allocation with inode/data bitmaps and up to 12 direct data blocks per file.",
+        "Added file insertion and metadata checksums, including CRC32 helpers."
+      ],
+      "limitations": "A group project. The tools read and write image files; they do not mount a filesystem.",
+      "flow": [
+        "Create image",
+        "Allocate blocks",
+        "Write file",
+        "Update metadata"
+      ],
+      "credits": [
+        {
+          "label": "Project type",
+          "value": "Group project"
+        }
+      ],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": false,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "minivsfs-step-1",
+          "title": "Create image",
+          "detail": "Create the image, superblock, inode table and root directory.",
+          "tech": [
+            "C",
+            "File systems",
+            "CRC32"
+          ],
+          "payload": "{\n  \"stage\": \"Create image\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"MiniVSFS File System Tools\"\n}"
+        },
+        {
+          "id": "minivsfs-step-2",
+          "title": "Allocate blocks",
+          "detail": "Find free inode and data-block positions in the allocation bitmaps.",
+          "tech": [
+            "C",
+            "File systems",
+            "CRC32"
+          ],
+          "payload": "{\n  \"stage\": \"Allocate blocks\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"MiniVSFS File System Tools\"\n}"
+        },
+        {
+          "id": "minivsfs-step-3",
+          "title": "Write file",
+          "detail": "Copy file contents into allocated direct blocks.",
+          "tech": [
+            "C",
+            "File systems",
+            "CRC32"
+          ],
+          "payload": "{\n  \"stage\": \"Write file\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"MiniVSFS File System Tools\"\n}"
+        },
+        {
+          "id": "minivsfs-step-4",
+          "title": "Update metadata",
+          "detail": "Write directory entries, inode metadata and checksums back to the image.",
+          "tech": [
+            "C",
+            "File systems",
+            "CRC32"
+          ],
+          "payload": "{\n  \"stage\": \"Update metadata\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"MiniVSFS File System Tools\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "ON-DISK LAYOUT",
+        "description": "Systems",
+        "footer": "INODES / BITMAPS / BLOCKS",
+        "labels": [
+          "Create image",
+          "Allocate blocks",
+          "Write file",
+          "Update metadata"
+        ]
+      }
+    },
+    {
+      "id": "pet-segmentation",
+      "slug": "pet-segmentation",
+      "title": "Pet Segmentation & Classification",
+      "year": "2026",
+      "category": "AI / ML",
+      "summary": "A PyTorch project that predicts a pet's breed and separates it from the image background.",
+      "description": "I used the Oxford-IIIT Pet dataset to work on two tasks together: finding the animal in each image and predicting its breed. A shared U-Net encoder feeds a mask decoder and a classification head. I also implemented attention gates and wrote scripts for training, evaluation and visual comparisons.",
+      "stack": [
+        "Python",
+        "PyTorch",
+        "NumPy",
+        "Matplotlib",
+        "U-Net",
+        "Jupyter"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/Other-Courses/CSE428",
+      "liveUrl": "",
+      "role": "Image processing project",
+      "challenge": "Use the same image features for both a foreground mask and a breed prediction.",
+      "outcomes": [
+        "Prepared binary foreground masks from trimaps, including boundary pixels.",
+        "Implemented base and attention-gated U-Net variants with a joint classification head.",
+        "Prepared training, evaluation and three-panel prediction visualization tools; retained a short CPU training run locally."
+      ],
+      "limitations": "The saved local run is a short CPU experiment. It is useful for checking the training and visualization code, but it is not a final benchmark of the two variants.",
+      "flow": [
+        "Image + trimap",
+        "Shared encoder",
+        "Mask + class",
+        "Evaluation"
+      ],
+      "credits": [],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": false,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "pet-segmentation-step-1",
+          "title": "Image + trimap",
+          "detail": "Load Oxford-IIIT Pet images and convert trimaps into binary foreground masks.",
+          "tech": [
+            "Python",
+            "PyTorch",
+            "NumPy"
+          ],
+          "payload": "{\n  \"stage\": \"Image + trimap\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Pet Segmentation & Classification\"\n}"
+        },
+        {
+          "id": "pet-segmentation-step-2",
+          "title": "Shared encoder",
+          "detail": "Encode the image with shared U-Net features; the attention variant gates skip connections.",
+          "tech": [
+            "Python",
+            "PyTorch",
+            "NumPy"
+          ],
+          "payload": "{\n  \"stage\": \"Shared encoder\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Pet Segmentation & Classification\"\n}"
+        },
+        {
+          "id": "pet-segmentation-step-3",
+          "title": "Mask + class",
+          "detail": "Decode a segmentation mask and predict an image-level class from the bottleneck.",
+          "tech": [
+            "Python",
+            "PyTorch",
+            "NumPy"
+          ],
+          "payload": "{\n  \"stage\": \"Mask + class\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Pet Segmentation & Classification\"\n}"
+        },
+        {
+          "id": "pet-segmentation-step-4",
+          "title": "Evaluation",
+          "detail": "Evaluate mask overlap and classification metrics, then visualize true and predicted masks.",
+          "tech": [
+            "Python",
+            "PyTorch",
+            "NumPy"
+          ],
+          "payload": "{\n  \"stage\": \"Evaluation\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Pet Segmentation & Classification\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "SEGMENTATION STUDY",
+        "description": "AI / ML",
+        "footer": "IMAGE / MASK / BREED",
+        "labels": [
+          "Image + trimap",
+          "Shared encoder",
+          "Mask + class",
+          "Evaluation"
+        ]
+      }
+    },
+    {
+      "id": "opengl-games",
+      "slug": "opengl-games",
+      "title": "OpenGL Interactive Graphics",
+      "year": "",
+      "category": "Graphics",
+      "summary": "Two graphics assignments: a diamond-catching game and a 3D shooting game.",
+      "description": "These graphics projects helped me work through drawing, movement and camera controls in OpenGL. The 2D game draws with a midpoint line algorithm. The 3D game adds a player, enemies, projectiles and different camera views.",
+      "stack": [
+        "Python",
+        "PyOpenGL",
+        "GLUT",
+        "Computer graphics"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/CSE423",
+      "liveUrl": "",
+      "role": "Graphics projects",
+      "challenge": "Keep drawing, input and collision checks working together as the scene changes.",
+      "outcomes": [
+        "Used a midpoint line algorithm and point drawing to render the 2D diamond-catching scene.",
+        "Implemented input callbacks, collision checks, scoring and restart/pause behaviour in the game submissions.",
+        "Built a 3D scene with camera controls, moving enemies and projectiles."
+      ],
+      "limitations": "Based on assignment tasks and supplied templates. The repository also contains scaffold and assisted-development versions alongside my named submissions.",
+      "flow": [
+        "Input",
+        "Game state",
+        "Transforms",
+        "OpenGL render"
+      ],
+      "credits": [],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": false,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "opengl-games-step-1",
+          "title": "Input",
+          "detail": "Read keyboard and mouse callbacks for movement and game controls.",
+          "tech": [
+            "Python",
+            "PyOpenGL",
+            "GLUT"
+          ],
+          "payload": "{\n  \"stage\": \"Input\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"OpenGL Interactive Graphics\"\n}"
+        },
+        {
+          "id": "opengl-games-step-2",
+          "title": "Game state",
+          "detail": "Update positions, collisions, scores and game state.",
+          "tech": [
+            "Python",
+            "PyOpenGL",
+            "GLUT"
+          ],
+          "payload": "{\n  \"stage\": \"Game state\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"OpenGL Interactive Graphics\"\n}"
+        },
+        {
+          "id": "opengl-games-step-3",
+          "title": "Transforms",
+          "detail": "Apply coordinate, model and camera transforms for the current scene.",
+          "tech": [
+            "Python",
+            "PyOpenGL",
+            "GLUT"
+          ],
+          "payload": "{\n  \"stage\": \"Transforms\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"OpenGL Interactive Graphics\"\n}"
+        },
+        {
+          "id": "opengl-games-step-4",
+          "title": "OpenGL render",
+          "detail": "Draw the 2D or 3D scene through OpenGL and GLUT callbacks.",
+          "tech": [
+            "Python",
+            "PyOpenGL",
+            "GLUT"
+          ],
+          "payload": "{\n  \"stage\": \"OpenGL render\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"OpenGL Interactive Graphics\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "2D + 3D SCENES",
+        "description": "Graphics",
+        "footer": "INPUT / COLLISIONS / CAMERA",
+        "labels": [
+          "Input",
+          "Game state",
+          "Transforms",
+          "OpenGL render"
+        ]
+      }
+    },
+    {
+      "id": "recipe-database",
+      "slug": "recipe-database",
+      "title": "Recipe & Cultural Heritage Database",
+      "year": "",
+      "category": "Database design",
+      "summary": "ER and schema diagrams for a recipe collection with reviews and cultural details.",
+      "description": "I designed a database for traditional and modern recipes, including their ingredients and cultural background. Users can be linked to reviews and saved recipes, while tags and cultural details connect back to each recipe. The work includes an ER diagram and a relational schema.",
+      "stack": [
+        "Database design",
+        "ER modeling",
+        "draw.io"
+      ],
+      "repository": "https://github.com/muazibneashraf/Bracu_Courses/tree/main/CSE370",
+      "liveUrl": "",
+      "role": "Database design",
+      "challenge": "Decide which information belongs in its own entity and how the relationships should connect.",
+      "outcomes": [
+        "Modelled recipes, ingredients, cultural details, tags, users, reviews and saved recipes.",
+        "Represented traditional/modern recipe and admin/regular user specializations.",
+        "Prepared ER and schema diagrams to communicate relationships and key fields."
+      ],
+      "limitations": "The work consists of two database-design diagrams.",
+      "flow": [
+        "Recipes",
+        "Ingredients + culture",
+        "Users",
+        "Reviews + saved recipes"
+      ],
+      "credits": [],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": false,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "recipe-database-step-1",
+          "title": "Recipes",
+          "detail": "Model traditional and modern recipes with their identifying fields.",
+          "tech": [
+            "Database design",
+            "ER modeling",
+            "draw.io"
+          ],
+          "payload": "{\n  \"stage\": \"Recipes\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Recipe & Cultural Heritage Database\"\n}"
+        },
+        {
+          "id": "recipe-database-step-2",
+          "title": "Ingredients + culture",
+          "detail": "Connect ingredients, tags and cultural details to recipes.",
+          "tech": [
+            "Database design",
+            "ER modeling",
+            "draw.io"
+          ],
+          "payload": "{\n  \"stage\": \"Ingredients + culture\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Recipe & Cultural Heritage Database\"\n}"
+        },
+        {
+          "id": "recipe-database-step-3",
+          "title": "Users",
+          "detail": "Represent user entities and their admin/regular specialization.",
+          "tech": [
+            "Database design",
+            "ER modeling",
+            "draw.io"
+          ],
+          "payload": "{\n  \"stage\": \"Users\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Recipe & Cultural Heritage Database\"\n}"
+        },
+        {
+          "id": "recipe-database-step-4",
+          "title": "Reviews + saved recipes",
+          "detail": "Link reviews and saved recipes to both users and recipes in the schema.",
+          "tech": [
+            "Database design",
+            "ER modeling",
+            "draw.io"
+          ],
+          "payload": "{\n  \"stage\": \"Reviews + saved recipes\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Recipe & Cultural Heritage Database\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "RECIPE RELATIONSHIPS",
+        "description": "Database design",
+        "footer": "ENTITIES / KEYS / RELATIONSHIPS",
+        "labels": [
+          "Recipes",
+          "Ingredients + culture",
+          "Users",
+          "Reviews + saved recipes"
+        ]
+      }
+    },
+    {
+      "id": "central-public-college",
+      "slug": "central-public-college",
+      "title": "Central Public College Website",
+      "year": "",
+      "category": "Full-stack",
+      "summary": "A Bengali and English college website with an admin panel for content updates.",
+      "description": "I built this site for Gazipur Central Public College using React and TypeScript. It puts programs, admission guidance, campus photos and contact details in one place. The admin panel updates the same content used by the public pages through Firebase Realtime Database.",
+      "stack": [
+        "React",
+        "TypeScript",
+        "Vite",
+        "Firebase",
+        "Tailwind CSS"
+      ],
+      "repository": "https://github.com/muazibneashraf/Central-Public-college-Dashboard",
+      "liveUrl": "",
+      "role": "Website development",
+      "challenge": "Make college information easy to find on a phone and easy for the admin to update.",
+      "outcomes": [
+        "Built responsive public sections and mobile navigation for college and admission information.",
+        "Connected editable site content to an admin portal and Firebase Realtime Database integration.",
+        "Included loading states, scroll reveals and fallback content."
+      ],
+      "limitations": "The site includes fallback content so its public information can still be shown when the database is unavailable.",
+      "flow": [
+        "Admin edit",
+        "Firebase content",
+        "React interface",
+        "Public information"
+      ],
+      "credits": [],
+      "cover": "",
+      "coverCrop": {
+        "x": 50,
+        "y": 50,
+        "zoom": 100,
+        "fit": "contain"
+      },
+      "featured": true,
+      "aspect": "landscape",
+      "videoUrl": "",
+      "gallery": [],
+      "galleryCrops": [],
+      "walkthroughSteps": [
+        {
+          "id": "central-public-college-step-1",
+          "title": "Admin edit",
+          "detail": "Edit the college's public content through the admin portal.",
+          "tech": [
+            "React",
+            "TypeScript",
+            "Vite"
+          ],
+          "payload": "{\n  \"stage\": \"Admin edit\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Central Public College Website\"\n}"
+        },
+        {
+          "id": "central-public-college-step-2",
+          "title": "Firebase content",
+          "detail": "Read shared content through Firebase Realtime Database integration.",
+          "tech": [
+            "React",
+            "TypeScript",
+            "Vite"
+          ],
+          "payload": "{\n  \"stage\": \"Firebase content\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Central Public College Website\"\n}"
+        },
+        {
+          "id": "central-public-college-step-3",
+          "title": "React interface",
+          "detail": "Render the bilingual public interface with React and TypeScript.",
+          "tech": [
+            "React",
+            "TypeScript",
+            "Vite"
+          ],
+          "payload": "{\n  \"stage\": \"React interface\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Central Public College Website\"\n}"
+        },
+        {
+          "id": "central-public-college-step-4",
+          "title": "Public information",
+          "detail": "Present academic programs, admission guidance, gallery and contact information.",
+          "tech": [
+            "React",
+            "TypeScript",
+            "Vite"
+          ],
+          "payload": "{\n  \"stage\": \"Public information\",\n  \"context\": \"Illustrative workflow\",\n  \"project\": \"Central Public College Website\"\n}"
+        }
+      ],
+      "visual": {
+        "kind": "custom",
+        "heading": "CONTENT EDITING",
+        "description": "Full-stack",
+        "footer": "PUBLIC PAGES / CONTENT UPDATES",
+        "labels": [
+          "Admin edit",
+          "Firebase content",
+          "React interface",
+          "Public information"
+        ]
+      }
     }
   ],
   "extracurricular": {
@@ -576,7 +1312,7 @@
         "title": "BRAC University Business Club — BIZ BEE",
         "role": "Senior Executive, Organising & Management",
         "year": "Jan 2022 — Jan 2024",
-        "description": "Served in an organizing and management leadership role within the university business club.",
+        "description": "I helped organize club activities as part of the organising and management team.",
         "image": "",
         "imageCrop": {
           "x": 50,
@@ -590,7 +1326,7 @@
         "title": "BRAC University Entrepreneurship Development Forum",
         "role": "Junior Executive",
         "year": "Feb 2022 — 2024",
-        "description": "Participated in the university’s entrepreneurship community as a junior executive.",
+        "description": "I was a junior executive in the forum during my time at BRAC University.",
         "image": "",
         "imageCrop": {
           "x": 50,
@@ -604,7 +1340,7 @@
         "title": "BRAC University Computer Club",
         "role": "General Member",
         "year": "Jan 2022 — Present",
-        "description": "Part of the university’s computer science and technology community.",
+        "description": "I was a general member while studying computer science at BRAC University.",
         "image": "",
         "imageCrop": {
           "x": 50,
@@ -618,7 +1354,7 @@
         "title": "Rajuk College Art Club",
         "role": "Secretary, Communication",
         "year": "Dec 2019 — Dec 2020",
-        "description": "Held a communication leadership role in the college art club.",
+        "description": "I handled communications as the club's secretary.",
         "image": "",
         "imageCrop": {
           "x": 50,
@@ -632,7 +1368,7 @@
         "title": "Ashia Foundation",
         "role": "Volunteer",
         "year": "Nov 2018 — Present",
-        "description": "Ongoing involvement in community volunteering.",
+        "description": "I've volunteered with Ashia Foundation since 2018.",
         "image": "",
         "imageCrop": {
           "x": 50,
@@ -780,7 +1516,9 @@
             "HTML",
             "CSS",
             "Bootstrap 5",
-            "Jinja"
+            "Jinja",
+            "Vite",
+            "Firebase"
           ]
         },
         {
@@ -793,7 +1531,8 @@
             "SQLite",
             "PostgreSQL",
             "SQLAlchemy",
-            "NumPy"
+            "NumPy",
+            "pandas"
           ]
         },
         {
@@ -803,7 +1542,9 @@
           "items": [
             "PyTorch",
             "CNN",
-            "LSTM / BiLSTM"
+            "LSTM / BiLSTM",
+            "scikit-learn",
+            "U-Net"
           ]
         },
         {
@@ -817,7 +1558,10 @@
             "Render",
             "Vercel",
             "VS Code",
-            "Figma"
+            "Figma",
+            "Flex",
+            "Bison",
+            "PyOpenGL"
           ]
         },
         {
@@ -852,10 +1596,10 @@
     "walkthrough": {
       "eyebrow": "PROJECT WALKTHROUGHS",
       "title": "How the projects work",
-      "intro": "Select a project, then follow one request through its main stages.",
-      "modeLabel": "LIVE REQUEST TRACE",
-      "requestLabel": "REQUEST",
-      "stepDetail": "A key stage in the {project} workflow.",
+      "intro": "Choose a project and step through how it works.",
+      "modeLabel": "PROJECT FLOW",
+      "requestLabel": "STEP",
+      "stepDetail": "The example below shows the shape of the data at this step.",
       "linkLabel": "Explore"
     },
     "capabilities": {
@@ -885,9 +1629,9 @@
       ]
     },
     "projectsPage": {
-      "eyebrow": "PROJECTS / SELECTED WORK",
+      "eyebrow": "PROJECTS",
       "title": "My projects",
-      "intro": "My thesis, course projects, and personal applications. Each case study explains what I worked on and links to the code where available."
+      "intro": "Things I've built and worked on, from course assignments to web applications. Open a project for the details and code."
     },
     "contactPage": {
       "eyebrow": "CONTACT",

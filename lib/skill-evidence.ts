@@ -1,5 +1,8 @@
 // Relations come from editable project metadata, never inferred proficiency.
 export function normalizeTechnology(value: string) {
+  const language = value.trim().toLowerCase();
+  if (["c++", "cpp", "cplusplus"].includes(language)) return "cpp";
+  if (["c#", "csharp"].includes(language)) return "csharp";
   const normalized = value.toLowerCase().replace(/[^a-z0-9]/g, "");
   const aliases: Record<string, string> = { nextjs: "next", nodejs: "node", postgres: "postgresql", lstmbilstm: "lstm", bilstm: "lstm", bootstrap5: "bootstrap" };
   return aliases[normalized] ?? normalized;

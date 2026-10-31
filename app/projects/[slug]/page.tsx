@@ -55,7 +55,7 @@ export default async function ProjectPage({
         </Link>
         <header className="page-intro">
           <p className="eyebrow">
-            {project.category} / {project.year}
+            {[project.category, project.year].filter(Boolean).join(" / ")}
           </p>
           <ProjectTransition slug={project.slug} part="title"><h1>{headingText(project.title)}</h1></ProjectTransition>
           <p>{project.summary}</p>

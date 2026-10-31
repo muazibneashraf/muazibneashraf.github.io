@@ -14,17 +14,15 @@ for (const folder of ["cmaps", "standard_fonts", "wasm"])
 // Ensure static resume PDF is always present in public/
 const resumesDir = join(process.cwd(), "data", "resumes");
 if (existsSync(resumesDir)) {
-  const { stat } = await import("node:fs/promises");
   const files = await readdir(resumesDir);
   const jsonFiles = files.filter(f => f.endsWith(".json"));
-  if (jsonFiles.length > 0) {
-    const statFiles = await Promise.all(jsonFiles.map(async f => ({
-      name: f,
-      mtime: (await stat(join(resumesDir, f))).mtimeMs
-    })));
-    statFiles.sort((a, b) => b.mtime - a.mtime);
-    const latest = statFiles[0].name;
-    const raw = JSON.parse(await readFile(join(resumesDir, latest), "utf-8"));
+    const content = JSON.parse(await readFile(join(process.cwd(), "data", "portfolio-content.json"), "utf8"));
+    const hash = new URL(content.identity.resumeUrl, "http://localhost").searchParams.get("v");
+    // Restore the published selection, never an unrelated older draft by mtime.
+    const selected = hash && /^[a-f0-9]{8,64}$/.test(hash)
+      ? jsonFiles.find(file => file.slice(0, -5).startsWith(hash)) : undefined;
+    if (selected) {
+      const raw = JSON.parse(await readFile(join(resumesDir, selected), "utf-8"));
     if (raw.base64) {
       const buf = Buffer.from(raw.base64, "base64");
       await writeFile(join(process.cwd(), "public", "Muaz_Ibne_Ashraf_CV.pdf"), buf);

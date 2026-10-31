@@ -97,7 +97,9 @@
 .site-frame .research-note { font-size: 12px; line-height: 1.7; }
 .site-frame .trace-workbench { border-color: var(--panel-border); border-radius: 20px; box-shadow: 0 24px 70px -45px #000b; }
 .site-frame .trace-toolbar { background: color-mix(in srgb, var(--surface) 88%, var(--bg)); border-bottom-color: var(--panel-border); }
-.site-frame .trace-projects button[aria-pressed="true"] { border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); box-shadow: none; }
+.trace-project-picker { display: flex; align-items: center; gap: 16px; min-width: 0; width: min(100%, 520px); }
+.trace-project-picker > .mono { color: var(--muted); font-size: 9px; letter-spacing: 1.1px; }
+@media (max-width: 760px) { .trace-project-picker { gap: 0; } .trace-project-picker > .mono, .trace-window-controls { display: none; } }
 .site-frame .trace-track { background-image: radial-gradient(color-mix(in srgb, var(--blue) 12%, transparent) 1px, transparent 1px); }
 .site-frame .trace-node { border-color: var(--panel-border); background: linear-gradient(155deg, color-mix(in srgb, var(--surface) 90%, var(--bg)), color-mix(in srgb, var(--surface) 70%, var(--bg))); box-shadow: none; }
 .site-frame .trace-node:hover { border-color: color-mix(in srgb, var(--accent) 28%, var(--line)); box-shadow: none; transform: translateY(-2px); }
@@ -109,12 +111,12 @@
 .site-frame .trace-section { --section-inset: clamp(40px, 5svh, 64px); padding-block: var(--section-inset); }
 .site-frame .trace-toolbar { padding: 10px 20px; }
 .site-frame .trace-track { padding: 16px 20px 36px; gap: 12px; }
-.site-frame .trace-inspector { background: color-mix(in srgb, var(--bg) 85%, var(--surface)); border-top-color: var(--panel-border); height: auto; max-height: none; min-height: 230px; padding: 24px; grid-template-columns: 64px minmax(0, .85fr) minmax(0, 1.3fr); gap: 16px 24px; align-items: start; }
+.site-frame .trace-inspector { background: color-mix(in srgb, var(--surface) 90%, transparent); border-top-color: var(--panel-border); height: auto; max-height: none; min-height: 230px; padding: 24px; grid-template-columns: 64px minmax(0, .85fr) minmax(0, 1.3fr); gap: 16px 24px; align-items: start; }
 .site-frame .trace-step-count { grid-row: 1 / span 2; height: 100%; padding-right: 16px; }
 .site-frame .trace-explanation { grid-column: 2; grid-row: 1; }
 .site-frame .trace-inspector[data-has-payload="false"] .trace-explanation { grid-column: 2 / -1; }
-.site-frame .trace-payload-preview { background: color-mix(in srgb, var(--surface) 72%, var(--bg)); border-color: var(--panel-border); box-shadow: none; grid-column: 3; grid-row: 1 / span 2; margin-top: 0; min-width: 0; }
-.site-frame .trace-payload-bar { background: color-mix(in srgb, var(--bg) 65%, var(--surface)); border-bottom-color: var(--panel-border); }
+.site-frame .trace-payload-preview { background: color-mix(in srgb, var(--surface) 94%, var(--blue)); border-color: var(--panel-border); box-shadow: none; grid-column: 3; grid-row: 1 / span 2; margin-top: 0; min-width: 0; }
+.site-frame .trace-payload-bar { background: color-mix(in srgb, var(--surface) 90%, var(--blue)); border-bottom-color: var(--panel-border); }
 .site-frame .trace-payload-body { color: color-mix(in srgb, var(--ink) 82%, var(--accent)); font-size: 13px; line-height: 1.7; height: 170px; max-height: 220px; padding: 14px 16px; }
 .site-frame .trace-explanation > p:not(.eyebrow) { font-size: 15px; line-height: 1.8; color: var(--reading-ink); }
 .site-frame .trace-explanation > p.trace-note { font-size: 12px; line-height: 1.65; margin-top: 8px; }
@@ -136,7 +138,15 @@
 .site-frame .contact-page-intro h1 { font-weight: 500; letter-spacing: -.015em; line-height: 1.2; }
 .site-frame .page-intro h1 { letter-spacing: -.015em; line-height: 1.2; }
 .site-frame .page-intro > p:not(.eyebrow), .site-frame .contact-page-intro > p:not(.eyebrow) { font-size: 17px; line-height: 1.85; max-width: 64ch; }
-.site-frame .project-narrative section { max-width: 68ch; margin-bottom: 52px; }
+.site-frame .project-overview { grid-template-columns: 220px minmax(0, 1fr); gap: clamp(32px, 3.5vw, 56px); }
+.site-frame .project-narrative { min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 40px 44px; align-items: start; }
+.site-frame .project-narrative section { min-width: 0; max-width: none; margin: 0; }
+.site-frame .project-narrative section.project-gallery { grid-column: 1 / -1; }
+.site-frame .project-narrative p { margin-block: 0; }
+.site-frame .project-narrative ul { margin-block: 0; }
+.site-frame .project-narrative .project-context { border-left: 0; border-top: 1px solid color-mix(in srgb, var(--lilac) 25%, var(--line)); padding: 20px 0 0; }
+@media (max-width: 1279px) { .site-frame .project-narrative { grid-template-columns: minmax(0, 1fr); gap: 36px; } }
+@media (max-width: 760px) { .site-frame .project-overview { grid-template-columns: minmax(0, 1fr); gap: 32px; } }
 .site-frame .project-narrative p, .site-frame .project-narrative li { font-size: 16px; line-height: 1.9; color: var(--reading-ink); }
 .site-frame .project-narrative h2 { line-height: 1.3; letter-spacing: -.01em; margin-bottom: 20px; }
 .site-frame .project-overview aside p, .site-frame .detail-flow > div { font-size: 14px; line-height: 1.8; }
@@ -144,23 +154,16 @@
 .site-frame .capability-card p, .site-frame .experience-description, .site-frame .research-copy > p:not(.research-badge), .site-frame .contact-bottom > p { font-size: 15px; line-height: 1.85; color: var(--reading-ink); }
 .site-frame .capability-card h3, .site-frame .experience-row h3 { letter-spacing: -.01em; line-height: 1.4; }
 .site-frame .experience-row p { font-size: 15px; line-height: 1.85; }
+.site-frame .evidence-instruction { font-size: 15px; line-height: 1.8; color: var(--reading-ink); }
 .site-frame .contact-form label, .site-frame .contact-details dd { font-size: 15px; line-height: 1.7; }
 .site-frame .contact-form label { margin-bottom: 24px; }
 .site-frame .contact-form input, .site-frame .contact-form textarea { padding: 14px; line-height: 1.65; }
 .site-frame .project-filters button { font-size: 14px; padding: 12px 16px; }
-.site-frame .evidence-instruction, .site-frame .evidence-caption p { font-size: 15px; line-height: 1.8; color: var(--reading-ink); }
 .site-frame .skill-family { padding-bottom: 18px; }
 .site-frame .skill-family:last-child { padding-bottom: 0; }
 .site-frame .skill-options { gap: 6px; }
 .site-frame .evidence-instruction { margin-bottom: 18px; }
 .site-frame .evidence-panel { padding: 24px; }
-.site-frame .evidence-map { margin-block: 16px; }
-.site-frame .evidence-panel-heading { font-size: 11px; letter-spacing: .8px; }
-.site-frame .evidence-project small { font-size: 10px; line-height: 1.6; }
-.site-frame .evidence-project strong { font-size: 15px; line-height: 1.45; font-weight: 500; letter-spacing: normal; }
-.site-frame .evidence-source strong { font-weight: 500; }
-.site-frame .evidence-caption { min-height: 100px; padding-top: 18px; }
-.site-frame .evidence-caption > strong { font-size: 12px; }
 .site-frame .contact-form input, .site-frame .contact-form textarea { background: color-mix(in srgb, var(--bg) 74%, var(--surface)); border-color: color-mix(in srgb, var(--muted) 26%, var(--line)); }
 .site-frame .site-footer { min-height: 0; padding-block: 16px; background: color-mix(in srgb, var(--surface) 35%, var(--bg)); border-top-color: color-mix(in srgb, var(--muted) 10%, transparent); gap: 18px; }
 .site-frame .site-footer > p { margin-block: 0; width: auto; flex: 1 0 auto; }
@@ -169,7 +172,6 @@
   .site-frame .nav-links { font-size: 13px; }
   .site-frame .about-portrait-frame { width: 132px; transform: none; }
   .site-frame .skill-evidence { grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: clamp(32px, 3vw, 48px); }
-  .site-frame .evidence-map { height: calc(var(--evidence-map-height) * .84); }
 }
 @media (min-width: 761px) and (max-width: 1100px) {
   .site-frame .trace-inspector { grid-template-columns: 64px minmax(0, 1fr); }
@@ -203,7 +205,6 @@
   .site-frame .trace-projects button { flex: 0 0 auto; white-space: nowrap; }
   .site-frame .trace-payload-body { padding: 16px; }
   .site-frame .featured-project-grid > .project-card:not(:first-child) .project-card-copy { padding: 26px; }
-  .site-frame .evidence-project strong { font-size: 14px; }
   .site-frame .skill-family { padding-bottom: 0; }
   .site-frame .skill-options button { min-height: 40px; }
   .site-frame .skill-mobile-families button { font-size: 13px; padding: 11px 15px; }
@@ -211,10 +212,6 @@
 }
 @media (max-width: 500px) {
   .site-frame .evidence-panel { padding: 20px 14px; }
-  .site-frame .evidence-source { left: 0; width: 40%; padding-inline: 4px; }
-  .site-frame .evidence-source strong { font-size: clamp(16px, 4.5vw, 20px); }
-  .site-frame .evidence-destinations { left: 48%; }
-  .site-frame .evidence-map > svg { width: 82.7586%; }
 }
 /* A desktop section owns the space below the sticky header. The content keeps
    its natural height, with the remaining room used as space around it. */

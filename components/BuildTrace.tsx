@@ -4,6 +4,7 @@ import { headingText } from "@/lib/editable-content";
 import Link from "next/link";
 import { useEffect, useMemo, useRef, useState } from "react";
 import type { Project, ContentSections } from "@/lib/types";
+import { ProjectChooser } from "./ProjectChooser";
 
 type TraceStep = {
   id: string;
@@ -94,18 +95,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
               <span className="dot-lilac" />
               <span className="dot-cyan" />
             </div>
-            <div className="trace-projects" aria-label="Choose a project">
-              {availableProjects.map((item, index) => (
-                <button
-                  aria-pressed={index === projectIndex}
-                  key={item.slug}
-                  onClick={() => selectProject(index)}
-                  type="button"
-                >
-                  {item.title}
-                </button>
-              ))}
-            </div>
+            <ProjectChooser projects={availableProjects} selectedIndex={projectIndex} onSelect={selectProject} />
             <span className="trace-mode mono">{settings.modeLabel}</span>
           </div>
 
@@ -140,7 +130,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
           <div className="trace-inspector" data-has-payload={Boolean(activeStep.payload)} aria-live="polite">
             <div className="trace-step-count mono">
               <span>STAGE</span>
-              <strong>{String(stepIndex + 1).padStart(2, "0")}</strong>
+              <strong key={activeStep.id}>{String(stepIndex + 1).padStart(2, "0")}</strong>
               <span>OF {String(steps.length).padStart(2, "0")}</span>
             </div>
             <div className="trace-explanation" key={activeStep.title}>
@@ -156,7 +146,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
             {activeStep.payload && (
                 <div className="trace-payload-preview" key={activeStep.id}>
                   <div className="trace-payload-bar mono">
-                    <span className="mint">◈ ILLUSTRATIVE STAGE SCHEMA</span>
+                    <span className="mint">◈ EXAMPLE DATA</span>
                     <span>JSON</span>
                   </div>
                   <pre className="trace-payload-body mono">

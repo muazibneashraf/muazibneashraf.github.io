@@ -12,3 +12,12 @@ test('skill connections use editable project evidence with exact technology alia
  assert.equal(projectUsesSkill({stack:[]},'Flask'),false,'removing a technology removes its connection');
  assert.equal(projectUsesSkill({},'Flask'),false);
 });
+
+test('C, C++ and C# are distinct technologies in project connections',()=>{
+ assert.equal(projectUsesSkill({stack:['C']},'C++'),false);
+ assert.equal(projectUsesSkill({stack:['C++']},'C'),false);
+ assert.equal(projectUsesSkill({stack:['C#']},'C'),false);
+ assert.equal(projectUsesSkill({stack:['C++']},'CPP'),true);
+ assert.equal(projectUsesSkill({stack:['C#']},'CSharp'),true);
+ assert.equal(projectUsesSkill({stack:['C++']},'C#'),false);
+});

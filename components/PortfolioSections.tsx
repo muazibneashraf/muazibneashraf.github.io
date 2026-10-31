@@ -5,7 +5,7 @@ import Image from "next/image";
 import type { SiteContent } from "@/lib/types";
 import { gmailComposeUrl } from "@/lib/gmail";
 import { Reveal } from "./Reveal";
-import { ProjectCard } from "./ProjectCard";
+import { HomeProjects } from "./HomeProjects";
 import { CopyEmail } from "./CopyEmail";
 import { AboutDetails } from "./AboutDetails";
 import { CroppedImage } from "./CroppedImage";
@@ -37,7 +37,6 @@ export function SectionHeading({
 }
 
 export function WorkSection({ content }: { content: SiteContent }) {
-  const projects = content.projects.filter((project) => project.featured);
   return (
     <section id="work" className="section work-section wrap">
       <SectionHeading
@@ -50,11 +49,7 @@ export function WorkSection({ content }: { content: SiteContent }) {
         }
       />
       {content.sections.work.intro && <p className="section-lede">{content.sections.work.intro}</p>}
-      <div className="project-grid featured-project-grid">
-        {projects.map((project) => (
-          <ProjectCard key={project.id} project={project} labels={content.sections.projectPage} />
-        ))}
-      </div>
+      <HomeProjects projects={content.projects} labels={content.sections.projectPage} />
     </section>
   );
 }

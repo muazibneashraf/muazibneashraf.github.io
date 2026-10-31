@@ -1,0 +1,76 @@
+.academic-visual { --academic-accent: var(--visual-accent, #4ddbf5); color: var(--academic-accent); background: radial-gradient(ellipse at 35% 45%, color-mix(in srgb, var(--academic-accent) 10%, transparent), transparent 75%), var(--surface); }
+.academic-visual[data-category="research"] { --academic-accent: var(--lilac, #ad98ee); }
+.academic-diagram { width: 100%; flex: 1; min-height: 0; max-height: 310px; overflow: visible; }
+.academic-diagram text { font: 10px var(--font-mono); fill: currentColor; stroke: none; }
+.academic-panel { fill: color-mix(in srgb, var(--academic-accent) 5%, var(--surface)); stroke: currentColor; stroke-opacity: .55; stroke-width: 1; }
+.academic-grid { fill: none; stroke: currentColor; stroke-width: .7; opacity: .14; }
+.academic-wire, .academic-lines { fill: none; stroke: currentColor; stroke-width: 1.2; stroke-opacity: .5; }
+.academic-node, .academic-packet { fill: currentColor; }
+.academic-packet { offset-distance: 0%; animation: academic-travel 4s linear infinite; filter: drop-shadow(0 0 4px currentColor); }
+@keyframes academic-travel { 0% { offset-distance: 0%; opacity: 0; } 12%, 85% { opacity: .85; } 100% { offset-distance: 100%; opacity: 0; } }
+.churn-region { fill: currentColor; opacity: .05; }
+.churn-point { fill: currentColor; animation: churn-classify 5s ease-in-out infinite; }
+.churn-point.point-1 { fill: #51d3e9; }
+.churn-boundary { stroke-dasharray: 5 5; stroke-opacity: .8; }
+.churn-sweep { stroke: currentColor; opacity: .18; stroke-width: 16; animation: churn-scan 5s ease-in-out infinite; }
+.churn-cell { fill: currentColor; opacity: .12; }
+.churn-cell.cell-0, .churn-cell.cell-3 { opacity: .45; animation: churn-classify 5s ease-in-out infinite; }
+@keyframes churn-classify { 0%, 100% { opacity: .25; } 55% { opacity: .9; } }
+@keyframes churn-scan { 0%, 100% { transform: translateX(0); opacity: 0; } 10%, 85% { opacity: .12; } 90% { transform: translateX(295px); opacity: 0; } }
+.compiler-code { stroke: currentColor; stroke-width: 3; stroke-linecap: round; stroke-dasharray: 1; animation: compiler-read 5s ease-in-out infinite; }
+.compiler-gutter { opacity: .35; }
+.compiler-caret { stroke: currentColor; animation: compiler-blink 1s steps(1) infinite; }
+.compiler-ast-node { fill: var(--surface); stroke: currentColor; stroke-opacity: .6; }
+@keyframes compiler-read { 0%, 15% { stroke-dashoffset: 1; opacity: .25; } 50%, 85% { stroke-dashoffset: 0; opacity: .8; } 100% { stroke-dashoffset: 0; opacity: .25; } }
+@keyframes compiler-blink { 50% { opacity: 0; } }
+.fs-disc { fill: currentColor; fill-opacity: .035; stroke: currentColor; stroke-opacity: .4; }
+.fs-platter { transform-origin: 420px 128px; animation: fs-rotate 18s linear infinite; }
+.fs-sectors { stroke: currentColor; stroke-opacity: .2; fill: none; }
+.fs-written { stroke: currentColor; stroke-width: 13; stroke-opacity: .4; fill: none; }
+.fs-bit { fill: none; stroke: currentColor; stroke-opacity: .3; }
+.fs-bit.allocated { fill: currentColor; fill-opacity: .22; animation: fs-allocate 6s ease-in-out infinite; }
+.fs-head { fill: var(--surface); stroke: currentColor; stroke-width: 3; transform-origin: 552px 219px; animation: fs-seek 7s ease-in-out infinite; }
+@keyframes fs-rotate { to { transform: rotate(360deg); } }
+@keyframes fs-seek { 50% { transform: rotate(15deg); } }
+@keyframes fs-allocate { 50% { fill-opacity: .6; } }
+.vision-image { fill: currentColor; fill-opacity: .03; stroke: currentColor; stroke-opacity: .25; }
+.vision-backdrop { fill: currentColor; fill-opacity: .06; }
+.vision-cat { fill: #d6b494; fill-opacity: .35; stroke: #d6b494; stroke-opacity: .55; }
+.vision-cat-face { stroke: currentColor; stroke-width: 3; stroke-linecap: round; fill: none; }
+.vision-mask { fill: currentColor; fill-opacity: .25; animation: vision-mask 6s ease-in-out infinite; }
+.vision-contour { fill: none; stroke: currentColor; stroke-width: 2; stroke-dasharray: 1; animation: vision-contour 6s ease-in-out infinite; }
+.vision-scan { stroke: currentColor; stroke-opacity: .55; animation: vision-scan 6s ease-in-out infinite; }
+@keyframes vision-mask { 0%, 15%, 100% { clip-path: inset(0 0 100% 0); } 65%, 85% { clip-path: inset(0); } }
+@keyframes vision-contour { 0%, 15%, 100% { stroke-dashoffset: 1; } 65%, 85% { stroke-dashoffset: 0; } }
+@keyframes vision-scan { 0%, 15%, 100% { transform: translateY(0); opacity: 0; } 25%, 65% { opacity: .5; } 80% { transform: translateY(120px); opacity: 0; } }
+.graphics-divider { stroke: currentColor; opacity: .15; }
+.graphics-falling-gem { fill: currentColor; fill-opacity: .2; stroke: currentColor; animation: graphics-fall 4s ease-in infinite; }
+.graphics-catcher { fill: none; stroke: currentColor; stroke-width: 2; animation: graphics-catch 4s ease-in-out infinite; }
+.graphics-player { fill: currentColor; fill-opacity: .3; stroke: currentColor; transform-origin: 412px 168px; animation: graphics-aim 8s ease-in-out infinite; }
+.graphics-enemy { fill: currentColor; animation: graphics-enemy 5s ease-in-out infinite alternate; }
+.graphics-enemy.enemy-second { animation-delay: -2s; }
+@keyframes graphics-fall { 0% { transform: translateY(0); opacity: 0; } 10%, 85% { opacity: 1; } 95%, 100% { transform: translateY(135px); opacity: 0; } }
+@keyframes graphics-catch { 0%, 100% { transform: translateX(-35px); } 85% { transform: translateX(0); } }
+@keyframes graphics-aim { 50% { transform: rotate(-65deg); } }
+@keyframes graphics-enemy { to { transform: translate(-12px, 9px); } }
+.database-relation { fill: none; stroke: currentColor; stroke-opacity: .25; }
+.database-entity-halo { fill: currentColor; fill-opacity: .04; stroke: currentColor; stroke-opacity: .3; animation: database-query 6s ease-in-out infinite; }
+.database-book { fill: var(--surface); stroke: currentColor; stroke-width: 1.4; }
+@keyframes database-query { 50% { fill-opacity: .25; stroke-opacity: .8; } }
+.college-hero { fill: currentColor; fill-opacity: .07; }
+.college-campus { fill: none; stroke: currentColor; stroke-opacity: .65; }
+.college-heading { stroke: currentColor; stroke-width: 5; stroke-linecap: round; animation: college-edit 7s ease-in-out infinite; }
+.college-content rect { fill: currentColor; fill-opacity: .05; stroke: currentColor; stroke-opacity: .2; }
+.college-content path { stroke: currentColor; stroke-opacity: .5; }
+.college-content { animation: college-edit 7s ease-in-out infinite; }
+.college-mobile { fill: var(--surface); stroke: currentColor; stroke-opacity: .65; stroke-width: 1.3; }
+.college-update { fill: currentColor; fill-opacity: .14; stroke: currentColor; stroke-width: 1.2; }
+@keyframes college-edit { 0%, 100% { opacity: .45; } 50%, 75% { opacity: 1; } }
+html[data-motion-paused="true"] .academic-diagram * { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) { .academic-diagram * { animation: none !important; } .academic-packet, .churn-sweep, .vision-scan { opacity: 0; } }
+.home-project-viewport { overflow: clip; overflow-anchor: none; }
+.home-project-expansion { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 32px; overflow-anchor: none; }
+.home-project-expansion .button { gap: 22px; }
+.home-project-expansion > .mono { color: var(--muted); font-size: 10px; }
+.site-frame .trace-mode { flex-shrink: 0; }
+@media (max-width: 760px) { .site-frame .trace-mode { display: none; } }

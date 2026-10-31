@@ -2,12 +2,15 @@ import type { Project } from "@/lib/types";
 import { CroppedImage } from "./CroppedImage";
 import { LotteryDiagram, StudioDiagram } from "./ProjectScenes";
 import { IcuDiagram, CommunityDiagram } from "./ProjectWorkflows";
+import { AcademicProjectVisual, hasAcademicVisual } from "./AcademicProjectVisual";
 
 export function ProjectVisual({ project }: { project: Project }) {
   const category = /ai|ml|research/i.test(project.category) ? "research" : /back/i.test(project.category) ? "backend" : "fullstack";
   if (project.cover) return <div className="project-visual project-cover" data-category={category}>
     <CroppedImage src={project.cover} crop={project.coverCrop} alt={project.title} loading="lazy" />
   </div>;
+
+  if (hasAcademicVisual(project.id)) return <AcademicProjectVisual project={project} />;
 
   const config = project.visual;
   if (!config || config.kind === "custom") return <div className="project-visual visual-lottery" data-category={category}>

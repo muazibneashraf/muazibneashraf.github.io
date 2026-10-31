@@ -10,6 +10,7 @@ export function ProjectsArchive({ projects, labels }: { projects: Project[]; lab
     (p) => filter === "All" || p.category === filter,
   );
   function selectFilter(next: string) {
+    if (next === filter) return;
     startTransition(() => {
       addTransitionType("project-filter");
       setFilter(next);
@@ -20,11 +21,12 @@ export function ProjectsArchive({ projects, labels }: { projects: Project[]; lab
       <div className="project-filters" aria-label="Filter projects">
         {filters.map((f) => (
           <button
+            type="button"
             key={f}
             aria-pressed={f === filter}
             onClick={() => selectFilter(f)}
           >
-            {f === filter && <ViewTransition name="project-filter-selection" default="none" share="project-filter-selection"><span className="project-filter-indicator" aria-hidden="true" /></ViewTransition>}
+            <span className="project-filter-indicator" aria-hidden="true" />
             <span className="project-filter-label">{f === "All" ? "All categories" : f}</span>
             <span className="project-filter-count">
               {f === "All"

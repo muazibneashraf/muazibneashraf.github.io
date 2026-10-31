@@ -1,0 +1,21 @@
+# Deploy source and public assets; keep local credentials and review artifacts local.
+.git/
+.next/
+node_modules/
+.vercel/
+.env*
+out/
+output/
+outputs/
+tmp/
+coverage/
+.codex-tmp/
+.sites-runtime/
+.vinext/
+.wrangler/
+.openai/
+dist/
+public/pdfjs/
+data/resumes/
+data/messages.json
+*.tsbuildinfo

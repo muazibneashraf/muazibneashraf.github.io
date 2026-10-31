@@ -1,0 +1,44 @@
+.trace-project-picker { position: relative; }
+.trace-chooser-anchor { position: relative; flex: 1; min-width: 0; z-index: 5; }
+.trace-chooser-trigger { display: flex; align-items: center; gap: 12px; width: 100%; min-height: 44px; padding: 10px 13px; text-align: left; border: 1px solid color-mix(in srgb, var(--accent) 25%, var(--line)); border-radius: 9px; background: color-mix(in srgb, var(--accent) 4%, var(--surface)); color: var(--ink); transition: border-color .2s ease, background .2s ease; }
+.trace-chooser-trigger:hover, .trace-chooser-trigger[aria-expanded="true"] { border-color: color-mix(in srgb, var(--accent) 65%, var(--line)); background: color-mix(in srgb, var(--accent) 7%, var(--surface)); }
+.trace-chooser-emblem { width: 22px; height: 22px; flex: 0 0 auto; stroke: var(--accent); stroke-width: 1.2; stroke-linecap: round; }
+.trace-chooser-current { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 14px; line-height: 1.5; animation: trace-choice-arrive .3s ease-out; }
+.trace-chooser-chevron { margin-left: auto; width: 16px; height: 16px; flex: 0 0 auto; stroke: var(--accent); stroke-width: 1.3; transition: transform .25s ease; }
+.trace-chooser-chevron[data-open="true"] { transform: rotate(180deg); }
+.trace-project-menu { position: absolute; left: 0; top: calc(100% + 9px); width: 640px; max-width: calc(100vw - 100px); z-index: 10; border: 1px solid color-mix(in srgb, var(--accent) 24%, var(--line)); border-radius: 13px; background: color-mix(in srgb, var(--surface) 97%, var(--blue)); box-shadow: 0 18px 45px -15px #000a; opacity: 0; visibility: hidden; pointer-events: none; transform: translateY(-7px) scale(.985); transform-origin: top left; transition: opacity .18s ease, transform .24s cubic-bezier(.22, 1, .36, 1), visibility .24s; }
+.trace-project-menu[data-open="true"] { opacity: 1; visibility: visible; pointer-events: auto; transform: translateY(0) scale(1); }
+.trace-menu-heading { display: flex; align-items: center; justify-content: space-between; gap: 16px; padding: 15px 18px; border-bottom: 1px solid var(--panel-border); color: var(--ink); font-size: 13px; }
+.trace-menu-heading .mono { color: var(--muted); font-size: 9px; }
+.trace-menu-options { position: relative; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; max-height: min(340px, calc(100svh - 260px)); overflow-y: auto; padding: 9px; scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+.trace-menu-options button { display: flex; align-items: center; gap: 10px; min-width: 0; padding: 11px 10px; min-height: 64px; border: 1px solid transparent; border-radius: 8px; color: var(--ink); text-align: left; background: transparent; transition: color .2s ease, background .2s ease, border-color .2s ease; }
+.trace-project-menu[data-open="true"] .trace-menu-options button { animation: trace-choice-arrive .28s ease-out both; animation-delay: calc(var(--option-order) * .015s); }
+.trace-menu-options button:hover, .trace-menu-options button:focus-visible { border-color: color-mix(in srgb, var(--accent) 25%, var(--line)); background: color-mix(in srgb, var(--accent) 5%, var(--surface)); }
+.trace-menu-options button[aria-selected="true"] { background: color-mix(in srgb, var(--accent) 8%, var(--surface)); }
+.trace-option-number { flex: 0 0 17px; font-size: 9px; color: var(--muted); }
+.trace-menu-options strong { display: block; font-size: 12.5px; font-weight: 500; line-height: 1.5; }
+.trace-menu-options small { display: block; margin-top: 4px; color: var(--muted); font: 9px/1.5 var(--font-mono); }
+.trace-option-check { margin-left: auto; font-size: 12px; color: var(--muted); }
+.trace-menu-options button[aria-selected="true"] :is(.trace-option-number, .trace-option-check) { color: var(--accent); }
+.trace-track-rail { overflow: hidden; }
+.trace-track-rail::after { content: ""; position: absolute; top: 0; bottom: 0; width: 34px; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: trace-route-signal 4.5s linear infinite; }
+.trace-node { position: relative; overflow: hidden; }
+.trace-node.selected::after { content: ""; position: absolute; height: 1px; bottom: 0; left: 15%; right: 15%; background: linear-gradient(90deg, transparent, var(--accent), transparent); animation: trace-stage-breathe 3.2s ease-in-out infinite; }
+.site-frame .trace-step-count strong { animation: trace-choice-arrive .3s ease-out both; }
+.site-frame .trace-payload-preview { animation: trace-stage-arrive .38s cubic-bezier(.22, 1, .36, 1) both; }
+@keyframes trace-choice-arrive { from { opacity: .3; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes trace-stage-arrive { from { opacity: .3; transform: translateY(7px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes trace-route-signal { from { left: -34px; } to { left: 100%; } }
+@keyframes trace-stage-breathe { 50% { opacity: .35; transform: scaleX(.45); } }
+@media (max-width: 900px) {
+  .trace-project-menu { width: 100%; max-width: 100%; }
+  .trace-menu-options { grid-template-columns: minmax(0, 1fr); max-height: min(350px, calc(100svh - 230px)); }
+  .trace-chooser-current { font-size: 13px; }
+  .trace-menu-heading { padding: 12px 14px; }
+}
+html[data-motion-paused="true"] :is(.trace-project-menu *, .trace-chooser-current, .trace-step-count strong, .trace-payload-preview) { animation: none !important; }
+html[data-motion-paused="true"] .trace-track-rail::after, html[data-motion-paused="true"] .trace-node.selected::after { animation-play-state: paused; }
+@media (prefers-reduced-motion: reduce) {
+  .trace-project-menu, .trace-project-picker *, .trace-step-count strong, .trace-payload-preview { animation: none !important; transition: none !important; }
+  .trace-track-rail::after, .trace-node.selected::after { animation: none !important; }
+}
