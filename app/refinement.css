@@ -330,3 +330,19 @@
   .site-frame .profile-motion { transform: none; }
 }
 @media (prefers-reduced-motion: reduce) { .site-frame .nav-links { transition: none; } }
+/* Capabilities use a centred composition with quieter, more readable type. */
+.site-frame .capability-grid { width: 100%; max-width: var(--max-content-width); margin-inline: auto; align-items: stretch; }
+.site-frame .capability-grid .capability-card { align-items: center; min-width: 0; padding: 24px 26px; text-align: center; }
+.site-frame .capability-grid .capability-visual { width: min(100%, 280px); margin-inline: auto; }
+.site-frame .capability-grid .capability-card h3 { width: 100%; font-size: 20px; font-weight: 500; line-height: 1.45; letter-spacing: 0; color: color-mix(in srgb, var(--ink) 88%, var(--muted)); margin-bottom: 12px; text-wrap: balance; }
+.site-frame .capability-grid .capability-card p { width: 100%; max-width: 49ch; font-size: 14px; font-weight: 400; line-height: 1.85; letter-spacing: .005em; color: color-mix(in srgb, var(--muted) 65%, #b6b8bf); margin: 0 0 20px; text-wrap: pretty; }
+.site-frame .capability-grid .capability-card .text-link { display: inline-flex; align-items: center; justify-content: center; min-height: 32px; font-size: 13px; font-weight: 500; color: color-mix(in srgb, var(--accent) 36%, var(--reading-ink)); }
+.site-frame .capability-grid .capability-card .text-link:hover { color: var(--ink); }
+@media (min-width: 851px) and (max-width: 1250px) {
+  .site-frame .capability-grid .capability-card h3 { min-height: 58px; display: grid; align-content: center; }
+}
+@media (max-width: 850px) {
+  .site-frame .capability-grid { max-width: 540px; }
+  .site-frame .capability-grid .capability-card { padding: 26px 24px; }
+  .site-frame .capability-grid .capability-card p { max-width: 44ch; }
+}

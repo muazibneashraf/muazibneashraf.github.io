@@ -1611,19 +1611,19 @@
           "id": "backend",
           "projectId": "admission-lottery",
           "title": "Backend development",
-          "summary": "In my Flask projects, I've worked on application routes, database integration, migrations, and deployment configuration."
+          "summary": "I build Flask backends with APIs, databases, migrations, and deployment setup."
         },
         {
           "id": "web",
           "projectId": "lifeline",
           "title": "Connected web applications",
-          "summary": "I contributed to LifeLine, a group project built with Flask, where I worked on request-and-offer features, location information, and interactive maps. The application also includes real-time chat."
+          "summary": "I worked on LifeLine’s requests, offers, location features, and interactive maps."
         },
         {
           "id": "ai",
           "projectId": "icu-analyzer",
           "title": "Applied AI research",
-          "summary": "For my final year thesis, I developed an OCR-based ICU report processing workflow and documented a proposed CNN–LSTM/BiLSTM approach for mortality risk research."
+          "summary": "My thesis covers OCR-based ICU report processing and a proposed CNN–LSTM/BiLSTM model."
         }
       ]
     },

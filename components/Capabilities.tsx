@@ -30,8 +30,8 @@ export function Capabilities({ content }: { content: SiteContent }) {
               <h3>{capability.title}</h3>
               <p>{capability.summary}</p>
               {project && (
-                <Link className="text-link" href={`/projects/${project.slug}`}>
-                  {settings.linkLabel}: {project.title}
+                <Link className="text-link" href={`/projects/${project.slug}`} aria-label={`${settings.linkLabel}: ${project.title}`}>
+                  {project.title}<span aria-hidden="true"> ↗</span>
                 </Link>
               )}
             </article>
