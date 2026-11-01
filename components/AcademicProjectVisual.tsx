@@ -56,7 +56,7 @@ function Graphics() {
 
 function Database() {
   const nodes = [[94, 55, "INGREDIENTS"], [300, 35, "CULTURE"], [504, 55, "TAGS"], [94, 205, "USERS"], [300, 230, "REVIEWS"], [504, 205, "SAVED"]] as const;
-  return <>{nodes.map(([x, y, label], i) => <g key={label}><path className="database-relation" d={`M300 130Q${x} 130 ${x} ${y}`} /><circle className="database-entity-halo" cx={x} cy={y} r="23" style={{ animationDelay: `${i * -.65}s` }} /><circle className="academic-node" cx={x} cy={y} r="5" /><text x={x} y={y + (y < 130 ? -31 : 31)} textAnchor="middle">{label}</text></g>)}
+  return <>{nodes.map(([x, y, label], i) => <g key={label} className={`database-entity entity-${label.toLowerCase()}`}><path className="database-relation" d={`M300 130Q${x} 130 ${x} ${y}`} /><circle className="database-entity-halo" cx={x} cy={y} r="23" style={{ animationDelay: `${i * -.65}s` }} /><circle className="academic-node" cx={x} cy={y} r="5" /><text x={x} y={y + (y < 130 ? -31 : 31)} textAnchor="middle">{label}</text></g>)}
     <path className="database-book" d="M253 91Q278 82 300 98Q323 82 347 91V171Q322 162 300 178Q278 162 253 171Z" /><path className="academic-wire" d="M300 98V178M264 109l23 3m-23 11 23 3m26-14 23-3m-23 17 23-3" /><text x="300" y="151" textAnchor="middle">RECIPES</text><Packet path="M300 130Q94 130 94 55" /><Packet path="M300 130Q504 130 504 205" delay={-2} /></>;
 }
 

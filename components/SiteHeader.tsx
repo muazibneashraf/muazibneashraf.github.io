@@ -10,7 +10,8 @@ function scrollToSection(hash: string) {
   const target = document.getElementById(hash.slice(1));
   if (!target) return false;
   const framed = getComputedStyle(target).getPropertyValue("--section-framed").trim() === "1";
-  const scrollTarget = framed ? target : (target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target);
+  const profileFirst = hash === "#about" && window.matchMedia("(max-width: 850px)").matches;
+  const scrollTarget = framed || profileFirst ? target : (target.querySelector(".section-heading .eyebrow, .eyebrow") ?? target);
   const headerHeight = document.querySelector(".site-header")?.getBoundingClientRect().height ?? 80;
   window.scrollTo({
     top: Math.max(0, scrollTarget.getBoundingClientRect().top + window.scrollY - headerHeight - (framed ? 0 : 16)),
@@ -22,7 +23,19 @@ function scrollToSection(hash: string) {
 export function SiteHeader({ site, hasJobExperience = false }: { site: SiteSettings; hasJobExperience?: boolean }) {
   const [open, setOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const menuButton = useRef<HTMLButtonElement>(null);
   const pathname = usePathname();
+  useEffect(() => {
+    if (!open) return;
+    const closeOutside = (event: PointerEvent) => { if (!headerRef.current?.contains(event.target as Node)) setOpen(false); };
+    const closeKeyboard = (event: KeyboardEvent) => { if (event.key === "Escape") { setOpen(false); menuButton.current?.focus(); } };
+    const desktop = matchMedia("(min-width: 761px)");
+    const resize = () => { if (desktop.matches) setOpen(false); };
+    document.addEventListener("pointerdown", closeOutside);
+    document.addEventListener("keydown", closeKeyboard);
+    desktop.addEventListener("change", resize);
+    return () => { document.removeEventListener("pointerdown", closeOutside); document.removeEventListener("keydown", closeKeyboard); desktop.removeEventListener("change", resize); };
+  }, [open]);
   useEffect(() => {
     const header = headerRef.current;
     if (!header) return;
@@ -106,6 +119,8 @@ export function SiteHeader({ site, hasJobExperience = false }: { site: SiteSetti
         <BrandLogo site={site} />
       </Link>
       <button
+        ref={menuButton}
+        type="button"
         className="menu-toggle"
         aria-expanded={open}
         aria-controls="primary-navigation"
@@ -117,6 +132,7 @@ export function SiteHeader({ site, hasJobExperience = false }: { site: SiteSetti
         id="primary-navigation"
         className={open ? "nav-links is-open" : "nav-links"}
         aria-label="Main navigation"
+        onBlur={event => { if (!headerRef.current?.contains(event.relatedTarget)) setOpen(false); }}
       >
         {links.map((link) => {
           const targetHref =

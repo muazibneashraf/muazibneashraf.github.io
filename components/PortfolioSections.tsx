@@ -72,24 +72,6 @@ export function AboutSection({
       className={`section about-section wrap ${standalone ? "about-section--full" : "about-section--compact"}`}
     >
       <div className="about-grid">
-        <div className="about-copy">
-          <p className="eyebrow about-eyebrow">{content.about.eyebrow}</p>
-          <div className="section-heading"><div><Heading>{headingText(content.about.title)}</Heading></div></div>
-          <p className="large-copy">{content.about.lede}</p>
-          {story.map((p, i) => (
-            <p key={i}>{p}</p>
-          ))}
-          {content.about.statement && (
-            <blockquote className="about-statement">
-              {content.about.statement}
-            </blockquote>
-          )}
-          <AboutDetails
-            story={content.about.story.slice(1)}
-            languages={content.about.languages}
-            languagesLabel={content.about.languagesLabel}
-          />
-        </div>
         <ProfileMotion>
           <figure className="about-portrait">
             <div className="about-portrait-frame">
@@ -161,6 +143,24 @@ export function AboutSection({
             </ResumeLink>
           </div>
         </ProfileMotion>
+        <div className="about-copy">
+          <p className="eyebrow about-eyebrow">{content.about.eyebrow}</p>
+          <div className="section-heading"><div><Heading>{headingText(content.about.title)}</Heading></div></div>
+          <p className="large-copy">{content.about.lede}</p>
+          {story.map((p, i) => (
+            <p key={i}>{p}</p>
+          ))}
+          {content.about.statement && (
+            <blockquote className="about-statement">
+              {content.about.statement}
+            </blockquote>
+          )}
+          <AboutDetails
+            story={content.about.story.slice(1)}
+            languages={content.about.languages}
+            languagesLabel={content.about.languagesLabel}
+          />
+        </div>
       </div>
     </section>
   );

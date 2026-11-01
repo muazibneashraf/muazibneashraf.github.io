@@ -8,7 +8,7 @@ export type { NarrativeSection } from "@/lib/background-system";
 const SECTIONS = Object.keys(SECTION_THEMES) as NarrativeSection[];
 const PROTECTED = [
   ".hero-copy", ".hero-actions", ".network-visual", ".section-heading",
-  ".project-card", ".about-copy", ".education-card", ".skill-group", ".research-panel", ".trace-workbench",
+  ".project-card", ".about-copy", ".education-card", ".skill-group", ".research-panel", ".trace-workbench", ".walkthrough",
   ".experience-row", ".capability-card", ".stack-section",
   ".page-intro", ".project-narrative", ".contact-details", ".contact-form",
   ".site-footer", ".globe-welcome h2", ".skill-catalog", ".evidence-panel", ".contact-page-intro", ".contact-heading h2", ".contact-arrow", ".contact-bottom",
@@ -112,7 +112,7 @@ export function SystemNarrativeBackground() {
       width = canvas.clientWidth; height = canvas.clientHeight;
       const wrap = document.querySelector("#main .wrap");
       gutter = wrap ? parseFloat(getComputedStyle(wrap).paddingLeft) : 24;
-      ratio = Math.min(window.devicePixelRatio || 1, 2);
+      ratio = Math.min(window.devicePixelRatio || 1, width < 768 ? 1.35 : 2);
       const w = Math.round(width * ratio), h = Math.round(height * ratio);
       if (canvas.width !== w || canvas.height !== h) { canvas.width = w; canvas.height = h; }
       atmosphere.width = Math.max(1, Math.round(width / 2));
@@ -137,7 +137,7 @@ export function SystemNarrativeBackground() {
       const header = document.querySelector(".site-header");
       headerBottom = header?.getBoundingClientRect().height ?? 80;
       const nav = header?.querySelector(".nav-links");
-      if (nav && getComputedStyle(nav).display !== "none") headerBottom = Math.max(headerBottom, nav.getBoundingClientRect().bottom);
+      if (nav && getComputedStyle(nav).display !== "none" && getComputedStyle(nav).visibility !== "hidden") headerBottom = Math.max(headerBottom, nav.getBoundingClientRect().bottom);
       selectSection();
       if (!canAnimate()) draw(0); else schedule();
     };

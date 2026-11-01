@@ -1,12 +1,21 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef } from "react";
 import type { Project, ContentSections } from "@/lib/types";
 import { ProjectVisual } from "./ProjectVisual";
 import { ProjectTransition } from "./ProjectTransition";
 
 export function ProjectCard({ project, labels }: { project: Project; labels: ContentSections["projectPage"]; index?: number }) {
   const href = "/projects/" + project.slug;
+  const cardRef = useRef<HTMLElement>(null);
+  useEffect(() => {
+    const card = cardRef.current;
+    if (!card) return;
+    const observer = new IntersectionObserver(([entry]) => { card.dataset.motionVisible = String(entry.isIntersecting); }, { rootMargin: "100px 0px" });
+    observer.observe(card);
+    return () => observer.disconnect();
+  }, []);
 
   const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
     const target = e.target as HTMLElement;
@@ -22,7 +31,7 @@ export function ProjectCard({ project, labels }: { project: Project; labels: Con
   };
 
   return (
-    <article className="project-card" onClick={handleCardClick}>
+    <article ref={cardRef} className="project-card" onClick={handleCardClick}>
       <ProjectTransition slug={project.slug} part="art"><Link
         className="project-image-link"
         href={href}

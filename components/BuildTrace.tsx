@@ -1,185 +1,124 @@
 "use client";
 
 import { headingText } from "@/lib/editable-content";
+import { getWalkthroughExample, getWalkthroughScenePhase } from "@/lib/walkthrough-examples";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState, type CSSProperties, type KeyboardEvent } from "react";
 import type { Project, ContentSections } from "@/lib/types";
 import { ProjectChooser } from "./ProjectChooser";
+import { WalkthroughScene } from "./WalkthroughScene";
+import { WalkthroughPreview } from "./WalkthroughPreview";
+import "./walkthrough.css";
 
-type TraceStep = {
-  id: string;
-  title: string;
-  detail: string;
-  tech: string[];
-  payload?: Record<string, unknown>;
-};
-
-function getSteps(project: Project, fallback: string): TraceStep[] {
-  return (project.walkthroughSteps ?? []).map(step => {
-    let payload: Record<string, unknown> | undefined;
-    try { if (step.payload.trim() && step.payload.trim() !== "{}") payload = JSON.parse(step.payload); } catch { /* Invalid draft data is never executed. */ }
-    return { id: step.id, title: step.title, detail: step.detail || fallback.replaceAll("{project}", project.title), tech: step.tech.length ? step.tech : project.stack?.slice(0, 3) ?? [], payload };
-  });
-}
+const STEP_DURATION = 4800;
 
 export function BuildTrace({ projects, settings }: { projects: Project[]; settings: ContentSections["walkthrough"] }) {
-  const availableProjects = useMemo(
-    () => projects.filter((project) => (project.walkthroughSteps?.length ?? 0) > 0),
-    [projects],
-  );
-  const [projectIndex, setProjectIndex] = useState(0);
-  const [stepIndex, setStepIndex] = useState(0);
-  const track = useRef<HTMLDivElement>(null);
-
-  const project = availableProjects[projectIndex];
+  const available = useMemo(() => projects.filter(project => (project.walkthroughSteps?.length ?? 0) > 0), [projects]);
+  const [selection, setSelection] = useState({ projectId: available[0]?.id, step: 0 });
+  const [playing, setPlaying] = useState(false);
+  const [inspectionKey, setInspectionKey] = useState<string | null>(null);
+  const [motionBlocked, setMotionBlocked] = useState(false);
+  const [visible, setVisible] = useState(false);
+  const root = useRef<HTMLDivElement>(null);
+  const stageButtons = useRef<(HTMLButtonElement | null)[]>([]);
+  const stageId = useId();
+  const projectIndex = Math.max(0, available.findIndex(project => project.id === selection.projectId));
+  const project = available[projectIndex];
+  const steps = project?.walkthroughSteps ?? [];
+  const stepIndex = Math.min(selection.step, Math.max(0, steps.length - 1));
+  const step = steps[stepIndex];
 
   useEffect(() => {
-    const element = track.current;
+    const element = root.current;
     if (!element) return;
-    const measure = () => {
-      const nodes = [...element.querySelectorAll<HTMLButtonElement>(".trace-node")];
-      const selected = nodes[Math.min(stepIndex, nodes.length - 1)];
-      if (!selected || !nodes.length) return;
-      const center = (node: HTMLElement) => node.offsetLeft + node.offsetWidth / 2;
-      const start = center(nodes[0]), end = center(nodes[nodes.length - 1]), current = center(selected);
-      const verticalCenter = selected.offsetTop + selected.offsetHeight / 2;
-      element.style.setProperty("--trace-first", `${start}px`);
-      element.style.setProperty("--trace-last", `${element.clientWidth - end}px`);
-      element.style.setProperty("--trace-current", `${current}px`);
-      element.style.setProperty("--trace-progress", `${current - start}px`);
-      element.style.setProperty("--trace-rail-y", `${verticalCenter}px`);
-      element.parentElement?.scrollTo({ left: current - element.parentElement.clientWidth / 2, behavior: "instant" });
+    const observer = new IntersectionObserver(([entry]) => setVisible(entry.isIntersecting), { threshold: .15 });
+    observer.observe(element);
+    const preference = matchMedia("(prefers-reduced-motion: reduce)");
+    const sync = () => {
+      const blocked = preference.matches || document.documentElement.dataset.motionPaused === "true" || document.hidden;
+      setMotionBlocked(blocked);
+      if (blocked) setPlaying(false);
     };
-    measure();
-    const observer = new ResizeObserver(measure); observer.observe(element);
-    return () => observer.disconnect();
-  }, [project, stepIndex]);
+    sync();
+    preference.addEventListener("change", sync);
+    window.addEventListener("muaz-motion-state", sync);
+    document.addEventListener("visibilitychange", sync);
+    return () => { observer.disconnect(); preference.removeEventListener("change", sync); window.removeEventListener("muaz-motion-state", sync); document.removeEventListener("visibilitychange", sync); };
+  }, []);
 
   useEffect(() => {
-    if (typeof window !== "undefined" && project) {
-      window.dispatchEvent(
-        new CustomEvent("muaz-trace-step", {
-          detail: { step: stepIndex, project: project.id },
-        }),
-      );
-    }
-  }, [stepIndex, project]);
+    if (!playing || !visible || motionBlocked) return;
+    const timer = window.setTimeout(() => {
+      if (stepIndex === steps.length - 1) setPlaying(false);
+      else setSelection(current => current.projectId === project?.id ? ({ ...current, step: stepIndex + 1 }) : current);
+    }, STEP_DURATION);
+    return () => window.clearTimeout(timer);
+  }, [playing, visible, motionBlocked, stepIndex, steps.length, project?.id]);
 
-  if (!availableProjects.length || !project) return null;
+  useEffect(() => {
+    if (!project) return;
+    window.dispatchEvent(new CustomEvent("muaz-trace-step", { detail: { step: stepIndex, project: project.id } }));
+    const button = stageButtons.current[stepIndex];
+    const list = button?.parentElement;
+    if (!button || !list) return;
+    const centerStage = () => {
+      if (list.scrollWidth > list.clientWidth) list.scrollTo({ left: button.offsetLeft - (list.clientWidth - button.offsetWidth) / 2, behavior: motionBlocked ? "instant" : "smooth" });
+    };
+    centerStage();
+    const observer = new ResizeObserver(centerStage);
+    observer.observe(list);
+    return () => observer.disconnect();
+  }, [project, stepIndex, motionBlocked]);
 
-  const steps = getSteps(project, settings.stepDetail);
-  const activeStep = steps[Math.min(stepIndex, steps.length - 1)];
-
-  const selectProject = (index: number) => {
-    setProjectIndex(index);
-    setStepIndex(0);
+  if (!project || !step) return null;
+  const example = getWalkthroughExample(project, step.title);
+  const detail = step.detail || example?.description || settings.stepDetail.replaceAll("{project}", project.title);
+  const tech = step.tech.length ? step.tech : project.stack?.slice(0, 3) ?? [];
+  const accent = project.category === "AI / ML" ? "var(--lilac)" : project.id === "lifeline" ? "var(--coral)" : "var(--accent)";
+  const inspectionId = `${project.id}-${step.id}`;
+  const inspecting = inspectionKey === inspectionId;
+  const active = playing && visible && !motionBlocked;
+  const selectStep = (index: number) => { setPlaying(false); setSelection({ projectId: project.id, step: index }); };
+  const stageKeyboard = (event: KeyboardEvent, index: number) => {
+    let next: number | undefined;
+    if (["ArrowRight", "ArrowDown"].includes(event.key)) next = (index + 1) % steps.length;
+    if (["ArrowLeft", "ArrowUp"].includes(event.key)) next = (index - 1 + steps.length) % steps.length;
+    if (event.key === "Home") next = 0;
+    if (event.key === "End") next = steps.length - 1;
+    if (next !== undefined) { event.preventDefault(); selectStep(next); stageButtons.current[next]?.focus({ preventScroll: true }); }
   };
 
-  return (
-    <section id="trace" className="trace-section section-pad">
-      <div className="site-wrap">
-        <div className="section-heading trace-heading">
-          <div>
-            <p className="eyebrow">{settings.eyebrow}</p>
-            <h2>{headingText(settings.title)}</h2>
-          </div>
-          <p className="trace-intro">
-            {settings.intro}
-          </p>
-        </div>
-
-        <div className="trace-workbench">
-          <div className="trace-toolbar">
-            <div className="trace-window-controls" aria-hidden="true">
-              <span className="dot-coral" />
-              <span className="dot-lilac" />
-              <span className="dot-cyan" />
-            </div>
-            <ProjectChooser projects={availableProjects} selectedIndex={projectIndex} onSelect={selectProject} />
-            <span className="trace-mode mono">{settings.modeLabel}</span>
-          </div>
-
-          <div className="trace-track-scroll"><div ref={track} className="trace-track" style={{gridTemplateColumns: `repeat(${steps.length}, minmax(0, 1fr))`, minWidth: steps.length * 132 + 48}}>
-            <div className="trace-track-rail" aria-hidden="true" />
-            <div
-              className="trace-track-progress"
-              aria-hidden="true"
-            />
-            {steps.map((item, index) => (
-              <button
-                aria-current={index === stepIndex ? "step" : undefined}
-                className={`trace-node${index === stepIndex ? " selected" : ""}${index < stepIndex ? " visited" : ""}`}
-                key={`${project.slug}-${item.id}`}
-                onClick={() => setStepIndex(index)}
-                type="button"
-              >
-                <span className="trace-node-number mono">{String(index + 1).padStart(2, "0")}</span>
-                <strong>{item.title}</strong>
-                <span className="trace-node-state mono">
-                  {index === stepIndex ? "INSPECTING" : index < stepIndex ? "PASSED" : "VIEW STAGE"}
-                </span>
-              </button>
-            ))}
-            <span
-              className="trace-packet"
-            >
-              {settings.requestLabel}
-            </span>
-          </div></div>
-
-          <div className="trace-inspector" data-has-payload={Boolean(activeStep.payload)} aria-live="polite">
-            <div className="trace-step-count mono">
-              <span>STAGE</span>
-              <strong key={activeStep.id}>{String(stepIndex + 1).padStart(2, "0")}</strong>
-              <span>OF {String(steps.length).padStart(2, "0")}</span>
-            </div>
-            <div className="trace-explanation" key={activeStep.title}>
-              <p className="eyebrow">CURRENT STAGE</p>
-              <h3>{activeStep.title}</h3>
-              <p>{activeStep.detail}</p>
-              {activeStep.tech.length > 0 && (
-                <p className="trace-note mono">
-                  {activeStep.tech.join(" · ")}
-                </p>
-              )}
-            </div>
-            {activeStep.payload && (
-                <div className="trace-payload-preview" key={activeStep.id}>
-                  <div className="trace-payload-bar mono">
-                    <span className="mint">◈ EXAMPLE DATA</span>
-                    <span>JSON</span>
-                  </div>
-                  <pre className="trace-payload-body mono">
-                    <code>{JSON.stringify(activeStep.payload, null, 2)}</code>
-                  </pre>
-                </div>
-            )}
-            <div className="trace-controls">
-              <button
-                className="button secondary"
-                disabled={stepIndex === 0}
-                onClick={() => setStepIndex((current) => Math.max(0, current - 1))}
-                type="button"
-              >
-                Previous
-              </button>
-              <button
-                className="button primary"
-                disabled={stepIndex === steps.length - 1}
-                onClick={() => setStepIndex((current) => Math.min(steps.length - 1, current + 1))}
-                type="button"
-              >
-                Next step
-              </button>
-            </div>
-          </div>
-
-          <div className="trace-footer">
-            <span>{project.category} · {project.role}</span>
-            <Link href={`/projects/${project.slug}`}>{settings.linkLabel} {project.title}</Link>
+  return <section id="trace" className="trace-section section-pad"><div className="site-wrap">
+    <div className="section-heading trace-heading"><div><p className="eyebrow">{settings.eyebrow}</p><h2>{headingText(settings.title)}</h2></div><p className="trace-intro">{settings.intro}</p></div>
+    <div ref={root} onKeyDown={event => { if (event.key === "Escape" && inspecting) { setInspectionKey(null); event.stopPropagation(); } }} className="walkthrough" data-visible={visible} data-playing={active} style={{ "--walk-accent": accent, "--step-duration": `${STEP_DURATION}ms` } as CSSProperties}>
+      <div className="walk-toolbar"><ProjectChooser projects={available} selectedIndex={projectIndex} onSelect={index => { setPlaying(false); setSelection({ projectId: available[index].id, step: 0 }); }} /><span className="walk-toolbar-note mono">{String(steps.length).padStart(2, "0")} STAGES</span></div>
+      <div className="walk-body">
+        <div className="walk-cinema" data-project={project.id} data-step={stepIndex} data-stage={step.title}>
+          <div className="walk-scene-label mono"><span>{project.category}</span><span>WORKFLOW / {String(stepIndex + 1).padStart(2, "0")}</span></div>
+          <div className="walk-scene-art" id={`${stageId}-inspection`} key={inspectionId}>
+            {inspecting ? <div className="walk-inspector" role="region" aria-label="Step example" tabIndex={0}><WalkthroughPreview example={example} fallback={step.payload && step.payload !== "{}" ? step.payload : undefined} /></div> : <WalkthroughScene slug={project.slug} example={example} phase={getWalkthroughScenePhase(project, step.title)} />}
           </div>
         </div>
+        <div className="walk-detail" id={`${stageId}-panel`} role="tabpanel" aria-labelledby={`${stageId}-tab-${stepIndex}`} tabIndex={0}><div className="walk-stage-content" key={`${project.id}-${step.id}`}>
+          <p className="walk-chapter mono">THE PROCESS <span>{String(stepIndex + 1).padStart(2, "0")} / {String(steps.length).padStart(2, "0")}</span></p>
+          <div className="walk-stage-heading"><h3>{step.title}</h3></div>
+          <p className="walk-description">{detail}</p>
+          <div className="walk-tech">{tech.map(item => <span key={item}>{item}</span>)}</div>
+          <button type="button" className="walk-inspect-toggle" aria-expanded={inspecting} aria-controls={`${stageId}-inspection`} onClick={() => { setPlaying(false); setInspectionKey(inspecting ? null : inspectionId); }}><span>{inspecting ? "Back to animation" : "Inspect this step"}</span><span aria-hidden="true">{inspecting ? "↶" : "↗"}</span></button>
+        </div></div>
       </div>
-    </section>
-  );
+        <div className="walk-stage-list" role="tablist" aria-label="Workflow stages" aria-orientation="horizontal">
+          {steps.map((item, index) => <button type="button" role="tab" id={`${stageId}-tab-${index}`} aria-controls={`${stageId}-panel`} aria-selected={index === stepIndex} tabIndex={index === stepIndex ? 0 : -1} ref={element => { stageButtons.current[index] = element; }} key={item.id} onClick={() => selectStep(index)} onKeyDown={event => stageKeyboard(event, index)} className="walk-stage" data-state={index === stepIndex ? "active" : index < stepIndex ? "passed" : "upcoming"}>
+            <span className="walk-stage-number mono">{String(index + 1).padStart(2, "0")}</span><span>{item.title}</span><span className="walk-stage-arrow" aria-hidden="true">{index < stepIndex ? "✓" : "↗"}</span>
+          </button>)}
+        </div>
+      <div className="walk-controls">
+        <button className="walk-play" type="button" aria-label={playing ? "Pause walkthrough" : stepIndex === steps.length - 1 ? "Replay walkthrough" : "Play walkthrough"} aria-pressed={playing} disabled={motionBlocked} onClick={() => { if (!playing && stepIndex === steps.length - 1) setSelection({ projectId: project.id, step: 0 }); setPlaying(value => !value); }}><span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span><span>{playing ? "Pause" : stepIndex === steps.length - 1 ? "Replay" : "Play"}</span></button>
+        <div className="walk-progress" aria-hidden="true">{steps.map((item, index) => <span data-complete={index < stepIndex} key={item.id}><i key={`${playing}-${visible}-${index === stepIndex}`} style={{ transform: index < stepIndex ? "scaleX(1)" : undefined, animationName: active && index === stepIndex ? "walk-play-progress" : undefined }} /></span>)}</div>
+        <div className="walk-step-controls"><button type="button" aria-label="Previous stage" disabled={stepIndex === 0} onClick={() => selectStep(stepIndex - 1)}>← <span>Previous</span></button><span className="mono">{stepIndex + 1} / {steps.length}</span><button type="button" aria-label="Next stage" disabled={stepIndex === steps.length - 1} onClick={() => selectStep(stepIndex + 1)}><span>Next</span> →</button></div>
+      </div>
+      <div className="walk-footer"><span>Illustrated workflow</span><Link href={`/projects/${project.slug}`}>{settings.linkLabel} <span className="walk-link-title">{project.title}</span> <span aria-hidden="true">↗</span></Link></div>
+      <p className="sr-only" role="status">{project.title}: stage {stepIndex + 1} of {steps.length}, {step.title}.</p>
+    </div>
+  </div></section>;
 }

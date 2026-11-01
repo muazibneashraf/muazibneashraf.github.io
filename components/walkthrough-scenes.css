@@ -1,0 +1,48 @@
+.process-scene { height:100%; min-height:0; display:grid; grid-template-rows:minmax(0,1fr) 42px; animation:process-enter .55s cubic-bezier(.22,1,.36,1) both; }
+.process-scene svg { width:100%; height:100%; min-height:0; overflow:visible; }
+.process-scene text { fill:var(--reading-ink); font:14px var(--font-mono); }
+.process-scene .process-small { font-size:10px; fill:var(--muted); }
+.process-panel { fill:color-mix(in srgb,var(--surface) 55%,transparent); stroke:color-mix(in srgb,var(--walk-accent) 22%,transparent); stroke-width:1; }
+.process-rule,.process-route,.process-map,.process-skip { fill:none; stroke:var(--walk-accent); stroke-width:1; stroke-opacity:.25; }
+.process-map { stroke-opacity:.12; }
+.process-route { stroke-dasharray:3 5; }
+.process-skip { stroke-dasharray:4 4; }
+.process-dot,.process-packet { fill:var(--walk-accent); }
+.process-packet { offset-distance:0%; animation:process-travel 3.6s ease-in-out infinite; }
+.process-arrow,.process-check,.process-shape,.process-caret { fill:none; stroke:var(--walk-accent); stroke-width:1.5; stroke-linecap:round; stroke-linejoin:round; }
+.process-check { stroke-dasharray:1; animation:process-check 3.6s ease-in-out infinite; }
+.process-token,.process-block,.process-layer,.process-chat,.process-key { fill:color-mix(in srgb,var(--walk-accent) 5%,transparent); stroke:color-mix(in srgb,var(--walk-accent) 32%,transparent); }
+.process-button { fill:color-mix(in srgb,var(--walk-accent) 12%,transparent); stroke:var(--walk-accent); stroke-opacity:.4; }
+.process-reveal { animation:process-reveal .55s ease-out both; animation-delay:var(--delay); }
+.process-scan { stroke:var(--walk-accent); stroke-width:2; animation:process-scan 3.6s ease-in-out infinite; }
+.process-caret { animation:process-caret 1.1s steps(1) infinite; }
+.process-block.reserved { fill:color-mix(in srgb,var(--blue) 20%,transparent); }
+.process-block.used { fill:color-mix(in srgb,var(--walk-accent) 18%,transparent); }
+.process-block.writing,.process-feature { fill:var(--walk-accent); opacity:.45; animation:process-fill 3.6s ease-in-out infinite; }
+.process-feature { animation:process-fill 3.6s ease-in-out infinite; }
+.process-convolve { animation:process-kernel 3.6s ease-in-out infinite; }
+.process-map-ring { fill:color-mix(in srgb,var(--walk-accent) 8%,transparent); stroke:var(--walk-accent); stroke-opacity:.35; }
+.process-error { stroke:var(--coral); fill:color-mix(in srgb,var(--coral) 6%,transparent); }
+.process-pet { fill:color-mix(in srgb,var(--walk-accent) 12%,transparent); stroke:var(--walk-accent); }
+.process-mask { fill:var(--walk-accent); opacity:.7; }
+.process-overlay { opacity:.35; animation:process-overlay 4.8s ease-in-out infinite; }
+.process-player-move { animation:process-move 3.6s ease-in-out infinite; }
+.process-fall { animation:process-fall 3.6s ease-in-out infinite; }
+.process-key { animation:process-fill 3.6s ease-in-out infinite; }
+.process-rotate { transform-origin:155px 145px; animation:process-turn 4.8s ease-in-out infinite; }
+.process-render { stroke:var(--walk-accent); fill:color-mix(in srgb,var(--walk-accent) 10%,transparent); stroke-width:1.5; stroke-dasharray:600; animation:process-draw 4.8s ease-in-out infinite; }
+.process-caption { margin:8px 0 0; color:var(--muted); font-size:11px; line-height:1.6; max-width:65ch; }
+@keyframes process-enter { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:none; } }
+@keyframes process-travel { 0%,8% { offset-distance:0%; opacity:0; } 18%,85% { opacity:1; } 95%,100% { offset-distance:100%; opacity:0; } }
+@keyframes process-reveal { from { opacity:.35; transform:translateY(4px); } to { opacity:1; transform:none; } }
+@keyframes process-scan { 0%,100% { transform:translateY(0); opacity:0; } 15%,85% { opacity:.8; } 90% { transform:translateY(135px); opacity:0; } }
+@keyframes process-caret { 50% { opacity:0; } }
+@keyframes process-check { 0%,10% { stroke-dashoffset:1; } 35%,90% { stroke-dashoffset:0; } 100% { stroke-dashoffset:1; } }
+@keyframes process-fill { 0%,100% { opacity:.2; } 40%,75% { opacity:.75; } }
+@keyframes process-kernel { 50% { transform:translateX(12px); } }
+@keyframes process-overlay { 0%,100% { transform:translateX(5px); opacity:.2; } 45%,75% { transform:translateX(-6px); opacity:.45; } }
+@keyframes process-move { 0%,100% { transform:translateX(-35px); } 50% { transform:translateX(35px); } }
+@keyframes process-fall { 0%,100% { transform:translateY(0); opacity:.2; } 15%,75% { opacity:1; } 85% { transform:translateY(118px); opacity:0; } }
+@keyframes process-turn { 0%,100% { transform:rotate(0); } 50% { transform:rotate(18deg) scale(.8); } }
+@keyframes process-draw { 0%,10% { stroke-dashoffset:600; fill-opacity:0; } 55%,90% { stroke-dashoffset:0; fill-opacity:1; } 100% { stroke-dashoffset:600; fill-opacity:0; } }
+@media(max-width:760px) { .process-caption { font-size:10px; } }
