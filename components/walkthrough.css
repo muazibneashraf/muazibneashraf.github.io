@@ -230,3 +230,7 @@ html[data-motion-paused="true"] .walkthrough *,html[data-motion-paused="true"] .
   .walk-inspect-controls { display: contents; }
 }
 .walk-scene-art { animation: none; }
+@media (min-width: 761px) {
+  .site-frame #trace .trace-heading, .walkthrough { max-width: none; }
+  .walk-body { width: 100%; max-width: 1320px; margin-inline: auto; }
+}
