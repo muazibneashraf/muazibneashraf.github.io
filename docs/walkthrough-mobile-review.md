@@ -67,3 +67,21 @@ panel and checks inspector height across all 45 stages at 1440 and 390 pixels.
 The live snapshot includes 51 edited fields across About, projects, activities,
 contact and section copy. The local API was compared deeply with the live API,
 and the selected original CV link was preserved.
+
+## Mobile viewport update — 2 November 2026
+
+The mobile workflow now puts numbered stage buttons above the scene and keeps
+playback, inspection and previous/next actions in one touch-sized row directly
+below it. The selected step's title and description stay above the animation.
+The scene adapts to available viewport height, rather than stacking a long text
+panel between the scene and its controls. Step selection resets inspection and
+preserves page position; Play restores the animation from inspection.
+
+Desktop uses a centred heading, project picker, balanced scene/explanation columns
+and centred controls. Its panel is capped at 1320 pixels, with a smaller scene and
+more space around the composition.
+
+`tests/walkthrough-viewport.browser.mjs` checks all 45 stages at 390×844 and
+320×568: the picker, steps, animation and controls stay in the same viewport,
+touch targets remain at least 44 pixels, and inspection/step changes preserve
+position. Live admin content is backed up locally and preserved during deployment.

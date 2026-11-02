@@ -78,7 +78,7 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
   const inspectionId = `${project.id}-${step.id}`;
   const inspecting = inspectionKey === inspectionId;
   const active = playing && visible && !motionBlocked;
-  const selectStep = (index: number) => { setPlaying(false); setSelection({ projectId: project.id, step: index }); };
+  const selectStep = (index: number) => { setInspectionKey(null); setPlaying(false); setSelection({ projectId: project.id, step: index }); };
   const stageKeyboard = (event: KeyboardEvent, index: number) => {
     let next: number | undefined;
     if (["ArrowRight", "ArrowDown"].includes(event.key)) next = (index + 1) % steps.length;
@@ -91,7 +91,12 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
   return <section id="trace" className="trace-section section-pad"><div className="site-wrap">
     <div className="section-heading trace-heading"><div><p className="eyebrow">{settings.eyebrow}</p><h2>{headingText(settings.title)}</h2></div><p className="trace-intro">{settings.intro}</p></div>
     <div ref={root} onKeyDown={event => { if (event.key === "Escape" && inspecting) { setInspectionKey(null); event.stopPropagation(); } }} className="walkthrough" data-visible={visible} data-playing={active} style={{ "--walk-accent": accent, "--step-duration": `${STEP_DURATION}ms` } as CSSProperties}>
-      <div className="walk-toolbar"><ProjectChooser projects={available} selectedIndex={projectIndex} onSelect={index => { setPlaying(false); setSelection({ projectId: available[index].id, step: 0 }); }} /><span className="walk-toolbar-note mono">{String(steps.length).padStart(2, "0")} STAGES</span></div>
+      <div className="walk-toolbar"><ProjectChooser projects={available} selectedIndex={projectIndex} onSelect={index => { setInspectionKey(null); setPlaying(false); setSelection({ projectId: available[index].id, step: 0 }); }} /><span className="walk-toolbar-note mono">{String(steps.length).padStart(2, "0")} STAGES</span></div>
+        <div className="walk-stage-list" role="tablist" aria-label="Workflow stages" aria-orientation="horizontal">
+          {steps.map((item, index) => <button type="button" role="tab" id={`${stageId}-tab-${index}`} aria-controls={`${stageId}-panel`} aria-label={`${String(index + 1).padStart(2, "0")} ${item.title}`} aria-selected={index === stepIndex} tabIndex={index === stepIndex ? 0 : -1} ref={element => { stageButtons.current[index] = element; }} key={item.id} onClick={() => selectStep(index)} onKeyDown={event => stageKeyboard(event, index)} className="walk-stage" data-state={index === stepIndex ? "active" : index < stepIndex ? "passed" : "upcoming"}>
+            <span className="walk-stage-number mono">{String(index + 1).padStart(2, "0")}</span><span className="walk-stage-title">{item.title}</span><span className="walk-stage-arrow" aria-hidden="true">{index < stepIndex ? "✓" : "↗"}</span>
+          </button>)}
+        </div>
       <div className="walk-body">
         <div className="walk-cinema" data-project={project.id} data-step={stepIndex} data-stage={step.title}>
           <div className="walk-scene-label mono"><span>{project.category}</span><span>WORKFLOW / {String(stepIndex + 1).padStart(2, "0")}</span></div>
@@ -104,17 +109,12 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
           <div className="walk-stage-heading"><h3>{step.title}</h3></div>
           <p className="walk-description">{detail}</p>
           <div className="walk-tech">{tech.map(item => <span key={item}>{item}</span>)}</div>
-          <button type="button" className="walk-inspect-toggle" aria-expanded={inspecting} aria-controls={`${stageId}-inspection`} onClick={() => { setPlaying(false); setInspectionKey(inspecting ? null : inspectionId); }}><span>{inspecting ? "Back to animation" : "Inspect this step"}</span><span aria-hidden="true">{inspecting ? "↶" : "↗"}</span></button>
         </div></div>
       </div>
-        <div className="walk-stage-list" role="tablist" aria-label="Workflow stages" aria-orientation="horizontal">
-          {steps.map((item, index) => <button type="button" role="tab" id={`${stageId}-tab-${index}`} aria-controls={`${stageId}-panel`} aria-selected={index === stepIndex} tabIndex={index === stepIndex ? 0 : -1} ref={element => { stageButtons.current[index] = element; }} key={item.id} onClick={() => selectStep(index)} onKeyDown={event => stageKeyboard(event, index)} className="walk-stage" data-state={index === stepIndex ? "active" : index < stepIndex ? "passed" : "upcoming"}>
-            <span className="walk-stage-number mono">{String(index + 1).padStart(2, "0")}</span><span>{item.title}</span><span className="walk-stage-arrow" aria-hidden="true">{index < stepIndex ? "✓" : "↗"}</span>
-          </button>)}
-        </div>
       <div className="walk-controls">
-        <button className="walk-play" type="button" aria-label={playing ? "Pause walkthrough" : stepIndex === steps.length - 1 ? "Replay walkthrough" : "Play walkthrough"} aria-pressed={playing} disabled={motionBlocked} onClick={() => { if (!playing && stepIndex === steps.length - 1) setSelection({ projectId: project.id, step: 0 }); setPlaying(value => !value); }}><span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span><span>{playing ? "Pause" : stepIndex === steps.length - 1 ? "Replay" : "Play"}</span></button>
+        <button className="walk-play" type="button" aria-label={playing ? "Pause walkthrough" : stepIndex === steps.length - 1 ? "Replay walkthrough" : "Play walkthrough"} aria-pressed={playing} disabled={motionBlocked} onClick={() => { setInspectionKey(null); if (!playing && stepIndex === steps.length - 1) setSelection({ projectId: project.id, step: 0 }); setPlaying(value => !value); }}><span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span><span>{playing ? "Pause" : stepIndex === steps.length - 1 ? "Replay" : "Play"}</span></button>
         <div className="walk-progress" aria-hidden="true">{steps.map((item, index) => <span data-complete={index < stepIndex} key={item.id}><i key={`${playing}-${visible}-${index === stepIndex}`} style={{ transform: index < stepIndex ? "scaleX(1)" : undefined, animationName: active && index === stepIndex ? "walk-play-progress" : undefined }} /></span>)}</div>
+        <button type="button" className="walk-inspect-toggle" title={inspecting ? "Back to animation" : "Inspect this step"} aria-label={inspecting ? "Back to animation" : "Inspect this step"} aria-expanded={inspecting} aria-controls={`${stageId}-inspection`} onClick={() => { setPlaying(false); setInspectionKey(inspecting ? null : inspectionId); }}><span className="walk-inspect-label">{inspecting ? "Back to animation" : "Inspect this step"}</span><span className="walk-inspect-mobile" aria-hidden="true">{inspecting ? "Back" : "Inspect"}</span><span className="walk-inspect-icon" aria-hidden="true">{inspecting ? "↶" : "⌘"}</span></button>
         <div className="walk-step-controls"><button type="button" aria-label="Previous stage" disabled={stepIndex === 0} onClick={() => selectStep(stepIndex - 1)}>← <span>Previous</span></button><span className="mono">{stepIndex + 1} / {steps.length}</span><button type="button" aria-label="Next stage" disabled={stepIndex === steps.length - 1} onClick={() => selectStep(stepIndex + 1)}><span>Next</span> →</button></div>
       </div>
       <div className="walk-footer"><span>Illustrated workflow</span><Link href={`/projects/${project.slug}`}>{settings.linkLabel} <span className="walk-link-title">{project.title}</span> <span aria-hidden="true">↗</span></Link></div>

@@ -1,0 +1,23 @@
+import assert from 'node:assert/strict';import{chromium}from'playwright';import{readFile,mkdir,writeFile}from'node:fs/promises';
+const data=JSON.parse(await readFile('data/portfolio-content.json','utf8'));const b=await chromium.launch({channel:'msedge',headless:true});const p=await b.newPage();const errors=[];p.on('pageerror',e=>errors.push(e.message));await mkdir('tmp/walkthrough-viewport',{recursive:true});
+const reports=[];
+try{await p.goto((process.env.BASE_URL||'http://127.0.0.1:3002')+'/#trace',{waitUntil:'networkidle'});
+ for(const [width,height]of[[390,844],[320,568]]){await p.setViewportSize({width,height});
+ for(const project of data.projects){await p.getByRole('button',{name:'Choose a project',exact:true}).click();await p.getByRole('option').filter({hasText:project.title}).click();
+ await p.evaluate(()=>{const e=document.querySelector('.walkthrough');const header=document.querySelector('.site-header').getBoundingClientRect().height;window.scrollTo({top:scrollY+e.getBoundingClientRect().top-header-8,behavior:'instant'})});await p.waitForTimeout(200);
+ for(let i=0;i<project.walkthroughSteps.length;i++){const previousScroll=await p.evaluate(()=>scrollY);await p.locator('.walk-stage').nth(i).click();const g=await p.locator('.walkthrough').evaluate(e=>{const box=n=>n.getBoundingClientRect().toJSON();return{toolbar:box(e.querySelector('.walk-toolbar')),tabs:box(e.querySelector('.walk-stage-list')),scene:box(e.querySelector('.walk-scene-art')),controls:box(e.querySelector('.walk-controls')),heading:e.querySelector('h3').textContent,buttons:[...e.querySelectorAll('.walk-controls button,.walk-stage')].filter(n=>getComputedStyle(n).display!=='none').map(box)}});
+ assert.equal(g.heading,project.walkthroughSteps[i].title);assert.ok(g.tabs.bottom<=g.scene.y,`${project.slug}: tabs above scene`);assert.ok(g.controls.y>=g.scene.bottom-1,`${project.slug}: controls immediately below`);assert.ok(g.controls.bottom<=height+1,`${project.slug}/${i}/${width}: controls bottom ${g.controls.bottom} > ${height}`);assert.ok(g.toolbar.y>=67,`${project.slug}: toolbar in view`);assert.equal(await p.evaluate(()=>document.documentElement.scrollWidth>innerWidth),false);assert.ok(g.buttons.every(r=>r.width>=43&&r.height>=43),'Touch targets');assert.ok(Math.abs(await p.evaluate(()=>scrollY)-previousScroll)<2,'Step selection must not scroll the page');
+ const body=await p.locator('.walk-body').boundingBox();await p.getByRole('button',{name:'Inspect this step',exact:true}).click();const inspected=await p.locator('.walk-body').boundingBox();assert.ok(Math.abs(body.height-inspected.height)<2);await p.getByRole('button',{name:'Back to animation',exact:true}).click();
+ }
+ reports.push({width,height,project:project.slug,steps:project.walkthroughSteps.length,controls:'same viewport'});
+ }
+ }
+ await p.locator('.walk-stage').first().click();await p.getByRole('button',{name:'Inspect this step',exact:true}).click();
+ await p.getByRole('button',{name:'Play walkthrough',exact:true}).click();assert.equal(await p.locator('.process-scene').count(),1,'Playback restores the animation');await p.getByRole('button',{name:'Pause walkthrough',exact:true}).click();
+ for(const width of [1440,1920]) {
+  await p.setViewportSize({width,height:1000});
+  const centred=await p.locator('.walkthrough').evaluate(e=>{const mid=n=>{const r=n.getBoundingClientRect();return(r.left+r.right)/2};const panel=mid(e);return{panelError:Math.abs(panel-mid(document.querySelector('.site-frame'))),pickerError:Math.abs(panel-mid(e.querySelector('.trace-project-picker'))),columnError:Math.abs(panel-(mid(e.querySelector('.walk-cinema'))+mid(e.querySelector('.walk-detail')))/2)};});
+  assert.ok(centred.panelError<1&&centred.pickerError<1&&centred.columnError<1,'Desktop composition must be centred and balanced');
+ }
+ assert.deepEqual(errors,[]);await writeFile('tmp/walkthrough-viewport/interaction-report.json',JSON.stringify(reports,null,2));console.log('PASS: all 45 stages at 390×844 and 320×568 keep project picker, steps, scene and controls together; inspection and step changes preserve position.');
+}finally{await b.close();}
