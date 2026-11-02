@@ -88,6 +88,8 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
     if (next !== undefined) { event.preventDefault(); selectStep(next); stageButtons.current[next]?.focus({ preventScroll: true }); }
   };
 
+  const inspectButton = <button type="button" className="walk-inspect-toggle" title={inspecting ? "Back to animation" : "Inspect this step"} aria-label={inspecting ? "Back to animation" : "Inspect this step"} aria-expanded={inspecting} aria-controls={`${stageId}-inspection`} onClick={() => { setPlaying(false); setInspectionKey(inspecting ? null : inspectionId); }}><span className="walk-inspect-label">{inspecting ? "Back to animation" : "Inspect this step"}</span><span className="walk-inspect-mobile" aria-hidden="true">{inspecting ? "Back" : "Inspect"}</span><span className="walk-inspect-icon" aria-hidden="true">{inspecting ? "↶" : "⌘"}</span></button>;
+
   return <section id="trace" className="trace-section section-pad"><div className="site-wrap">
     <div className="section-heading trace-heading"><div><p className="eyebrow">{settings.eyebrow}</p><h2>{headingText(settings.title)}</h2></div><p className="trace-intro">{settings.intro}</p></div>
     <div ref={root} onKeyDown={event => { if (event.key === "Escape" && inspecting) { setInspectionKey(null); event.stopPropagation(); } }} className="walkthrough" data-visible={visible} data-playing={active} style={{ "--walk-accent": accent, "--step-duration": `${STEP_DURATION}ms` } as CSSProperties}>
@@ -109,12 +111,13 @@ export function BuildTrace({ projects, settings }: { projects: Project[]; settin
           <div className="walk-stage-heading"><h3>{step.title}</h3></div>
           <p className="walk-description">{detail}</p>
           <div className="walk-tech">{tech.map(item => <span key={item}>{item}</span>)}</div>
+          <div className="walk-inspect-detail">{inspectButton}</div>
         </div></div>
       </div>
       <div className="walk-controls">
         <button className="walk-play" type="button" aria-label={playing ? "Pause walkthrough" : stepIndex === steps.length - 1 ? "Replay walkthrough" : "Play walkthrough"} aria-pressed={playing} disabled={motionBlocked} onClick={() => { setInspectionKey(null); if (!playing && stepIndex === steps.length - 1) setSelection({ projectId: project.id, step: 0 }); setPlaying(value => !value); }}><span aria-hidden="true">{playing ? "Ⅱ" : "▷"}</span><span>{playing ? "Pause" : stepIndex === steps.length - 1 ? "Replay" : "Play"}</span></button>
         <div className="walk-progress" aria-hidden="true">{steps.map((item, index) => <span data-complete={index < stepIndex} key={item.id}><i key={`${playing}-${visible}-${index === stepIndex}`} style={{ transform: index < stepIndex ? "scaleX(1)" : undefined, animationName: active && index === stepIndex ? "walk-play-progress" : undefined }} /></span>)}</div>
-        <button type="button" className="walk-inspect-toggle" title={inspecting ? "Back to animation" : "Inspect this step"} aria-label={inspecting ? "Back to animation" : "Inspect this step"} aria-expanded={inspecting} aria-controls={`${stageId}-inspection`} onClick={() => { setPlaying(false); setInspectionKey(inspecting ? null : inspectionId); }}><span className="walk-inspect-label">{inspecting ? "Back to animation" : "Inspect this step"}</span><span className="walk-inspect-mobile" aria-hidden="true">{inspecting ? "Back" : "Inspect"}</span><span className="walk-inspect-icon" aria-hidden="true">{inspecting ? "↶" : "⌘"}</span></button>
+        <div className="walk-inspect-controls">{inspectButton}</div>
         <div className="walk-step-controls"><button type="button" aria-label="Previous stage" disabled={stepIndex === 0} onClick={() => selectStep(stepIndex - 1)}>← <span>Previous</span></button><span className="mono">{stepIndex + 1} / {steps.length}</span><button type="button" aria-label="Next stage" disabled={stepIndex === steps.length - 1} onClick={() => selectStep(stepIndex + 1)}><span>Next</span> →</button></div>
       </div>
       <div className="walk-footer"><span>Illustrated workflow</span><Link href={`/projects/${project.slug}`}>{settings.linkLabel} <span className="walk-link-title">{project.title}</span> <span aria-hidden="true">↗</span></Link></div>

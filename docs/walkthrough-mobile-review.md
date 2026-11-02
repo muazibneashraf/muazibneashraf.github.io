@@ -77,9 +77,11 @@ The scene adapts to available viewport height, rather than stacking a long text
 panel between the scene and its controls. Step selection resets inspection and
 preserves page position; Play restores the animation from inspection.
 
-Desktop uses a centred heading, project picker, balanced scene/explanation columns
-and centred controls. Its panel is capped at 1320 pixels, with a smaller scene and
-more space around the composition.
+Desktop centres only the scene/explanation composition, using balanced columns.
+The heading and project picker remain left aligned, playback stays on the left,
+and previous/next controls remain on the right. Inspect sits beneath the desktop
+explanation; on mobile it stays beside playback. The panel is capped at 1320 pixels
+with a smaller scene and more space around the composition.
 
 `tests/walkthrough-viewport.browser.mjs` checks all 45 stages at 390×844 and
 320×568: the picker, steps, animation and controls stay in the same viewport,

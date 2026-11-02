@@ -218,19 +218,15 @@ html[data-motion-paused="true"] .walkthrough *,html[data-motion-paused="true"] .
   .walk-inspect-mobile { display: inline; font-size: 11px; }
   .walk-inspect-icon { display: none; }
 }
-/* The desktop walkthrough is a balanced panel centred within its section. */
+/* Balance only the illustration and explanation; keep the surrounding layout. */
+.walk-inspect-controls { display: none; }
+.walk-inspect-detail .walk-inspect-toggle { width: 100%; margin-top: 22px; padding: 12px 0; border: 0; border-block: 1px solid var(--panel-border); border-radius: 0; }
 @media (min-width: 761px) {
-  .site-frame #trace .trace-heading { flex-direction: column; align-items: center; gap: 12px; text-align: center; }
-  .site-frame #trace .trace-heading .eyebrow { justify-content: center; }
-  .site-frame #trace .trace-intro { max-width: 60ch; margin: 0; text-align: center; }
-  .walk-toolbar { position: relative; justify-content: center; }
-  .walk-toolbar .trace-project-picker { margin-inline: auto; width: min(100% - 100px, 560px); }
-  .walk-toolbar-note { position: absolute; right: 0; }
   .walk-body { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
   .walk-detail { width: 100%; max-width: 450px; padding: 12px 0; justify-self: center; }
-  .walk-controls { justify-content: center; gap: 16px; }
-  .walk-progress { flex: 0 1 140px; }
-  .walk-step-controls { margin-left: 0; }
-  .walk-footer { justify-content: center; gap: 28px; }
+}
+@media (max-width: 760px) {
+  .walk-inspect-detail { display: none; }
+  .walk-inspect-controls { display: contents; }
 }
 .walk-scene-art { animation: none; }
