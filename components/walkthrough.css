@@ -153,7 +153,6 @@ html[data-motion-paused="true"] .walkthrough *,html[data-motion-paused="true"] .
 @media(prefers-reduced-motion:reduce) { .walkthrough *, .walkthrough *::after { animation:none!important; transition:none!important; } }
 /* Keep the scene and its controls in one compact, predictable composition. */
 .site-frame #trace .trace-heading, .walkthrough { max-width: 1320px; margin-inline: auto; width: 100%; }
-.site-frame #trace .trace-heading h2 { font-size: clamp(30px, 3vw, 42px); }
 .walkthrough { display: flex; flex-direction: column; }
 .walk-toolbar { order: 0; padding-block: 12px; }
 .walk-body { order: 1; min-height: 324px; padding-block: 20px; gap: clamp(24px, 3vw, 44px); }
@@ -173,7 +172,6 @@ html[data-motion-paused="true"] .walkthrough *,html[data-motion-paused="true"] .
 @media (max-width: 760px) {
   .site-frame #trace { padding-block: 32px; }
   .site-frame #trace .trace-heading { margin-bottom: 16px; }
-  .site-frame #trace .trace-heading h2 { font-size: clamp(27px, 6.8vw, 34px); line-height: 1.2; }
   .site-frame #trace .trace-intro { display: none; }
   .walk-toolbar { padding-block: 8px; }
   .walk-toolbar .trace-chooser-trigger { min-height: 46px; padding-block: 8px; }
@@ -232,5 +230,9 @@ html[data-motion-paused="true"] .walkthrough *,html[data-motion-paused="true"] .
 .walk-scene-art { animation: none; }
 @media (min-width: 761px) {
   .site-frame #trace .trace-heading, .walkthrough { max-width: none; }
-  .walk-body { width: 100%; max-width: 1320px; margin-inline: auto; }
+  .walk-body { width: 100%; max-width: none; min-height: 382px; margin-inline: auto; gap: clamp(24px, 4vw, 64px); }
+  .walk-scene-art { height: 306px; }
+  .walk-stage-heading h3 { font-size: clamp(25px, 2.5vw, 38px); }
+  .walk-chapter { margin-bottom: 22px; }
+  .walk-description { margin-block: 20px; }
 }

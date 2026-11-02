@@ -80,8 +80,9 @@ preserves page position; Play restores the animation from inspection.
 Desktop centres only the scene/explanation composition, using balanced columns.
 The heading and project picker remain left aligned, playback stays on the left,
 and previous/next controls remain on the right. Inspect sits beneath the desktop
-explanation; on mobile it stays beside playback. Only the inner scene/explanation area is capped at 1320 pixels. The heading,
-project toolbar and outer controls follow the same content edges as other sections.
+explanation; on mobile it stays beside playback. The scene and stage title retain their original desktop scale. The heading uses
+the same typography as every other section, and the heading, project toolbar and
+outer controls follow the same content edges. Only the middle columns are balanced.
 
 `tests/walkthrough-viewport.browser.mjs` checks all 45 stages at 390×844 and
 320×568: the picker, steps, animation and controls stay in the same viewport,
